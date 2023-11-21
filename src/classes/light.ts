@@ -1,8 +1,9 @@
 import { AmbientLight, CameraHelper, DirectionalLight } from "three";
-import { gameScene } from "../main";
+import BaseEntity, { BasePropsType } from "./baseEntity";
 
-export default class Light {
-  constructor() {
+export default class Light extends BaseEntity {
+  constructor(props: BasePropsType) {
+    super(props);
     this.initial();
   }
 
@@ -27,9 +28,9 @@ export default class Light {
     );
     // gameScene.scene.add(directionalLightHelper);
 
-    gameScene.scene.add(directionalLight);
+    this.scene?.add(directionalLight);
 
     const ambientLight = new AmbientLight(0xffffff, 1);
-    gameScene.scene.add(ambientLight);
+    this.scene?.add(ambientLight);
   }
 }

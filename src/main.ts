@@ -1,11 +1,12 @@
 import MouseControl from "./action/mouseControl";
 import Light from "./classes/light";
 import Terrant from "./classes/terrant";
-import GameScene from "./gameScene";
+import { gameScene } from "./gameScene";
+import Player from "./player/character";
 import "./style.css";
 
 class Three {
-  gameScene = new GameScene();
+  gameScene = gameScene;
 
   constructor() {
     this.initialize();
@@ -13,14 +14,7 @@ class Three {
 
   initialize() {
     this.gameScene.afterRender();
-
-    setTimeout(() => {
-      new MouseControl();
-      new Terrant();
-      new Light();
-    }, 200);
   }
 }
 
 const app = new Three();
-export const gameScene = app.gameScene;

@@ -1,14 +1,15 @@
-import { gameScene } from "@/main";
+import BaseEntity, { BasePropsType } from "@/classes/baseEntity";
 import { $ } from "@/utils/selector";
 
-export default class MouseControl {
+export default class MouseControl extends BaseEntity {
   public mousePercentScreenX = 0;
   public mousePercentScreenY = 0;
   public paused = true;
   public x = 0;
   public y = 0;
 
-  constructor() {
+  constructor(props: BasePropsType) {
+    super(props);
     this.initialControl();
   }
 
@@ -16,10 +17,6 @@ export default class MouseControl {
     const btnFocus = $("#focus");
 
     const canvas = document.querySelector("canvas");
-
-    btnFocus?.addEventListener("click", () => {
-      gameScene.control.lock();
-    });
 
     const updatePosition = (e: any) => {
       const canvasWidth = canvas?.width || 0;
@@ -43,18 +40,32 @@ export default class MouseControl {
       this.mousePercentScreenY = this.y / canvasHeight;
     };
 
-    gameScene.control.addEventListener("lock", () => {
-      const modalFocus = $("#modal_focus");
-      this.paused = false;
-      document.addEventListener("mousemove", updatePosition, false);
-      if (modalFocus) modalFocus.style.display = "none";
+    btnFocus?.addEventListener("click", () => {
+      this.control?.lock();
     });
 
-    gameScene.control.addEventListener("unlock", () => {
+    this.control?.addEventListener("lock", () => {
       const modalFocus = $("#modal_focus");
+      const modalGame = $("#modal_game");
+
+      this.paused = false;
+
+      document.addEventListener("mousemove", updatePosition, false);
+
+      modalFocus.style.display = "none";
+      modalGame.style.display = "flex";
+    });
+
+    this.control?.addEventListener("unlock", () => {
+      const modalFocus = $("#modal_focus");
+      const modalGame = $("#modal_game");
+
       this.paused = true;
+
       document.removeEventListener("mousemove", updatePosition, false);
-      if (modalFocus) modalFocus.style.display = "flex";
+
+      modalFocus.style.display = "flex";
+      modalGame.style.display = "none";
     });
   }
 }

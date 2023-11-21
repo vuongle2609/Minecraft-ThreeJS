@@ -5,11 +5,12 @@ import {
   RepeatWrapping,
   TextureLoader,
 } from "three";
-import { gameScene } from "../main";
 import grassImage from "../assets/grass.png";
+import BaseEntity, { BasePropsType } from "./baseEntity";
 
-export default class Terrant {
-  constructor() {
+export default class Terrant extends BaseEntity {
+  constructor(props: BasePropsType) {
+    super(props);
     this.initialize();
   }
 
@@ -29,9 +30,10 @@ export default class Terrant {
       })
     );
 
+    plane.receiveShadow = true
     plane.position.set(0, 0, 0);
     plane.rotation.x = -Math.PI / 2;
 
-    gameScene.scene.add(plane);
+    this.scene?.add(plane);
   }
 }
