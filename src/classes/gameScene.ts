@@ -1,11 +1,11 @@
+import MouseControl from "@/action/mouseControl";
+import Player from "@/player/character";
 import { GUI } from "dat.gui";
 import * as THREE from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
-import { RenderPage } from "./classes/renderPage";
-import Player from "./player/character";
-import MouseControl from "./action/mouseControl";
-import Terrant from "./classes/terrant";
-import Light from "./classes/light";
+import Light from "./light";
+import { RenderPage } from "./renderPage";
+import Terrant from "./terrant";
 
 export default class GameScene extends RenderPage {
   renderer = new THREE.WebGLRenderer({ antialias: true });

@@ -1,8 +1,4 @@
-import MouseControl from "./action/mouseControl";
-import Light from "./classes/light";
-import Terrant from "./classes/terrant";
-import { gameScene } from "./gameScene";
-import Player from "./player/character";
+import { gameScene } from "./classes/gameScene";
 import "./style.css";
 
 class Three {

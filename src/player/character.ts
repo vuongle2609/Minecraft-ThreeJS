@@ -57,12 +57,14 @@ export default class Player extends BaseEntity {
 
     moveVector.normalize().multiplyScalar(delta * SPEED);
 
+    //https://www.cgtrader.com/free-3d-models/character/man/minecraft-steve-low-poly-rigged
     this.player.position.add(moveVector);
   }
 
   updateCamera() {
     const { x, y, z } = this.player.position;
 
+    //constant lerp and diff y
     this.camera?.position.lerp(new Vector3(x, y + 1, z), 0.4);
   }
 
