@@ -5,3 +5,12 @@
 body {
   margin: 0;
 }
+
+@font-face {
+  font-family: minecraft;
+  src: url("./assets/fonts/MinecraftRegular-Bmg3.otf") format("opentype");
+}
+
+* {
+  font-family: minecraft;
+}

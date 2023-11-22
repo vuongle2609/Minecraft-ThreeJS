@@ -1,3 +1,5 @@
+import blocks from "@/constants/blocks";
+import { Body, Box, Vec3 } from "cannon-es";
 import {
   BoxGeometry,
   Mesh,
@@ -6,8 +8,7 @@ import {
   Vector3,
 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
-import { Body, Box, Vec3, Material } from "cannon-es";
-import blocks from "@/constants/blocks";
+import { physicsMaterial } from "./gameScene";
 
 interface PropsType {
   position: Vector3;
@@ -28,7 +29,10 @@ export default class Block extends BaseEntity {
     const textureLoader = new TextureLoader();
 
     const placeBlock = blocks[type];
-    console.log("🚀 ~ file: block.ts:31 ~ Block ~ initialize ~ placeBlock:", type)
+    console.log(
+      "🚀 ~ file: block.ts:31 ~ Block ~ initialize ~ placeBlock:",
+      type
+    );
 
     const textures = await Promise.all(
       placeBlock.texture.map(async (namePath) => {
@@ -44,11 +48,9 @@ export default class Block extends BaseEntity {
 
     const newBlock = new Mesh(new BoxGeometry(2, 2, 2), textures);
 
-    const physicsMaterial = new Material("physics");
-
     const blockPhysicsBody = new Body({
       type: Body.STATIC,
-      shape: new Box(new Vec3(2, 2, 2)),
+      shape: new Box(new Vec3(1, 1, 1)),
       material: physicsMaterial,
     });
     blockPhysicsBody.position.set(position.x, position.y, position.z);

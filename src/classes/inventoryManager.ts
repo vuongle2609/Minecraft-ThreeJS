@@ -15,8 +15,10 @@ export default class InventoryManager {
     null,
   ];
 
-  currentFocusIndex = 0
+  currentFocusIndex = 0;
   currentFocus = this.inventory[this.currentFocusIndex];
+
+  timeoutHideLabel: NodeJS.Timeout | null = null
 
   constructor() {
     this.initialize();
@@ -24,15 +26,15 @@ export default class InventoryManager {
 
   initialize() {
     const keyMap: Record<string, number> = {
-      "Digit1": 1,
-      "Digit2": 2,
-      "Digit3": 3,
-      "Digit4": 4,
-      "Digit5": 5,
-      "Digit6": 6,
-      "Digit7": 7,
-      "Digit8": 8,
-      "Digit9": 9,
+      Digit1: 1,
+      Digit2: 2,
+      Digit3: 3,
+      Digit4: 4,
+      Digit5: 5,
+      Digit6: 6,
+      Digit7: 7,
+      Digit8: 8,
+      Digit9: 9,
     };
 
     document.addEventListener(
@@ -47,10 +49,31 @@ export default class InventoryManager {
   }
 
   handleChangeFocusItem(indexFocus: number) {
-    this.currentFocusIndex = indexFocus - 1
+    this.currentFocusIndex = indexFocus - 1;
     this.currentFocus = this.inventory[this.currentFocusIndex];
 
+    if (this.currentFocus)
+      this.renderLabelFocusItem(blocks[this.currentFocus].name || "");
+
     this.renderInventory();
+  }
+
+  renderLabelFocusItem(label: string) {
+    const labelFocus = $("#itemLabel");
+
+    if (!labelFocus || !label) return;
+
+    if (this.timeoutHideLabel) {
+      clearTimeout(this.timeoutHideLabel)
+    }
+
+    labelFocus.style.opacity = '1'
+
+    labelFocus.innerHTML = `<span>${label}</span>`;
+
+    this.timeoutHideLabel = setTimeout(() => {
+      labelFocus.style.opacity = '0'
+    }, 1500)
   }
 
   renderInventory() {

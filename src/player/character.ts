@@ -1,7 +1,8 @@
 import BasicCharacterControllerInput from "@/action/input";
 import BaseEntity, { BasePropsType } from "@/classes/baseEntity";
+import { humanMaterial } from "@/classes/gameScene";
 import { SPEED } from "@/constants/player";
-import { Body, Box, ContactMaterial, Material, Vec3 } from "cannon-es";
+import { Body, Box, Vec3 } from "cannon-es";
 import { CapsuleGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
 
 export default class Player extends BaseEntity {
@@ -27,13 +28,13 @@ export default class Player extends BaseEntity {
     this.player.receiveShadow = true;
     this.player.castShadow = true;
 
-    const humanMaterial = new Material("human");
-
     this.playerPhysicBody = new Body({
       mass: 5,
-      shape: new Box(new Vec3(1, 1, 1)),
+      shape: new Box(new Vec3(0.5, 2, 0.5)),
       material: humanMaterial,
+      fixedRotation: true,
     });
+
     this.playerPhysicBody.position.set(0, 4, 0);
     this.playerPhysicBody.linearDamping = 0.9;
     this.world?.addBody(this.playerPhysicBody);
@@ -109,7 +110,7 @@ export default class Player extends BaseEntity {
     const { x, y, z } = this.player.position;
 
     //constant lerp and diff y
-    this.camera?.position.copy(new Vector3(x, y + 1, z))
+    this.camera?.position.copy(new Vector3(x, y + 1, z));
   }
 
   update(delta: number) {

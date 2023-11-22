@@ -1,4 +1,3 @@
-import { ContactMaterial, Material } from "cannon-es";
 import { Vector3 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
@@ -10,17 +9,6 @@ export default class Terrant extends BaseEntity {
   }
 
   async initialize() {
-    const physicsMaterial = new Material("physics");
-    const humanMaterial = new Material("human");
-    const physics_physics = new ContactMaterial(
-      physicsMaterial,
-      humanMaterial,
-      {
-        friction: 0,
-        restitution: 0,
-      }
-    );
-
     for (let i = -3; i < 3; i++) {
       for (let j = -3; j < 3; j++) {
         new Block({
@@ -31,7 +19,5 @@ export default class Terrant extends BaseEntity {
         });
       }
     }
-
-    this.world?.addContactMaterial(physics_physics);
   }
 }

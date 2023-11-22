@@ -1,6 +1,6 @@
 import MouseControl from "@/action/mouseControl";
 import Player from "@/player/character";
-import { Vec3, World } from "cannon-es";
+import { Vec3, World, ContactMaterial, Material } from "cannon-es";
 import { GUI } from "dat.gui";
 import * as THREE from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
@@ -9,8 +9,13 @@ import InventoryManager from "./inventoryManager";
 import Light from "./light";
 import { RenderPage } from "./renderPage";
 import Terrant from "./terrant";
+import CannonDebugger from "cannon-es-debugger";
 
 const timeStep = 1 / 60;
+
+export const physicsMaterial = new Material("physics");
+
+export const humanMaterial = new Material("human");
 
 export default class GameScene extends RenderPage {
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -19,7 +24,11 @@ export default class GameScene extends RenderPage {
 
   world = new World({
     gravity: new Vec3(0, -60, 0),
+    frictionGravity: new Vec3(),
   });
+
+  //@ts-ignore
+  cannonDebugger = new CannonDebugger(this.scene, this.world, {});
 
   camera = new THREE.PerspectiveCamera(
     80,
@@ -65,6 +74,8 @@ export default class GameScene extends RenderPage {
           <div class="w-5 h-1 bg-gray-500 absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2"></div>
         </div>
 
+        <div id="itemLabel" class="fixed opacity-0 text-white bottom-20 text-xl transition-all duration-300 drop-shadow-md"></div>
+
         <div class="fixed bottom-1 bg-gray-900/60 border-4 border-solid border-black rounded-md">
           <div class="border-4 border-solid border-gray-300 flex" id="inventory_container">
               
@@ -87,7 +98,7 @@ export default class GameScene extends RenderPage {
       inventoryManager: this.inventoryManager,
     });
 
-    this.inventoryManager.renderInventory()
+    this.inventoryManager.renderInventory();
   };
 
   constructor() {
@@ -112,6 +123,17 @@ export default class GameScene extends RenderPage {
     document.body.appendChild(this.element);
 
     this.scene.background = new THREE.Color("#87CEEB");
+
+    const physics_physics = new ContactMaterial(
+      physicsMaterial,
+      humanMaterial,
+      {
+        friction: 0,
+        restitution: 0,
+      }
+    );
+
+    this.world?.addContactMaterial(physics_physics);
 
     this.player = new Player({
       scene: this.scene,
@@ -152,6 +174,8 @@ export default class GameScene extends RenderPage {
       this.player.update(delta);
 
       this.blockManager?.update();
+
+      // this.cannonDebugger.update();
 
       this.renderer.render(this.scene, this.camera);
     }
