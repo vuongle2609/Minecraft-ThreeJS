@@ -1,5 +1,6 @@
 import BaseEntity, { BasePropsType } from "@/classes/baseEntity";
 import { $ } from "@/utils/selector";
+import { Raycaster, Vector2 } from "three";
 
 export default class MouseControl extends BaseEntity {
   public mousePercentScreenX = 0;
@@ -7,6 +8,8 @@ export default class MouseControl extends BaseEntity {
   public paused = true;
   public x = 0;
   public y = 0;
+  raycaster = new Raycaster();
+  pointer = new Vector2();
 
   constructor(props: BasePropsType) {
     super(props);
@@ -40,6 +43,10 @@ export default class MouseControl extends BaseEntity {
       this.mousePercentScreenY = this.y / canvasHeight;
     };
 
+    window.addEventListener("pointermove", (e) => {
+      this.onPointerMove(e);
+    });
+
     btnFocus?.addEventListener("click", () => {
       this.control?.lock();
     });
@@ -67,5 +74,10 @@ export default class MouseControl extends BaseEntity {
       modalFocus.style.display = "flex";
       modalGame.style.display = "none";
     });
+  }
+
+  onPointerMove(event: PointerEvent) {
+    this.pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+    this.pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
   }
 }

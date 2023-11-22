@@ -1,12 +1,16 @@
 import MouseControl from "@/action/mouseControl";
 import Player from "@/player/character";
+import { Vec3, World } from "cannon-es";
 import { GUI } from "dat.gui";
 import * as THREE from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
+import BlockManager from "./blockManager";
+import InventoryManager from "./inventoryManager";
 import Light from "./light";
 import { RenderPage } from "./renderPage";
 import Terrant from "./terrant";
-import { Vec3, World } from "cannon-es";
+
+const timeStep = 1 / 60;
 
 export default class GameScene extends RenderPage {
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -14,7 +18,7 @@ export default class GameScene extends RenderPage {
   scene = new THREE.Scene();
 
   world = new World({
-    gravity: new Vec3(0, -22, 0), // m/s²
+    gravity: new Vec3(0, -60, 0),
   });
 
   camera = new THREE.PerspectiveCamera(
@@ -32,6 +36,14 @@ export default class GameScene extends RenderPage {
 
   player: Player;
 
+  mouseControl: MouseControl;
+
+  blockManager: BlockManager;
+
+  inventoryManager: InventoryManager;
+
+  lastCallTime = 0;
+
   afterRender = () => {
     const app = document.querySelector("#app");
 
@@ -44,20 +56,43 @@ export default class GameScene extends RenderPage {
       "beforeend",
       `
       <div id="modal_focus" class="fixed top-0 bottom-0 left-0 right-0 flex items-center justify-center bg-blue-500">
-        <button class="bg-red-600 p-9" id="focus">Focus</button>
+         <button class="bg-red-600 p-9" id="focus">Focus</button>
       </div>
 
       <div id="modal_game" class="fixed top-0 bottom-0 left-0 right-0 hidden items-center justify-center">
-        <div class="relative">
-          <div class="w-1 h-5 bg-white absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2"></div>
-          <div class="w-5 h-1 bg-white absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2"></div>
+        <div class="relative shadow-md">
+          <div class="w-1 h-5 bg-gray-500 absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2"></div>
+          <div class="w-5 h-1 bg-gray-500 absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2"></div>
+        </div>
+
+        <div class="fixed bottom-1 bg-gray-900/60 border-4 border-solid border-black rounded-md">
+          <div class="border-4 border-solid border-gray-300 flex">
+          <div class="h-12 w-12 border-4 border-solid border-gray-600"></div>
+          <div class="h-12 w-12 border-4 border-solid border-gray-600"></div>
+          <div class="h-12 w-12 border-4 border-solid border-gray-600"></div>
+          <div class="h-12 w-12 border-4 border-solid border-gray-600"></div>
+          <div class="h-12 w-12 border-4 border-solid border-gray-600"></div>
+          <div class="h-12 w-12 border-4 border-solid border-gray-600"></div>
+          <div class="h-12 w-12 border-4 border-solid border-gray-600"></div>
+          <div class="h-12 w-12 border-4 border-solid border-gray-600"></div>
+          <div class="h-12 w-12 border-4 border-solid border-gray-600"></div>
+          </div>
         </div>
       </div>
       `
     );
 
-    new MouseControl({
+    this.mouseControl = new MouseControl({
       control: this.control,
+      camera: this.camera,
+    });
+
+    this.blockManager = new BlockManager({
+      mouseControl: this.mouseControl,
+      scene: this.scene,
+      camera: this.camera,
+      world: this.world,
+      inventoryManager: this.inventoryManager,
     });
   };
 
@@ -84,9 +119,6 @@ export default class GameScene extends RenderPage {
 
     this.scene.background = new THREE.Color("#87CEEB");
 
-    this.camera.position.set(0, 3, 20);
-    this.camera.lookAt(0, 4, 0);
-
     this.player = new Player({
       scene: this.scene,
       camera: this.camera,
@@ -102,6 +134,8 @@ export default class GameScene extends RenderPage {
       scene: this.scene,
     });
 
+    this.inventoryManager = new InventoryManager();
+
     this.RAF(0);
   }
 
@@ -116,13 +150,17 @@ export default class GameScene extends RenderPage {
       this.RAF(t);
     });
 
-    const delta = this.clock.getDelta();
+    if (!this.mouseControl?.paused) {
+      const delta = this.clock.getDelta();
 
-    this.world.fixedStep(delta);
+      if (delta) this.world.step(timeStep, delta);
 
-    this.player.update(delta);
+      this.player.update(delta);
 
-    this.renderer.render(this.scene, this.camera);
+      this.blockManager?.update();
+
+      this.renderer.render(this.scene, this.camera);
+    }
   }
 }
 

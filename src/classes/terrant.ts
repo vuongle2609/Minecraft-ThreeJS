@@ -1,15 +1,7 @@
-import {
-  Material,
-  Mesh,
-  MeshStandardMaterial,
-  Plane,
-  PlaneGeometry,
-  RepeatWrapping,
-  TextureLoader,
-} from "three";
-import grassImage from "../assets/grass.png";
+import { ContactMaterial, Material } from "cannon-es";
+import { RepeatWrapping, TextureLoader, Vector3 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
-import { ContactMaterial, Body, Plane as PlaneCannon } from "cannon-es";
+import Block from "./block";
 
 export default class Terrant extends BaseEntity {
   constructor(props: BasePropsType) {
@@ -18,32 +10,28 @@ export default class Terrant extends BaseEntity {
   }
 
   async initialize() {
-    const loader = new TextureLoader();
-
-    const texture = await loader.loadAsync(grassImage, console.log);
-    texture.wrapS = RepeatWrapping;
-    texture.wrapT = RepeatWrapping;
-    texture.repeat.set(100, 100);
-
-    const plane = new Mesh(
-      new PlaneGeometry(200, 200),
-      new MeshStandardMaterial({
-        color: 0xf0f0f0,
-        map: texture,
-      })
+    const physicsMaterial = new Material("physics");
+    const humanMaterial = new Material("human");
+    const physics_physics = new ContactMaterial(
+      physicsMaterial,
+      humanMaterial,
+      {
+        friction: 0,
+        restitution: 0.3,
+      }
     );
 
-    plane.receiveShadow = true;
-    plane.position.set(0, 0, 0);
-    plane.rotation.x = -Math.PI / 2;
+    for (let i = -5; i < 5; i++) {
+      for (let j = -5; j < 5; j++) {
+        new Block({
+          position: new Vector3(i * 2, 0, j * 2),
+          scene: this.scene,
+          world: this.world,
+          type: "grass",
+        });
+      }
+    }
 
-    const groundBody = new Body({
-      type: Body.STATIC,
-      shape: new PlaneCannon(),
-    });
-    groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
-    this.world?.addBody(groundBody);
-
-    this.scene?.add(plane);
+    this.world?.addContactMaterial(physics_physics);
   }
 }
