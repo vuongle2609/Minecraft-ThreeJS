@@ -1,12 +1,15 @@
 import {
+  Material,
   Mesh,
   MeshStandardMaterial,
+  Plane,
   PlaneGeometry,
   RepeatWrapping,
   TextureLoader,
 } from "three";
 import grassImage from "../assets/grass.png";
 import BaseEntity, { BasePropsType } from "./baseEntity";
+import { ContactMaterial, Body, Plane as PlaneCannon } from "cannon-es";
 
 export default class Terrant extends BaseEntity {
   constructor(props: BasePropsType) {
@@ -30,9 +33,16 @@ export default class Terrant extends BaseEntity {
       })
     );
 
-    plane.receiveShadow = true
+    plane.receiveShadow = true;
     plane.position.set(0, 0, 0);
     plane.rotation.x = -Math.PI / 2;
+
+    const groundBody = new Body({
+      type: Body.STATIC,
+      shape: new PlaneCannon(),
+    });
+    groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+    this.world?.addBody(groundBody);
 
     this.scene?.add(plane);
   }

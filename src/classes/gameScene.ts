@@ -6,11 +6,16 @@ import { PointerLockControls } from "three/examples/jsm/controls/PointerLockCont
 import Light from "./light";
 import { RenderPage } from "./renderPage";
 import Terrant from "./terrant";
+import { Vec3, World } from "cannon-es";
 
 export default class GameScene extends RenderPage {
   renderer = new THREE.WebGLRenderer({ antialias: true });
 
   scene = new THREE.Scene();
+
+  world = new World({
+    gravity: new Vec3(0, -22, 0), // m/s²
+  });
 
   camera = new THREE.PerspectiveCamera(
     80,
@@ -85,10 +90,12 @@ export default class GameScene extends RenderPage {
     this.player = new Player({
       scene: this.scene,
       camera: this.camera,
+      world: this.world,
     });
 
     new Terrant({
       scene: this.scene,
+      world: this.world,
     });
 
     new Light({
@@ -110,6 +117,8 @@ export default class GameScene extends RenderPage {
     });
 
     const delta = this.clock.getDelta();
+
+    this.world.fixedStep(delta);
 
     this.player.update(delta);
 

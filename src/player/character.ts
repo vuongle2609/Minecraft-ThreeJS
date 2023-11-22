@@ -1,10 +1,16 @@
 import BasicCharacterControllerInput from "@/action/input";
 import BaseEntity, { BasePropsType } from "@/classes/baseEntity";
 import { SPEED } from "@/constants/player";
+import { Body, Sphere, Vec3 } from "cannon-es";
 import { CapsuleGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
 
 export default class Player extends BaseEntity {
   player: Mesh;
+  playerPhysicBody: Body;
+
+  jumpVelocity = 10;
+  canJump = true;
+
   input = new BasicCharacterControllerInput();
 
   constructor(props: BasePropsType) {
@@ -20,7 +26,31 @@ export default class Player extends BaseEntity {
 
     this.player.receiveShadow = true;
     this.player.castShadow = true;
-    this.player.position.set(0, 2.1, 0);
+
+    const radius = 2;
+    this.playerPhysicBody = new Body({
+      mass: 5,
+      shape: new Sphere(radius),
+    });
+    this.playerPhysicBody.position.set(0, 10, 0);
+    this.world?.addBody(this.playerPhysicBody);
+
+    const contactNormal = new Vec3();
+    const upAxis = new Vec3(0, 1, 0);
+
+    this.playerPhysicBody.addEventListener("collide", (e: any) => {
+      const { contact } = e;
+
+      if (contact.bi.id === this.playerPhysicBody.id) {
+        contact.ni.negate(contactNormal);
+      } else {
+        contactNormal.copy(contact.ni);
+      }
+
+      if (contactNormal.dot(upAxis) > 0.5) {
+        this.canJump = true;
+      }
+    });
 
     this.scene?.add(this.player);
   }
@@ -28,19 +58,20 @@ export default class Player extends BaseEntity {
   handleMovement(delta: number) {
     const { keys } = this.input;
 
-    const frontVector = new Vector3();
+    const directionVector = new Vector3();
 
-    const sideVector = new Vector3();
+    if (keys.left) directionVector.x += 1;
+    if (keys.right) directionVector.x -= 1;
+    if (keys.forward) directionVector.z += 1;
+    if (keys.backward) directionVector.z -= 1;
 
-    if (keys.left) sideVector.x += 1;
-
-    if (keys.right) sideVector.x -= 1;
-
-    if (keys.forward) frontVector.z += 1;
-
-    if (keys.backward) frontVector.z -= 1;
+    if (keys.space && this.canJump) {
+      this.canJump = false;
+      this.playerPhysicBody.velocity.y = this.jumpVelocity;
+    }
 
     const forwardVector = new Vector3();
+
     this.camera?.getWorldDirection(forwardVector);
 
     forwardVector.y = 0;
@@ -51,14 +82,24 @@ export default class Player extends BaseEntity {
     const vectorRight = vectorUp.clone().crossVectors(vectorUp, forwardVector);
 
     const moveVector = new Vector3().addVectors(
-      forwardVector.clone().multiplyScalar(frontVector.z),
-      vectorRight.multiplyScalar(sideVector.x)
+      forwardVector.clone().multiplyScalar(directionVector.z),
+      vectorRight.multiplyScalar(directionVector.x)
     );
 
     moveVector.normalize().multiplyScalar(delta * SPEED);
-
     //https://www.cgtrader.com/free-3d-models/character/man/minecraft-steve-low-poly-rigged
-    this.player.position.add(moveVector);
+
+    const { x, y, z } = moveVector;
+
+    const vectorMoveConverted = this.playerPhysicBody.position.vadd(
+      new Vec3(x, y, z)
+    );
+
+    this.playerPhysicBody.position.set(
+      vectorMoveConverted.x,
+      vectorMoveConverted.y,
+      vectorMoveConverted.z
+    );
   }
 
   updateCamera() {
@@ -71,5 +112,8 @@ export default class Player extends BaseEntity {
   update(delta: number) {
     this.handleMovement(delta);
     this.updateCamera();
+
+    const { x, y, z } = this.playerPhysicBody.position;
+    this.player.position.copy(new Vector3(x, y, z));
   }
 }
