@@ -86,12 +86,13 @@ export default class BlockManager extends BaseEntity {
         break;
     }
 
-    new Block({
-      position: blockPosition,
-      scene: this.scene,
-      world: this.world,
-      type: this.inventoryManager.currentFocus
-    });
+    if (this.inventoryManager.currentFocus)
+      new Block({
+        position: blockPosition,
+        scene: this.scene,
+        world: this.world,
+        type: this.inventoryManager.currentFocus,
+      });
   }
 
   update() {}

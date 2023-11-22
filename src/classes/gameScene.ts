@@ -66,16 +66,8 @@ export default class GameScene extends RenderPage {
         </div>
 
         <div class="fixed bottom-1 bg-gray-900/60 border-4 border-solid border-black rounded-md">
-          <div class="border-4 border-solid border-gray-300 flex">
-          <div class="h-12 w-12 border-4 border-solid border-gray-600"></div>
-          <div class="h-12 w-12 border-4 border-solid border-gray-600"></div>
-          <div class="h-12 w-12 border-4 border-solid border-gray-600"></div>
-          <div class="h-12 w-12 border-4 border-solid border-gray-600"></div>
-          <div class="h-12 w-12 border-4 border-solid border-gray-600"></div>
-          <div class="h-12 w-12 border-4 border-solid border-gray-600"></div>
-          <div class="h-12 w-12 border-4 border-solid border-gray-600"></div>
-          <div class="h-12 w-12 border-4 border-solid border-gray-600"></div>
-          <div class="h-12 w-12 border-4 border-solid border-gray-600"></div>
+          <div class="border-4 border-solid border-gray-300 flex" id="inventory_container">
+              
           </div>
         </div>
       </div>
