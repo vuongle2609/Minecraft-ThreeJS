@@ -4,6 +4,7 @@ import {
   Vector3,
   Object3DEventMap,
   MeshStandardMaterial,
+  Vector2,
 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
@@ -50,11 +51,11 @@ export default class BlockManager extends BaseEntity {
   }
 
   handleHoverBlock() {
-    const { raycaster, pointer } = this.mouseControl! || {};
+    const { raycaster } = this.mouseControl! || {};
 
     if (!this.camera || !this.scene) return;
 
-    raycaster.setFromCamera(pointer, this.camera);
+    raycaster.setFromCamera(new Vector2(), this.camera);
 
     const intersects = raycaster.intersectObjects(this.scene.children, false);
 
@@ -78,6 +79,7 @@ export default class BlockManager extends BaseEntity {
 
     object.material = object.material.map((item) => {
       this.prevHoverBlockHex = item.emissive.getHex();
+      // random hex for block lighter
       item.emissive.setHex(0x6e6e6e50);
 
       return item;
@@ -87,11 +89,11 @@ export default class BlockManager extends BaseEntity {
   }
 
   handleBreakBlock() {
-    const { raycaster, pointer } = this.mouseControl! || {};
+    const { raycaster } = this.mouseControl! || {};
 
     if (!this.camera || !this.scene) return;
 
-    raycaster.setFromCamera(pointer, this.camera);
+    raycaster.setFromCamera(new Vector2(), this.camera);
 
     const intersects = raycaster.intersectObjects(this.scene.children, false);
 
@@ -101,11 +103,11 @@ export default class BlockManager extends BaseEntity {
   }
 
   handlePlaceBlock() {
-    const { raycaster, pointer } = this.mouseControl! || {};
+    const { raycaster } = this.mouseControl! || {};
 
     if (!this.camera || !this.scene) return;
 
-    raycaster.setFromCamera(pointer, this.camera);
+    raycaster.setFromCamera(new Vector2(), this.camera);
 
     const intersects = raycaster.intersectObjects(this.scene.children, false);
 
