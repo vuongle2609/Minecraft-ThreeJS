@@ -86,6 +86,8 @@ export default class GameScene extends RenderPage {
       world: this.world,
       inventoryManager: this.inventoryManager,
     });
+
+    this.inventoryManager.renderInventory()
   };
 
   constructor() {
