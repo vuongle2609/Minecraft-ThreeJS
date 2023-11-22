@@ -1,4 +1,5 @@
 import blocks from "@/constants/blocks";
+import nameFromCoordinate from "@/helpers/nameFromCoordinate";
 import { Body, Box, Vec3 } from "cannon-es";
 import {
   BoxGeometry,
@@ -29,10 +30,6 @@ export default class Block extends BaseEntity {
     const textureLoader = new TextureLoader();
 
     const placeBlock = blocks[type];
-    console.log(
-      "🚀 ~ file: block.ts:31 ~ Block ~ initialize ~ placeBlock:",
-      type
-    );
 
     const textures = await Promise.all(
       placeBlock.texture.map(async (namePath) => {
@@ -48,18 +45,22 @@ export default class Block extends BaseEntity {
 
     const newBlock = new Mesh(new BoxGeometry(2, 2, 2), textures);
 
+    newBlock.receiveShadow = true;
+    newBlock.castShadow = true;
+    newBlock.name = nameFromCoordinate(position.x, position.y, position.z);
+
+    newBlock.position.set(position.x, position.y, position.z);
+
+    this.scene?.add(newBlock);
+
     const blockPhysicsBody = new Body({
       type: Body.STATIC,
       shape: new Box(new Vec3(1, 1, 1)),
       material: physicsMaterial,
     });
+
     blockPhysicsBody.position.set(position.x, position.y, position.z);
+
     this.world?.addBody(blockPhysicsBody);
-
-    newBlock.receiveShadow = true;
-    newBlock.castShadow = true;
-    newBlock.position.set(position.x, position.y, position.z);
-
-    this.scene?.add(newBlock);
   }
 }

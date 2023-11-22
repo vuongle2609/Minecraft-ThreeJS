@@ -1,4 +1,10 @@
-import { Vector3 } from "three";
+import {
+  BoxGeometry,
+  Mesh,
+  Vector3,
+  Object3DEventMap,
+  MeshStandardMaterial,
+} from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
@@ -9,6 +15,13 @@ interface PropsType {
 
 export default class BlockManager extends BaseEntity {
   inventoryManager: InventoryManager;
+
+  prevHoverBlockHex: number | null = null;
+  prevHoverBlock: Mesh<
+    BoxGeometry,
+    MeshStandardMaterial[],
+    Object3DEventMap
+  > | null = null;
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
@@ -34,6 +47,43 @@ export default class BlockManager extends BaseEntity {
         // right click
         this.handlePlaceBlock();
     }
+  }
+
+  handleHoverBlock() {
+    const { raycaster, pointer } = this.mouseControl! || {};
+
+    if (!this.camera || !this.scene) return;
+
+    raycaster.setFromCamera(pointer, this.camera);
+
+    const intersects = raycaster.intersectObjects(this.scene.children, false);
+
+    const object = intersects[0]?.object as Mesh<
+      BoxGeometry,
+      MeshStandardMaterial[],
+      Object3DEventMap
+    >;
+
+    if (this.prevHoverBlock) {
+      this.prevHoverBlock.material = this.prevHoverBlock.material.map(
+        (item) => {
+          item.emissive.setHex(this.prevHoverBlockHex as number);
+
+          return item;
+        }
+      );
+    }
+
+    if (!object) return;
+
+    object.material = object.material.map((item) => {
+      this.prevHoverBlockHex = item.emissive.getHex();
+      item.emissive.setHex(0x6e6e6e50);
+
+      return item;
+    });
+
+    this.prevHoverBlock = object;
   }
 
   handleBreakBlock() {
@@ -95,5 +145,7 @@ export default class BlockManager extends BaseEntity {
       });
   }
 
-  update() {}
+  update() {
+    this.handleHoverBlock();
+  }
 }
