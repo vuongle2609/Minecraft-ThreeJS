@@ -18,7 +18,7 @@ export default class InventoryManager {
   currentFocusIndex = 0;
   currentFocus = this.inventory[this.currentFocusIndex];
 
-  timeoutHideLabel: NodeJS.Timeout | null = null
+  timeoutHideLabel: NodeJS.Timeout | null = null;
 
   constructor() {
     this.initialize();
@@ -40,8 +40,8 @@ export default class InventoryManager {
     document.addEventListener(
       "keydown",
       (e) => {
-        if (keyMap[e.code]) {
-          this.handleChangeFocusItem(keyMap[e.code]);
+        if (!!Number(e.key)) {
+          this.handleChangeFocusItem(Number(e.key));
         }
       },
       false
@@ -64,16 +64,16 @@ export default class InventoryManager {
     if (!labelFocus || !label) return;
 
     if (this.timeoutHideLabel) {
-      clearTimeout(this.timeoutHideLabel)
+      clearTimeout(this.timeoutHideLabel);
     }
 
-    labelFocus.style.opacity = '1'
+    labelFocus.style.opacity = "1";
 
     labelFocus.innerHTML = `<span>${label}</span>`;
 
     this.timeoutHideLabel = setTimeout(() => {
-      labelFocus.style.opacity = '0'
-    }, 1500)
+      labelFocus.style.opacity = "0";
+    }, 1500);
   }
 
   renderInventory() {

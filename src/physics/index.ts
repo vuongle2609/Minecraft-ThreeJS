@@ -5,6 +5,7 @@ const timeStep = 1 / 60;
 const world = new World({
   gravity: new Vec3(0, -60, 0),
   frictionGravity: new Vec3(),
+  // allowSleep: true,
 });
 
 const bodies: Record<string, Body> = {};
@@ -35,7 +36,7 @@ const handleAddBodyToWorld = () => {
 
   const contactNormal = new Vec3();
   const upAxis = new Vec3(0, 1, 0);
-  
+
   newBody.addEventListener("collide", (e: any) => {
     const { contact } = e;
 
@@ -46,7 +47,7 @@ const handleAddBodyToWorld = () => {
     }
 
     if (contactNormal.dot(upAxis) > 0.5) {
-      self.postMessage('done_jump')
+      self.postMessage("done_jump");
     }
   });
 

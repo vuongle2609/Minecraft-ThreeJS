@@ -3,15 +3,36 @@
 const blocks = {
   grass: {
     name: "Grass",
-    texture: ["side", "side", "top", "bottom", "side", "side"],
+    texture: [
+      "grass_block_side",
+      "grass_block_side",
+      "grass_top_green",
+      "dirt",
+      "grass_block_side",
+      "grass_block_side",
+    ],
   },
   oak_planks: {
     name: "Oak Wood Planks",
-    texture: ["side", "side", "side", "side", "side", "side"],
+    texture: [
+      "oak_planks",
+      "oak_planks",
+      "oak_planks",
+      "oak_planks",
+      "oak_planks",
+      "oak_planks",
+    ],
   },
   block_of_diamond: {
     name: "Block of Diamond",
-    texture: ["side", "side", "side", "side", "side", "side"],
+    texture: [
+      "diamond_block",
+      "diamond_block",
+      "diamond_block",
+      "diamond_block",
+      "diamond_block",
+      "diamond_block",
+    ],
   },
 };
 

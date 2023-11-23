@@ -129,11 +129,6 @@ export default class GameScene extends RenderPage {
       worker: this.worker,
     });
 
-    new Terrant({
-      scene: this.scene,
-      worker: this.worker,
-    });
-
     new Light({
       scene: this.scene,
     });
