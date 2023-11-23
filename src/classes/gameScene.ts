@@ -11,16 +11,9 @@ import { RenderPage } from "./renderPage";
 import Terrant from "./terrant";
 import CannonDebugger from "cannon-es-debugger";
 
-const timeStep = 1 / 60;
-
 export const physicsMaterial = new Material("physics");
 
 export const humanMaterial = new Material("human");
-
-//@ts-ignore
-window.worker = new Worker(new URL("../physics/index", import.meta.url), {
-  type: "module",
-});
 
 export default class GameScene extends RenderPage {
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -32,9 +25,11 @@ export default class GameScene extends RenderPage {
     frictionGravity: new Vec3(),
   });
 
-  worldBodiesPositions = new Float32Array();
+  worker = new Worker(new URL("../physics/index", import.meta.url), {
+    type: "module",
+  });
 
-  // worker = ;
+  worldBodiesPositions = new Float32Array(3);
 
   //@ts-ignore
   cannonDebugger = new CannonDebugger(this.scene, this.world, {});
@@ -131,16 +126,6 @@ export default class GameScene extends RenderPage {
 
     document.body.appendChild(this.element);
 
-    // const
-
-    // // gửi dữ liệu đến Worker xử lý
-    // worker.postMessage("Tin nhắn này gửi đến worker");
-
-    // //nhận tin nhắn từ Worker
-    // worker.onmessage = function (e) {
-    //   console.log(e.data); // Tin nhắn này gửi đến main thread
-    // };
-
     this.scene.background = new THREE.Color("#87CEEB");
 
     const physics_physics = new ContactMaterial(
@@ -188,13 +173,13 @@ export default class GameScene extends RenderPage {
     if (!this.mouseControl?.paused) {
       const delta = this.clock.getDelta();
 
-      if (delta) this.world.step(timeStep, delta);
+      // if (delta) this.world.step(timeStep, delta);
 
       this.player.update(delta);
 
       this.blockManager?.update();
 
-      // this.cannonDebugger.update();
+      this.cannonDebugger.update();
 
       this.renderer.render(this.scene, this.camera);
     }

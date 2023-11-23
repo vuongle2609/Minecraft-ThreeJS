@@ -38,9 +38,19 @@ const handleAddBodyToWorld = () => {
 
 handleAddBodyToWorld();
 
+const timeStep = 1 / 60;
+
 // get all bodies position
-const getBodyProperties = ({ position }: { position: Float32Array }) => {
-  world.fixedStep();
+const getBodyProperties = ({
+  position,
+  delta,
+}: {
+  position: Float32Array;
+  delta: number;
+}) => {
+  if (delta) world.step(timeStep, delta);
+
+  bodies["character"].position.set(position[0], position[1], position[2]);
 
   const { x, y, z } = bodies["character"].position;
 
@@ -48,8 +58,7 @@ const getBodyProperties = ({ position }: { position: Float32Array }) => {
   position[1] = y;
   position[2] = z;
 
-  //@ts-ignore
-  self.postMessage({ position }, [position.buffer]);
+  self.postMessage({ position, delta });
 };
 
 const eventMapping = {

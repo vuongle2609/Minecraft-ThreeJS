@@ -15,7 +15,8 @@ export default class Player extends BaseEntity {
 
   input = new BasicCharacterControllerInput();
 
-  worldBodiesPositions = new Float32Array(3);
+  worldBodiesPositionsSend = new Float32Array(3);
+  worldBodiesPositionsReceive = new Float32Array(3);
 
   constructor(props: BasePropsType) {
     super(props);
@@ -42,9 +43,6 @@ export default class Player extends BaseEntity {
     this.playerPhysicBody.linearDamping = 0.9;
     this.world?.addBody(this.playerPhysicBody);
 
-    // //@ts-ignore
-    // window.worker.postMessage(object, [object]);
-
     const contactNormal = new Vec3();
     const upAxis = new Vec3(0, 1, 0);
 
@@ -62,10 +60,13 @@ export default class Player extends BaseEntity {
       }
     });
 
-    //@ts-ignore
-    window.worker.onmessage = function (e) {
-      console.log(e.data.position[0], e.data.position[1], e.data.position[2]); // Tin nhắn này gửi đến main thread
-    };
+    if (this.worker)
+      this.worker.onmessage = (e) => {
+        console.log(e.data.position[0], e.data.position[1], e.data.position[2]);
+        this.worldBodiesPositionsReceive[0] = e.data.position[0];
+        this.worldBodiesPositionsReceive[1] = e.data.position[1];
+        this.worldBodiesPositionsReceive[2] = e.data.position[2];
+      };
 
     this.scene?.add(this.player);
   }
@@ -104,17 +105,28 @@ export default class Player extends BaseEntity {
     moveVector.normalize().multiplyScalar(delta * SPEED);
     //https://www.cgtrader.com/free-3d-models/character/man/minecraft-steve-low-poly-rigged
 
-    const { x, y, z } = moveVector;
-
     const vectorMoveConverted = this.playerPhysicBody.position.vadd(
-      new Vec3(x, y, z)
+      new Vec3(moveVector.x, moveVector.y, moveVector.z)
     );
 
-    this.playerPhysicBody.position.set(
-      vectorMoveConverted.x,
-      vectorMoveConverted.y,
-      vectorMoveConverted.z
-    );
+    this.worldBodiesPositionsSend[0] = vectorMoveConverted.x;
+    this.worldBodiesPositionsSend[1] = vectorMoveConverted.y;
+    this.worldBodiesPositionsSend[2] = vectorMoveConverted.z;
+
+    this.worker?.postMessage({
+      position: this.worldBodiesPositionsSend,
+      delta,
+    });
+
+    // this.playerPhysicBody.position.set(
+    //   vectorMoveConverted.x,
+    //   vectorMoveConverted.y,
+    //   vectorMoveConverted.z
+    // );
+
+    const [x, y, z] = this.worldBodiesPositionsReceive;
+
+    this.player.position.copy(new Vector3(x, y, z));
   }
 
   updateCamera() {
@@ -127,16 +139,5 @@ export default class Player extends BaseEntity {
   update(delta: number) {
     this.handleMovement(delta);
     this.updateCamera();
-
-    const { x, y, z } = this.playerPhysicBody.position;
-
-    // dispatchWorkerAction("getBodyProperties", {
-    //   position: this.worldBodiesPositions,
-    // });
-
-    //@ts-ignore
-    window.worker.postMessage({ position: this.worldBodiesPositions });
-
-    this.player.position.copy(new Vector3(x, y, z));
   }
 }

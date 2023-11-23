@@ -11,6 +11,7 @@ export interface BasePropsType {
   gui?: GUI;
   camera?: Camera;
   world?: World;
+  worker?: Worker;
 }
 
 export default class BaseEntity {
@@ -20,14 +21,17 @@ export default class BaseEntity {
   camera?: Camera;
   world?: World;
   mouseControl?: MouseControl;
+  worker?: Worker;
 
   constructor(props?: BasePropsType) {
-    const { control, gui, scene, camera, world, mouseControl } = props || {};
+    const { control, gui, scene, camera, world, mouseControl, worker } =
+      props || {};
     this.control = control;
     this.gui = gui;
     this.scene = scene;
     this.camera = camera;
     this.world = world;
     this.mouseControl = mouseControl;
+    this.worker = worker;
   }
 }
