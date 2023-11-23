@@ -20,11 +20,6 @@ export default class GameScene extends RenderPage {
 
   scene = new THREE.Scene();
 
-  world = new World({
-    gravity: new Vec3(0, -60, 0),
-    frictionGravity: new Vec3(),
-  });
-
   worker = new Worker(new URL("../physics/index", import.meta.url), {
     type: "module",
   });
@@ -98,8 +93,8 @@ export default class GameScene extends RenderPage {
       mouseControl: this.mouseControl,
       scene: this.scene,
       camera: this.camera,
-      world: this.world,
       inventoryManager: this.inventoryManager,
+      worker: this.worker,
     });
 
     this.inventoryManager.renderInventory();
@@ -128,26 +123,15 @@ export default class GameScene extends RenderPage {
 
     this.scene.background = new THREE.Color("#87CEEB");
 
-    const physics_physics = new ContactMaterial(
-      physicsMaterial,
-      humanMaterial,
-      {
-        friction: 0,
-        restitution: 0,
-      }
-    );
-
-    this.world.addContactMaterial(physics_physics);
-
     this.player = new Player({
       scene: this.scene,
       camera: this.camera,
-      world: this.world,
+      worker: this.worker,
     });
 
     new Terrant({
       scene: this.scene,
-      world: this.world,
+      worker: this.worker,
     });
 
     new Light({
@@ -173,13 +157,11 @@ export default class GameScene extends RenderPage {
     if (!this.mouseControl?.paused) {
       const delta = this.clock.getDelta();
 
-      // if (delta) this.world.step(timeStep, delta);
-
       this.player.update(delta);
 
       this.blockManager?.update();
 
-      this.cannonDebugger.update();
+      // this.cannonDebugger.update();
 
       this.renderer.render(this.scene, this.camera);
     }

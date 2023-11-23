@@ -16,7 +16,6 @@ export default class Player extends BaseEntity {
   input = new BasicCharacterControllerInput();
 
   worldBodiesPositionsSend = new Float32Array(3);
-  worldBodiesPositionsReceive = new Float32Array(3);
 
   constructor(props: BasePropsType) {
     super(props);
@@ -32,40 +31,16 @@ export default class Player extends BaseEntity {
     this.player.receiveShadow = true;
     this.player.castShadow = true;
 
-    this.playerPhysicBody = new Body({
-      mass: 5,
-      shape: new Box(new Vec3(0.5, 2, 0.5)),
-      material: humanMaterial,
-      fixedRotation: true,
-    });
-
-    this.playerPhysicBody.position.set(0, 4, 0);
-    this.playerPhysicBody.linearDamping = 0.9;
-    this.world?.addBody(this.playerPhysicBody);
-
-    const contactNormal = new Vec3();
-    const upAxis = new Vec3(0, 1, 0);
-
-    this.playerPhysicBody.addEventListener("collide", (e: any) => {
-      const { contact } = e;
-
-      if (contact.bi.id === this.playerPhysicBody.id) {
-        contact.ni.negate(contactNormal);
-      } else {
-        contactNormal.copy(contact.ni);
-      }
-
-      if (contactNormal.dot(upAxis) > 0.5) {
-        this.canJump = true;
-      }
-    });
-
     if (this.worker)
       this.worker.onmessage = (e) => {
-        console.log(e.data.position[0], e.data.position[1], e.data.position[2]);
-        this.worldBodiesPositionsReceive[0] = e.data.position[0];
-        this.worldBodiesPositionsReceive[1] = e.data.position[1];
-        this.worldBodiesPositionsReceive[2] = e.data.position[2];
+        if (e.data === "done_jump") {
+          this.canJump = true;
+          return;
+        }
+
+        const [x, y, z] = e.data.position;
+
+        this.player.position.copy(new Vector3(x, y, z));
       };
 
     this.scene?.add(this.player);
@@ -83,7 +58,9 @@ export default class Player extends BaseEntity {
 
     if (keys.space && this.canJump) {
       this.canJump = false;
-      this.playerPhysicBody.velocity.y = this.jumpVelocity;
+      this.worker?.postMessage({
+        type: "handleJumpBody",
+      });
     }
 
     const forwardVector = new Vector3();
@@ -105,28 +82,17 @@ export default class Player extends BaseEntity {
     moveVector.normalize().multiplyScalar(delta * SPEED);
     //https://www.cgtrader.com/free-3d-models/character/man/minecraft-steve-low-poly-rigged
 
-    const vectorMoveConverted = this.playerPhysicBody.position.vadd(
-      new Vec3(moveVector.x, moveVector.y, moveVector.z)
-    );
-
-    this.worldBodiesPositionsSend[0] = vectorMoveConverted.x;
-    this.worldBodiesPositionsSend[1] = vectorMoveConverted.y;
-    this.worldBodiesPositionsSend[2] = vectorMoveConverted.z;
+    this.worldBodiesPositionsSend[0] = moveVector.x;
+    this.worldBodiesPositionsSend[1] = moveVector.y;
+    this.worldBodiesPositionsSend[2] = moveVector.z;
 
     this.worker?.postMessage({
-      position: this.worldBodiesPositionsSend,
-      delta,
+      type: "getBodyProperties",
+      payload: {
+        position: this.worldBodiesPositionsSend,
+        delta,
+      },
     });
-
-    // this.playerPhysicBody.position.set(
-    //   vectorMoveConverted.x,
-    //   vectorMoveConverted.y,
-    //   vectorMoveConverted.z
-    // );
-
-    const [x, y, z] = this.worldBodiesPositionsReceive;
-
-    this.player.position.copy(new Vector3(x, y, z));
   }
 
   updateCamera() {

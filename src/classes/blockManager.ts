@@ -65,7 +65,7 @@ export default class BlockManager extends BaseEntity {
       Object3DEventMap
     >;
 
-    if (this.prevHoverBlock) {
+    if (this.prevHoverBlock?.material?.length) {
       this.prevHoverBlock.material = this.prevHoverBlock.material.map(
         (item) => {
           item.emissive.setHex(this.prevHoverBlockHex as number);
@@ -77,13 +77,14 @@ export default class BlockManager extends BaseEntity {
 
     if (!object) return;
 
-    object.material = object.material.map((item) => {
-      this.prevHoverBlockHex = item.emissive.getHex();
-      // random hex for block lighter
-      item.emissive.setHex(0x6e6e6e50);
+    if (object.material?.length)
+      object.material = object.material.map((item) => {
+        this.prevHoverBlockHex = item.emissive.getHex();
+        // random hex for block lighter
+        item.emissive.setHex(0x6e6e6e50);
 
-      return item;
-    });
+        return item;
+      });
 
     this.prevHoverBlock = object;
   }
@@ -98,7 +99,7 @@ export default class BlockManager extends BaseEntity {
     const intersects = raycaster.intersectObjects(this.scene.children, false);
 
     for (let i = 0; i < intersects.length; i++) {
-      console.log("break block", intersects[i].object);
+      // console.log("break block", intersects[i].object);
     }
   }
 
@@ -142,8 +143,8 @@ export default class BlockManager extends BaseEntity {
       new Block({
         position: blockPosition,
         scene: this.scene,
-        world: this.world,
         type: this.inventoryManager.currentFocus,
+        worker: this.worker,
       });
   }
 
