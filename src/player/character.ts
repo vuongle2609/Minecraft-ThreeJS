@@ -2,6 +2,7 @@ import BasicCharacterControllerInput from "@/action/input";
 import BaseEntity, { BasePropsType } from "@/classes/baseEntity";
 import { humanMaterial } from "@/classes/gameScene";
 import { SPEED } from "@/constants/player";
+import dispatchWorkerAction from "@/helpers/dispatchWorkerAction";
 import { Body, Box, Vec3 } from "cannon-es";
 import { CapsuleGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
 
@@ -13,6 +14,8 @@ export default class Player extends BaseEntity {
   canJump = true;
 
   input = new BasicCharacterControllerInput();
+
+  worldBodiesPositions = new Float32Array(3);
 
   constructor(props: BasePropsType) {
     super(props);
@@ -39,6 +42,9 @@ export default class Player extends BaseEntity {
     this.playerPhysicBody.linearDamping = 0.9;
     this.world?.addBody(this.playerPhysicBody);
 
+    // //@ts-ignore
+    // window.worker.postMessage(object, [object]);
+
     const contactNormal = new Vec3();
     const upAxis = new Vec3(0, 1, 0);
 
@@ -55,6 +61,11 @@ export default class Player extends BaseEntity {
         this.canJump = true;
       }
     });
+
+    //@ts-ignore
+    window.worker.onmessage = function (e) {
+      console.log(e.data.position[0], e.data.position[1], e.data.position[2]); // Tin nhắn này gửi đến main thread
+    };
 
     this.scene?.add(this.player);
   }
@@ -118,6 +129,14 @@ export default class Player extends BaseEntity {
     this.updateCamera();
 
     const { x, y, z } = this.playerPhysicBody.position;
+
+    // dispatchWorkerAction("getBodyProperties", {
+    //   position: this.worldBodiesPositions,
+    // });
+
+    //@ts-ignore
+    window.worker.postMessage({ position: this.worldBodiesPositions });
+
     this.player.position.copy(new Vector3(x, y, z));
   }
 }

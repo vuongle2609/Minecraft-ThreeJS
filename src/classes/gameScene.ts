@@ -17,6 +17,11 @@ export const physicsMaterial = new Material("physics");
 
 export const humanMaterial = new Material("human");
 
+//@ts-ignore
+window.worker = new Worker(new URL("../physics/index", import.meta.url), {
+  type: "module",
+});
+
 export default class GameScene extends RenderPage {
   renderer = new THREE.WebGLRenderer({ antialias: true });
 
@@ -26,6 +31,10 @@ export default class GameScene extends RenderPage {
     gravity: new Vec3(0, -60, 0),
     frictionGravity: new Vec3(),
   });
+
+  worldBodiesPositions = new Float32Array();
+
+  // worker = ;
 
   //@ts-ignore
   cannonDebugger = new CannonDebugger(this.scene, this.world, {});
@@ -122,6 +131,16 @@ export default class GameScene extends RenderPage {
 
     document.body.appendChild(this.element);
 
+    // const
+
+    // // gửi dữ liệu đến Worker xử lý
+    // worker.postMessage("Tin nhắn này gửi đến worker");
+
+    // //nhận tin nhắn từ Worker
+    // worker.onmessage = function (e) {
+    //   console.log(e.data); // Tin nhắn này gửi đến main thread
+    // };
+
     this.scene.background = new THREE.Color("#87CEEB");
 
     const physics_physics = new ContactMaterial(
@@ -133,7 +152,7 @@ export default class GameScene extends RenderPage {
       }
     );
 
-    this.world?.addContactMaterial(physics_physics);
+    this.world.addContactMaterial(physics_physics);
 
     this.player = new Player({
       scene: this.scene,
