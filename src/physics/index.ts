@@ -1,31 +1,50 @@
-import { Body, Box, ContactMaterial, Material, Vec3, World } from "cannon-es";
+import { lerp } from "three/src/math/MathUtils";
 
 import("@dimforge/rapier3d").then((RAPIER) => {
   // Use the RAPIER module here.
   let gravity = { x: 0.0, y: -9.81, z: 0.0 };
   let world = new RAPIER.World(gravity);
 
-  // Create the ground
-  let groundColliderDesc = RAPIER.ColliderDesc.cuboid(10.0, 0.0, 10.0);
-  world.createCollider(groundColliderDesc);
+  // let grounddesc = RAPIER.RigidBodyDesc.fixed().setTranslation(0, 0, 0);
+  // let groundBody = world.createRigidBody(grounddesc);
+
+  // // Create the ground
+  // let groundColliderDesc = RAPIER.ColliderDesc.cuboid(1, 1, 1);
+  // world.createCollider(groundColliderDesc, groundBody);
 
   let rigidBodyDesc = new RAPIER.RigidBodyDesc(
     RAPIER.RigidBodyType.KinematicVelocityBased
   )
-    .setTranslation(0, 8, 0)
+    .setTranslation(0, 10, 0)
     .setGravityScale(50);
-  let rigidBody = world.createRigidBody(rigidBodyDesc);
+  let characterBody = world.createRigidBody(rigidBodyDesc);
 
-  let colliderDesc = RAPIER.ColliderDesc.capsule(0.5, 0.5);
-  let collider = world.createCollider(colliderDesc, rigidBody);
+  let colliderDesc = RAPIER.ColliderDesc.capsule(1, 0.5);
+  // colliderDesc.setMass(2);
+  let collider = world.createCollider(colliderDesc, characterBody);
 
-  let offset = 0.01;
+  let offset = 0.001;
   let characterController = world.createCharacterController(offset);
 
   characterController.setUp({ x: 0, y: 1, z: 0 });
 
   let vy = -20;
   let ground = false;
+
+  const ray = new RAPIER.Ray(
+    {
+      x: 0,
+      y: 0,
+      z: 0,
+    },
+    {
+      x: 0,
+      y: -1,
+      z: 0,
+    }
+  );
+
+  let storedFall = 0;
 
   // get all bodies position
   const getBodyProperties = ({
@@ -37,48 +56,79 @@ import("@dimforge/rapier3d").then((RAPIER) => {
   }) => {
     world.step();
 
-    if (vy > -20) {
-      vy -= 1;
+    ray.origin.x = characterBody.translation().x;
+    ray.origin.y = characterBody.translation().y;
+    ray.origin.z = characterBody.translation().z;
+
+    let hit = world.castRay(ray, 0.1, false);
+
+    let yDirection = 0;
+
+    // lerp(storedFall, -9.81 * 100, 0.1);
+    yDirection += lerp(storedFall, -9.81, 0.1);
+    storedFall = yDirection;
+
+    console.log("🚀 ~ file: index.ts:74 ~ import ~ diff:", hit);
+    if (hit) {
+      const point = ray.pointAt(hit.toi);
+      let diff = characterBody.translation().y - (point.y + 1.1);
+
+      if (diff < 0.0) {
+        yDirection = lerp(0, Math.abs(diff), 0.5);
+      }
     }
 
     characterController.computeColliderMovement(collider, {
       x: position[0],
-      y: ground ? 0 : vy,
+      y: yDirection,
       z: position[2],
     });
-    
+
     const correctMovement = characterController.computedMovement();
 
-    for (let i = 0; i < characterController.numComputedCollisions(); i++) {
-      let collision = characterController.computedCollision(i);
-      console.log("🚀 ~ file: index.ts:52 ~ import ~ collision:", collision);
+    characterBody.setLinvel(correctMovement, true);
 
-      // if (collision?.normal1.y === 1) {
-      //   ground = true;
-      // }
-    }
+    let { x, y, z } = characterBody.translation();
 
-    rigidBody.setLinvel(correctMovement, true);
-
-    let { x, y, z } = rigidBody.translation();
     // console.log("🚀 ~ file: index.ts:46 ~ import ~ { x, y, z } :", { x, y, z });
 
     position[0] = x;
     position[1] = y;
     position[2] = z;
 
+    let buffers = world.debugRender();
+
+    self.postMessage({
+      ge: "a",
+      vertices: buffers.vertices,
+      colors: buffers.colors,
+    });
+
     self.postMessage({ position, delta });
   };
 
   const handleJumpBody = () => {
-    if (ground) {
-      ground = false;
-      vy = 40;
-    }
+    // storedFall = -40;
+  };
+
+  const handleAddBlockToWorld = ({ position }: { position: Float32Array }) => {
+    console.log(
+      "🚀 ~ file: index.ts:115 ~ handleAddBlockToWorld ~ position:",
+      position
+    );
+    let grounddesc = RAPIER.RigidBodyDesc.fixed().setTranslation(
+      position[0],
+      position[1],
+      position[2]
+    );
+    let groundBody = world.createRigidBody(grounddesc);
+
+    let groundColliderDesc = RAPIER.ColliderDesc.cuboid(1, 1, 1);
+    world.createCollider(groundColliderDesc, groundBody);
   };
 
   const eventMapping = {
-    // handleAddBlockToWorld,
+    handleAddBlockToWorld,
     getBodyProperties,
     handleJumpBody,
   };
@@ -92,76 +142,3 @@ import("@dimforge/rapier3d").then((RAPIER) => {
     eventMapping[e.data.type]?.(e.data.payload);
   };
 });
-
-// const timeStep = 1 / 60;
-
-// const world = new World({
-//   gravity: new Vec3(0, -60, 0),
-//   frictionGravity: new Vec3(),
-//   // allowSleep: true,
-// });
-
-// const bodies: Record<string, Body> = {};
-
-// export const physicsMaterial = new Material("physics");
-
-// export const humanMaterial = new Material("human");
-
-// const physics_physics = new ContactMaterial(physicsMaterial, humanMaterial, {
-//   friction: 0,
-//   restitution: 0,
-// });
-
-// world.addContactMaterial(physics_physics);
-
-// const handleAddBodyToWorld = () => {
-//   const newBody = new Body({
-//     mass: 5,
-//     shape: new Box(new Vec3(0.5, 2, 0.5)),
-//     material: humanMaterial,
-//     fixedRotation: true,
-//   });
-
-//   newBody.position.set(0, 4, 0);
-//   newBody.linearDamping = 0.9;
-
-//   world.addBody(newBody);
-
-//   const contactNormal = new Vec3();
-//   const upAxis = new Vec3(0, 1, 0);
-
-//   newBody.addEventListener("collide", (e: any) => {
-//     const { contact } = e;
-
-//     if (contact.bi.id === newBody.id) {
-//       contact.ni.negate(contactNormal);
-//     } else {
-//       contactNormal.copy(contact.ni);
-//     }
-
-//     if (contactNormal.dot(upAxis) > 0.5) {
-//       self.postMessage("done_jump");
-//     }
-//   });
-
-//   bodies["character"] = newBody;
-// };
-
-// handleAddBodyToWorld();
-
-//imp
-// const handleJumpBody = () => {
-//   bodies["character"].velocity.y = 30;
-// };
-
-// const handleAddBlockToWorld = ({ position }: { position: Float32Array }) => {
-//   const blockPhysicsBody = new Body({
-//     type: Body.STATIC,
-//     shape: new Box(new Vec3(1, 1, 1)),
-//     material: physicsMaterial,
-//   });
-
-//   blockPhysicsBody.position.set(position[0], position[1], position[2]);
-
-//   world.addBody(blockPhysicsBody);
-// };

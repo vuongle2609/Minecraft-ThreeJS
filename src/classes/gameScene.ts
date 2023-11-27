@@ -10,6 +10,7 @@ import Light from "./light";
 import { RenderPage } from "./renderPage";
 import Terrant from "./terrant";
 import CannonDebugger from "cannon-es-debugger";
+import { lerp } from "three/src/math/MathUtils";
 
 export const physicsMaterial = new Material("physics");
 
@@ -169,3 +170,125 @@ export { gameScene };
 export const scene = gameScene.scene;
 export const control = gameScene.control;
 export const gui = gameScene.gui;
+
+
+// import("@dimforge/rapier3d").then((RAPIER) => {
+//   // Use the RAPIER module here.
+//   let gravity = { x: 0.0, y: -9.81, z: 0.0 };
+//   let world = new RAPIER.World(gravity);
+
+//   // Create the ground
+//   let groundColliderDesc = RAPIER.ColliderDesc.cuboid(1.0, 1.0, 1.0);
+//   world.createCollider(groundColliderDesc);
+
+//   let rigidBodyDesc = new RAPIER.RigidBodyDesc(
+//     RAPIER.RigidBodyType.KinematicVelocityBased
+//   )
+//     .setTranslation(0, 2, 0)
+//     .setGravityScale(50);
+//   let characterBody = world.createRigidBody(rigidBodyDesc);
+
+//   let colliderDesc = RAPIER.ColliderDesc.capsule(0.5, 0.5);
+//   colliderDesc.setMass(2);
+//   let collider = world.createCollider(colliderDesc, characterBody);
+
+//   let offset = 0.01;
+//   let characterController = world.createCharacterController(offset);
+
+//   characterController.setUp({ x: 0, y: 1, z: 0 });
+
+//   let vy = -20;
+//   let ground = false;
+
+//   const ray = new RAPIER.Ray(
+//     {
+//       x: 0,
+//       y: 0,
+//       z: 0,
+//     },
+//     {
+//       x: 0,
+//       y: -1,
+//       z: 0,
+//     }
+//   );
+
+//   let storedFall = 0;
+
+//   // get all bodies position
+//   const getBodyProperties = ({
+//     position,
+//     delta,
+//   }: {
+//     position: Float32Array;
+//     delta: number;
+//   }) => {
+//     world.step();
+
+//     ray.origin.x = characterBody.translation().x;
+//     ray.origin.y = characterBody.translation().y;
+//     ray.origin.z = characterBody.translation().z;
+
+//     let hit = world.castRay(ray, 0.5, true);
+
+//     let yDirection = 0;
+
+//     yDirection += lerp(storedFall, -9.81 * delta * 100, 0.1);
+//     storedFall = yDirection;
+
+//     if (hit) {
+//       const point = ray.pointAt(hit.toi);
+//       let diff = characterBody.translation().y - (point.y + 0.5);
+//       console.log("🚀 ~ file: index.ts:69 ~ import ~ diff:", diff);
+//       if (diff < 0.0) {
+//         yDirection = lerp(0, Math.abs(diff), 0.5);
+//       }
+//     }
+
+//     characterController.computeColliderMovement(collider, {
+//       x: position[0],
+//       y: position[1],
+//       z: position[2],
+//     });
+
+//     const correctMovement = characterController.computedMovement();
+
+//     characterBody.setLinvel(correctMovement, true);
+
+//     let { x, y, z } = characterBody.translation();
+
+//     // console.log("🚀 ~ file: index.ts:46 ~ import ~ { x, y, z } :", { x, y, z });
+
+//     position[0] = x;
+//     position[1] = y;
+//     position[2] = z;
+
+//     // self.postMessage({ position, delta });
+
+//     gameScene.player.player.
+
+//     // self.postMessage()
+//   };
+
+//   const handleJumpBody = () => {
+//     // if (ground) {
+//     //   ground = false;
+//     //   vy = 40;
+//     // }
+//   };
+
+//   const eventMapping = {
+//     // handleAddBlockToWorld,
+//     getBodyProperties,
+//     handleJumpBody,
+//   };
+
+//   self.onmessage = (
+//     e: MessageEvent<{
+//       type: keyof typeof eventMapping;
+//       payload: any;
+//     }>
+//   ) => {
+//     eventMapping[e.data.type]?.(e.data.payload);
+//   };
+// });

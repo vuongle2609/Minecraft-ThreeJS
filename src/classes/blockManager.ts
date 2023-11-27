@@ -65,17 +65,31 @@ export default class BlockManager extends BaseEntity {
       })
     );
 
-    for (let i = -10; i < 10; i++) {
-      for (let j = -10; j < 10; j++) {
-        new Block({
-          position: new Vector3(i * 2, 0, j * 2),
-          scene: this.scene,
-          type: "grass",
-          worker: this.worker,
-          geometryBlock: this.geometryBlock,
-        });
+    // for (let i = -10; i < 10; i++) {
+    //   for (let j = -10; j < 10; j++) {
+    //     new Block({
+    //       position: new Vector3(i * 2, 0, j * 2),
+    //       scene: this.scene,
+    //       type: "grass",
+    //       worker: this.worker,
+    //       geometryBlock: this.geometryBlock,
+    //     });
+    //   }
+    // }
+
+    setTimeout(() => {
+      for (let i = -10; i < 10; i++) {
+        for (let j = -10; j < 10; j++) {
+          new Block({
+            position: new Vector3(i * 2, 0, j * 2),
+            scene: this.scene,
+            type: "grass",
+            worker: this.worker,
+            geometryBlock: this.geometryBlock,
+          });
+        }
       }
-    }
+    }, 100);
 
     document.addEventListener("mousedown", (e) => {
       this.onMouseDown(e);
