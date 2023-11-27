@@ -7,6 +7,11 @@
   resolved "https://registry.npmjs.org/@alloc/quick-lru/-/quick-lru-5.2.0.tgz"
   integrity sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==
 
+"@dimforge/rapier3d@^0.11.2":
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/@dimforge/rapier3d/-/rapier3d-0.11.2.tgz#b81d64a6a86b5f04805da29ce7eec57424769c6a"
+  integrity sha512-B+AKkPmtJxED3goMTGU8v0ju8hUAUQGLgghzCos4G4OeN9X+mJ5lfN2xtNA0n8tJRJk2YfsMk9BOj/6AN89Acg==
+
 "@esbuild/android-arm64@0.19.7":
   version "0.19.7"
   resolved "https://registry.yarnpkg.com/@esbuild/android-arm64/-/android-arm64-0.19.7.tgz#646156aea43e8e6723de6e94a4ac07c5aed41be1"
@@ -941,6 +946,11 @@ util@^0.10.3:
   integrity sha512-0Pm9hTQ3se5ll1XihRic3FDIku70C+iHUdT/W926rSgHV5QgXsYbKZN8MSC3tJtSkhuROzvsQjAaFENRXr+19A==
   dependencies:
     inherits "2.0.3"
+
+vite-plugin-wasm@^3.2.2:
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/vite-plugin-wasm/-/vite-plugin-wasm-3.2.2.tgz#7a66fef27733a0dea9b2b14f942a6389a2523f7c"
+  integrity sha512-cdbBUNR850AEoMd5nvLmnyeq63CSfoP1ctD/L2vLk/5+wsgAPlAVAzUK5nGKWO/jtehNlrSSHLteN+gFQw7VOA==
 
 vite-tsconfig-paths@^4.2.1:
   version "4.2.1"
