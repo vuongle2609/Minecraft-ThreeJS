@@ -42,54 +42,14 @@ export default class BlockManager extends BaseEntity {
   }
 
   async initialize() {
-    // new Terrant({
-    //   scene: this.scene,
-    //   worker: this.worker,
-    // });
+    new Terrant({
+      scene: this.scene,
+      worker: this.worker,
+    });
 
     const placeBlock = blocks["grass"];
-    const textureLoader = new TextureLoader();
 
-    const textures = await Promise.all(
-      placeBlock.texture.map(async (namePath) => {
-        const texture = await textureLoader.loadAsync(
-          `/assets/block/${namePath}.png`
-        );
-
-        texture.magFilter = NearestFilter;
-
-        return new MeshStandardMaterial({
-          map: texture,
-          side: 0,
-        });
-      })
-    );
-
-    // for (let i = -10; i < 10; i++) {
-    //   for (let j = -10; j < 10; j++) {
-    //     new Block({
-    //       position: new Vector3(i * 2, 0, j * 2),
-    //       scene: this.scene,
-    //       type: "grass",
-    //       worker: this.worker,
-    //       geometryBlock: this.geometryBlock,
-    //     });
-    //   }
-    // }
-
-    setTimeout(() => {
-      for (let i = -10; i < 10; i++) {
-        for (let j = -10; j < 10; j++) {
-          new Block({
-            position: new Vector3(i * 2, 0, j * 2),
-            scene: this.scene,
-            type: "grass",
-            worker: this.worker,
-            geometryBlock: this.geometryBlock,
-          });
-        }
-      }
-    }, 100);
+    const textures = placeBlock.texture;
 
     document.addEventListener("mousedown", (e) => {
       this.onMouseDown(e);
@@ -109,44 +69,44 @@ export default class BlockManager extends BaseEntity {
   }
 
   handleHoverBlock() {
-    const { raycaster } = this.mouseControl! || {};
+    // const { raycaster } = this.mouseControl! || {};
 
-    if (!this.camera || !this.scene) return;
+    // if (!this.camera || !this.scene) return;
 
-    raycaster.setFromCamera(new Vector2(), this.camera);
+    // raycaster.setFromCamera(new Vector2(), this.camera);
 
-    const intersects = raycaster.intersectObjects(this.scene.children, false);
+    // const intersects = raycaster.intersectObjects(this.scene.children, false);
 
-    if (intersects[0]?.distance > 12) return;
+    // if (intersects[0]?.distance > 12) return;
 
-    const object = intersects[0]?.object as Mesh<
-      BoxGeometry,
-      MeshStandardMaterial[],
-      Object3DEventMap
-    >;
+    // const object = intersects[0]?.object as Mesh<
+    //   BoxGeometry,
+    //   MeshStandardMaterial[],
+    //   Object3DEventMap
+    // >;
 
-    if (this.prevHoverBlock?.material?.length) {
-      this.prevHoverBlock.material = this.prevHoverBlock.material.map(
-        (item) => {
-          item.emissive.setHex(this.prevHoverBlockHex as number);
+    // if (this.prevHoverBlock?.material?.length) {
+    //   this.prevHoverBlock.material = this.prevHoverBlock.material.map(
+    //     (item) => {
+    //       item.emissive.setHex(this.prevHoverBlockHex as number);
 
-          return item;
-        }
-      );
-    }
+    //       return item;
+    //     }
+    //   );
+    // }
 
-    if (!object) return;
+    // if (!object) return;
 
-    if (object.material?.length)
-      object.material = object.material.map((item) => {
-        this.prevHoverBlockHex = item.emissive.getHex();
-        // random hex for block lighter
-        item.emissive.setHex(0x6e6e6e50);
+    // if (object.material?.length)
+    //   object.material = object.material.map((item) => {
+    //     this.prevHoverBlockHex = item.emissive.getHex();
+    //     // random hex for block lighter
+    //     item.emissive.setHex(0x6e6e6e50);
 
-        return item;
-      });
+    //     return item;
+    //   });
 
-    this.prevHoverBlock = object;
+    // this.prevHoverBlock = object;
   }
 
   handleBreakBlock() {

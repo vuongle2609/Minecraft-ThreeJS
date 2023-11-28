@@ -60,14 +60,14 @@ export default class Player extends BaseEntity {
         }
 
         if (e.data?.ge === "a") {
-          this.lines.geometry.setAttribute(
-            "position",
-            new BufferAttribute(e.data.vertices, 3)
-          );
-          this.lines.geometry.setAttribute(
-            "color",
-            new BufferAttribute(e.data.colors, 4)
-          );
+          // this.lines.geometry.setAttribute(
+          //   "position",
+          //   new BufferAttribute(e.data.vertices, 3)
+          // );
+          // this.lines.geometry.setAttribute(
+          //   "color",
+          //   new BufferAttribute(e.data.colors, 4)
+          // );
 
           return;
         }
@@ -117,7 +117,7 @@ export default class Player extends BaseEntity {
     //https://www.cgtrader.com/free-3d-models/character/man/minecraft-steve-low-poly-rigged
 
     this.worldBodiesPositionsSend[0] = moveVector.x;
-    this.worldBodiesPositionsSend[1] = moveVector.y;
+    this.worldBodiesPositionsSend[1] = moveVector.y + -0.2;
     this.worldBodiesPositionsSend[2] = moveVector.z;
 
     this.worker?.postMessage({

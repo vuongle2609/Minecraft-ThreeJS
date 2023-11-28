@@ -1,18 +1,6 @@
 import blocks from "@/constants/blocks";
 import nameFromCoordinate from "@/helpers/nameFromCoordinate";
-import {
-  BoxGeometry,
-  BufferAttribute,
-  BufferGeometry,
-  Float32BufferAttribute,
-  InstancedMesh,
-  Mesh,
-  MeshBasicMaterial,
-  MeshStandardMaterial,
-  NearestFilter,
-  TextureLoader,
-  Vector3,
-} from "three";
+import { BoxGeometry, InstancedMesh, Mesh, Vector3 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 
 interface PropsType {
@@ -32,24 +20,9 @@ export default class Block extends BaseEntity {
   }
 
   async initialize({ position, type, geometryBlock }: PropsType) {
-    const textureLoader = new TextureLoader();
-
     const placeBlock = blocks[type];
 
-    const textures = await Promise.all(
-      placeBlock.texture.map(async (namePath) => {
-        const texture = await textureLoader.loadAsync(
-          `/assets/block/${namePath}.png`
-        );
-
-        texture.magFilter = NearestFilter;
-
-        return new MeshStandardMaterial({
-          map: texture,
-          side: 0,
-        });
-      })
-    );
+    const textures = placeBlock.texture;
 
     const boxGeometry = new BoxGeometry(2, 2, 2);
 
@@ -57,8 +30,6 @@ export default class Block extends BaseEntity {
       ? new InstancedMesh(geometryBlock, textures, 1600 * 2)
       : new Mesh(boxGeometry, textures);
 
-    // newBlock.receiveShadow = true;
-    // newBlock.castShadow = true;
     newBlock.name = nameFromCoordinate(position.x, position.y, position.z);
 
     newBlock.position.set(position.x, position.y, position.z);
