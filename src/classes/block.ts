@@ -31,6 +31,8 @@ export default class Block extends BaseEntity {
       : new Mesh(boxGeometry, textures);
 
     newBlock.name = nameFromCoordinate(position.x, position.y, position.z);
+    newBlock.castShadow = true;
+    newBlock.receiveShadow = true;
 
     newBlock.position.set(position.x, position.y, position.z);
 

@@ -12,8 +12,8 @@ export default class Terrant extends BaseEntity {
 
   async initialize() {
     setTimeout(() => {
-      for (let i = -5; i < 5; i++) {
-        for (let j = -5; j < 5; j++) {
+      for (let i = -7; i < 7; i++) {
+        for (let j = -7; j < 7; j++) {
           new Block({
             position: new Vector3(i * 2, 0, j * 2),
             scene: this.scene,
@@ -23,6 +23,6 @@ export default class Terrant extends BaseEntity {
           });
         }
       }
-    }, 100);
+    }, 200);
   }
 }

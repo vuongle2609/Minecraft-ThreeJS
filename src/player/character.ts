@@ -14,7 +14,6 @@ import {
   MeshStandardMaterial,
   Vector3,
 } from "three";
-import { lerp } from "three/src/math/MathUtils";
 
 export default class Player extends BaseEntity {
   player: Mesh;
@@ -90,7 +89,7 @@ export default class Player extends BaseEntity {
     if (keys.forward) directionVector.z += 1;
     if (keys.backward) directionVector.z -= 1;
 
-    if (keys.space && this.canJump) {
+    if (keys.space) {
       this.canJump = false;
       this.worker?.postMessage({
         type: "handleJumpBody",
@@ -117,7 +116,7 @@ export default class Player extends BaseEntity {
     //https://www.cgtrader.com/free-3d-models/character/man/minecraft-steve-low-poly-rigged
 
     this.worldBodiesPositionsSend[0] = moveVector.x;
-    this.worldBodiesPositionsSend[1] = moveVector.y + -0.2;
+    this.worldBodiesPositionsSend[1] = 0;
     this.worldBodiesPositionsSend[2] = moveVector.z;
 
     this.worker?.postMessage({
@@ -134,7 +133,7 @@ export default class Player extends BaseEntity {
 
     //constant lerp and diff y
 
-    // this.camera?.lookAt(this.player.position);
+    // this.camera?.lookAt(0, 0, 0);
 
     // this.camera?.position.set(10, 10, 10);
 
