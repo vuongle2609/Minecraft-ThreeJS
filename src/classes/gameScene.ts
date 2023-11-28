@@ -64,8 +64,12 @@ export default class GameScene extends RenderPage {
     app?.insertAdjacentHTML(
       "beforeend",
       `
-      <div id="modal_focus" class="fixed top-0 bottom-0 left-0 right-0 flex items-center justify-center bg-blue-500">
-         <button class="bg-red-600 p-9" id="focus">Focus</button>
+      <div id="modal_focus" class="fixed top-0 bottom-0 left-0 right-0 items-center justify-center bg-blue-500 flex flex-col" style="background-image: url('/assets/home/bg.jpg')">
+        <div class="flex flex-col w-full h-full backdrop-blur-md items-center justify-center px-[200px]">
+            <img src="/assets/home/minecraft-logo-8.png" class="max-w-[800px] w-full mb-20"/>
+
+            <button class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full max-w-[500px]" id="focus">Focus</button>
+        </div>
       </div>
 
       <div id="modal_game" class="fixed top-0 bottom-0 left-0 right-0 hidden items-center justify-center">
@@ -170,7 +174,6 @@ export { gameScene };
 export const scene = gameScene.scene;
 export const control = gameScene.control;
 export const gui = gameScene.gui;
-
 
 // import("@dimforge/rapier3d").then((RAPIER) => {
 //   // Use the RAPIER module here.

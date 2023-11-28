@@ -1,5 +1,3 @@
-import { lerp } from "three/src/math/MathUtils";
-
 import("@dimforge/rapier3d").then((RAPIER) => {
   let gravity = { x: 0.0, y: -9.81, z: 0.0 };
   let world = new RAPIER.World(gravity);
@@ -51,10 +49,7 @@ import("@dimforge/rapier3d").then((RAPIER) => {
       // The first collider hit has the handle `hit.colliderHandle` and it hit after
       // the ray travelled a distance equal to `ray.dir * toi`.
       let hitPoint = ray.pointAt(hitWithNormal.toi);
-      console.log(
-        "Collider",
-        hitWithNormal
-      );
+      console.log("Collider", hitWithNormal);
     }
 
     const correctMovement = characterController.computedMovement();

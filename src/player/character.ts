@@ -1,18 +1,15 @@
 import BasicCharacterControllerInput from "@/action/input";
 import BaseEntity, { BasePropsType } from "@/classes/baseEntity";
-import { humanMaterial } from "@/classes/gameScene";
 import { SPEED } from "@/constants/player";
-import dispatchWorkerAction from "@/helpers/dispatchWorkerAction";
-import { Body, Box, Vec3 } from "cannon-es";
+import { Body } from "cannon-es";
 import {
-  BufferAttribute,
   BufferGeometry,
   CapsuleGeometry,
   LineBasicMaterial,
   LineSegments,
   Mesh,
   MeshStandardMaterial,
-  Vector3,
+  Vector3
 } from "three";
 
 export default class Player extends BaseEntity {
