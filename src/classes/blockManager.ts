@@ -1,20 +1,17 @@
+import blocks from "@/constants/blocks";
 import {
   BoxGeometry,
-  Mesh,
-  Vector3,
-  Object3DEventMap,
-  MeshStandardMaterial,
-  Vector2,
   InstancedMesh,
-  TextureLoader,
-  NearestFilter,
+  Mesh,
+  MeshStandardMaterial,
+  Object3DEventMap,
+  Vector2,
+  Vector3
 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
 import Terrant from "./terrant";
-import blocks from "@/constants/blocks";
-import nameFromCoordinate from "@/helpers/nameFromCoordinate";
 
 interface PropsType {
   inventoryManager: InventoryManager;
@@ -42,10 +39,7 @@ export default class BlockManager extends BaseEntity {
   }
 
   async initialize() {
-    new Terrant({
-      scene: this.scene,
-      worker: this.worker,
-    });
+   
 
     const placeBlock = blocks["grass"];
 
@@ -70,42 +64,31 @@ export default class BlockManager extends BaseEntity {
 
   handleHoverBlock() {
     // const { raycaster } = this.mouseControl! || {};
-
     // if (!this.camera || !this.scene) return;
-
     // raycaster.setFromCamera(new Vector2(), this.camera);
-
     // const intersects = raycaster.intersectObjects(this.scene.children, false);
-
     // if (intersects[0]?.distance > 12) return;
-
     // const object = intersects[0]?.object as Mesh<
     //   BoxGeometry,
     //   MeshStandardMaterial[],
     //   Object3DEventMap
     // >;
-
     // if (this.prevHoverBlock?.material?.length) {
     //   this.prevHoverBlock.material = this.prevHoverBlock.material.map(
     //     (item) => {
     //       item.emissive.setHex(this.prevHoverBlockHex as number);
-
     //       return item;
     //     }
     //   );
     // }
-
     // if (!object) return;
-
     // if (object.material?.length)
     //   object.material = object.material.map((item) => {
     //     this.prevHoverBlockHex = item.emissive.getHex();
     //     // random hex for block lighter
     //     item.emissive.setHex(0x6e6e6e50);
-
     //     return item;
     //   });
-
     // this.prevHoverBlock = object;
   }
 

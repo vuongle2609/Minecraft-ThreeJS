@@ -1,10 +1,12 @@
 import("@dimforge/rapier3d").then((RAPIER) => {
+  self.postMessage("loaded");
+
   let gravity = { x: 0.0, y: -9.81, z: 0.0 };
   let world = new RAPIER.World(gravity);
 
   let rigidBodyDesc = new RAPIER.RigidBodyDesc(
     RAPIER.RigidBodyType.KinematicPositionBased
-  ).setTranslation(0, 50, 0);
+  ).setTranslation(0, 20, 0);
 
   let characterBody = world.createRigidBody(rigidBodyDesc);
 
@@ -21,10 +23,6 @@ import("@dimforge/rapier3d").then((RAPIER) => {
 
   const raw = -20;
   let vy = raw;
-
-  let ray = new RAPIER.Ray({ x: 0, y: 0, z: 0 }, { x: 0, y: -1, z: 0 });
-  let maxToi = 1;
-  let solid = false;
 
   const getBodyProperties = ({
     position,
@@ -43,15 +41,6 @@ import("@dimforge/rapier3d").then((RAPIER) => {
       vy -= 1;
     }
 
-    // let hit = world.castRayAndGetNormal(ray, maxToi, solid);
-    let hitWithNormal = world.castRayAndGetNormal(ray, maxToi, solid);
-    if (hitWithNormal != null) {
-      // The first collider hit has the handle `hit.colliderHandle` and it hit after
-      // the ray travelled a distance equal to `ray.dir * toi`.
-      let hitPoint = ray.pointAt(hitWithNormal.toi);
-      console.log("Collider", hitWithNormal);
-    }
-
     const correctMovement = characterController.computedMovement();
 
     const newPos = characterBody.translation();
@@ -67,9 +56,6 @@ import("@dimforge/rapier3d").then((RAPIER) => {
     position[0] = x;
     position[1] = y;
     position[2] = z;
-
-    ray.origin = { x, y, z };
-    ray.dir = { x, y: y - 3, z };
 
     self.postMessage({ position, delta });
 

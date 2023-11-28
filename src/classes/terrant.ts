@@ -11,18 +11,16 @@ export default class Terrant extends BaseEntity {
   }
 
   async initialize() {
-    setTimeout(() => {
-      for (let i = -7; i < 7; i++) {
-        for (let j = -7; j < 7; j++) {
-          new Block({
-            position: new Vector3(i * 2, 0, j * 2),
-            scene: this.scene,
-            type: "grass",
-            worker: this.worker,
-            geometryBlock: this.geometryBlock,
-          });
-        }
+    for (let i = -7; i < 7; i++) {
+      for (let j = -7; j < 7; j++) {
+        new Block({
+          position: new Vector3(i * 2, 0, j * 2),
+          scene: this.scene,
+          type: "grass",
+          worker: this.worker,
+          geometryBlock: this.geometryBlock,
+        });
       }
-    }, 200);
+    }
   }
 }

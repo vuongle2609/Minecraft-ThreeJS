@@ -1,5 +1,6 @@
 import BasicCharacterControllerInput from "@/action/input";
 import BaseEntity, { BasePropsType } from "@/classes/baseEntity";
+import Terrant from "@/classes/terrant";
 import { SPEED } from "@/constants/player";
 import { Body } from "cannon-es";
 import {
@@ -9,7 +10,7 @@ import {
   LineSegments,
   Mesh,
   MeshStandardMaterial,
-  Vector3
+  Vector3,
 } from "three";
 
 export default class Player extends BaseEntity {
@@ -55,22 +56,20 @@ export default class Player extends BaseEntity {
           return;
         }
 
-        if (e.data?.ge === "a") {
-          // this.lines.geometry.setAttribute(
-          //   "position",
-          //   new BufferAttribute(e.data.vertices, 3)
-          // );
-          // this.lines.geometry.setAttribute(
-          //   "color",
-          //   new BufferAttribute(e.data.colors, 4)
-          // );
+        if (e.data === "loaded") {
+          new Terrant({
+            scene: this.scene,
+            worker: this.worker,
+          });
 
           return;
         }
 
-        const [x, y, z] = e.data.position;
+        if (e.data.position) {
+          const [x, y, z] = e.data.position;
 
-        this.player.position.copy(new Vector3(x, y, z));
+          this.player.position.copy(new Vector3(x, y, z));
+        }
       };
 
     this.scene?.add(this.player);
