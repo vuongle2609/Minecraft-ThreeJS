@@ -4,7 +4,16 @@ import { humanMaterial } from "@/classes/gameScene";
 import { SPEED } from "@/constants/player";
 import dispatchWorkerAction from "@/helpers/dispatchWorkerAction";
 import { Body, Box, Vec3 } from "cannon-es";
-import { CapsuleGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
+import {
+  BufferAttribute,
+  BufferGeometry,
+  CapsuleGeometry,
+  LineBasicMaterial,
+  LineSegments,
+  Mesh,
+  MeshStandardMaterial,
+  Vector3,
+} from "three";
 
 export default class Player extends BaseEntity {
   player: Mesh;
@@ -16,6 +25,7 @@ export default class Player extends BaseEntity {
   input = new BasicCharacterControllerInput();
 
   worldBodiesPositionsSend = new Float32Array(3);
+  lines: any;
 
   constructor(props: BasePropsType) {
     super(props);
@@ -31,10 +41,33 @@ export default class Player extends BaseEntity {
     this.player.receiveShadow = true;
     this.player.castShadow = true;
 
+    if (!this.lines) {
+      let material = new LineBasicMaterial({
+        color: 0xffffff,
+        vertexColors: true,
+      });
+      let geometry = new BufferGeometry();
+      this.lines = new LineSegments(geometry, material);
+      this.scene?.add(this.lines);
+    }
+
     if (this.worker)
       this.worker.onmessage = (e) => {
         if (e.data === "done_jump") {
           this.canJump = true;
+          return;
+        }
+
+        if (e.data?.ge === "a") {
+          // this.lines.geometry.setAttribute(
+          //   "position",
+          //   new BufferAttribute(e.data.vertices, 3)
+          // );
+          // this.lines.geometry.setAttribute(
+          //   "color",
+          //   new BufferAttribute(e.data.colors, 4)
+          // );
+
           return;
         }
 
@@ -56,7 +89,7 @@ export default class Player extends BaseEntity {
     if (keys.forward) directionVector.z += 1;
     if (keys.backward) directionVector.z -= 1;
 
-    if (keys.space && this.canJump) {
+    if (keys.space) {
       this.canJump = false;
       this.worker?.postMessage({
         type: "handleJumpBody",
@@ -83,7 +116,7 @@ export default class Player extends BaseEntity {
     //https://www.cgtrader.com/free-3d-models/character/man/minecraft-steve-low-poly-rigged
 
     this.worldBodiesPositionsSend[0] = moveVector.x;
-    this.worldBodiesPositionsSend[1] = moveVector.y;
+    this.worldBodiesPositionsSend[1] = 0;
     this.worldBodiesPositionsSend[2] = moveVector.z;
 
     this.worker?.postMessage({
@@ -99,7 +132,12 @@ export default class Player extends BaseEntity {
     const { x, y, z } = this.player.position;
 
     //constant lerp and diff y
-    this.camera?.position.copy(new Vector3(x, y + 1, z));
+
+    // this.camera?.lookAt(0, 0, 0);
+
+    // this.camera?.position.set(10, 10, 10);
+
+    this.camera?.position.copy(new Vector3(x, y + 2, z));
   }
 
   update(delta: number) {

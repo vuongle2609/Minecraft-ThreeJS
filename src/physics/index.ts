@@ -1,116 +1,114 @@
-import { Body, Box, ContactMaterial, Material, Vec3, World } from "cannon-es";
+import { lerp } from "three/src/math/MathUtils";
 
-const timeStep = 1 / 60;
+import("@dimforge/rapier3d").then((RAPIER) => {
+  let gravity = { x: 0.0, y: -9.81, z: 0.0 };
+  let world = new RAPIER.World(gravity);
 
-const world = new World({
-  gravity: new Vec3(0, -60, 0),
-  frictionGravity: new Vec3(),
-});
+  let rigidBodyDesc = new RAPIER.RigidBodyDesc(
+    RAPIER.RigidBodyType.KinematicPositionBased
+  ).setTranslation(0, 50, 0);
 
-const bodies: Record<string, Body> = {};
+  let characterBody = world.createRigidBody(rigidBodyDesc);
 
-export const physicsMaterial = new Material("physics");
-
-export const humanMaterial = new Material("human");
-
-const physics_physics = new ContactMaterial(physicsMaterial, humanMaterial, {
-  friction: 0,
-  restitution: 0,
-});
-
-world.addContactMaterial(physics_physics);
-
-const handleAddBodyToWorld = () => {
-  const newBody = new Body({
-    mass: 5,
-    shape: new Box(new Vec3(0.5, 2, 0.5)),
-    material: humanMaterial,
-    fixedRotation: true,
-  });
-
-  newBody.position.set(0, 4, 0);
-  newBody.linearDamping = 0.9;
-
-  world.addBody(newBody);
-
-  const contactNormal = new Vec3();
-  const upAxis = new Vec3(0, 1, 0);
-  
-  newBody.addEventListener("collide", (e: any) => {
-    const { contact } = e;
-
-    if (contact.bi.id === newBody.id) {
-      contact.ni.negate(contactNormal);
-    } else {
-      contactNormal.copy(contact.ni);
-    }
-
-    if (contactNormal.dot(upAxis) > 0.5) {
-      self.postMessage('done_jump')
-    }
-  });
-
-  bodies["character"] = newBody;
-};
-
-handleAddBodyToWorld();
-
-const handleJumpBody = () => {
-  bodies["character"].velocity.y = 30;
-};
-
-const handleAddBlockToWorld = ({ position }: { position: Float32Array }) => {
-  const blockPhysicsBody = new Body({
-    type: Body.STATIC,
-    shape: new Box(new Vec3(1, 1, 1)),
-    material: physicsMaterial,
-  });
-
-  blockPhysicsBody.position.set(position[0], position[1], position[2]);
-
-  world.addBody(blockPhysicsBody);
-};
-
-// get all bodies position
-const getBodyProperties = ({
-  position,
-  delta,
-}: {
-  position: Float32Array;
-  delta: number;
-}) => {
-  if (delta) world.step(timeStep, delta);
-
-  const vectorMoveConverted = bodies["character"].position.vadd(
-    new Vec3(position[0], position[1], position[2])
+  let colliderDescCharacter = RAPIER.ColliderDesc.capsule(1, 1);
+  let colliderCharacter = world.createCollider(
+    colliderDescCharacter,
+    characterBody
   );
 
-  bodies["character"].position.set(
-    vectorMoveConverted.x,
-    vectorMoveConverted.y,
-    vectorMoveConverted.z
-  );
+  let offset = 0.01;
+  let characterController = world.createCharacterController(offset);
+  characterController.disableAutostep();
+  characterController.setUp({ x: 0, y: 1, z: 0 });
 
-  const { x, y, z } = bodies["character"].position;
+  const raw = -20;
+  let vy = raw;
 
-  position[0] = x;
-  position[1] = y;
-  position[2] = z;
+  let ray = new RAPIER.Ray({ x: 0, y: 0, z: 0 }, { x: 0, y: -1, z: 0 });
+  let maxToi = 1;
+  let solid = false;
 
-  self.postMessage({ position, delta });
-};
+  const getBodyProperties = ({
+    position,
+    delta,
+  }: {
+    position: Float32Array;
+    delta: number;
+  }) => {
+    characterController.computeColliderMovement(colliderCharacter, {
+      x: position[0],
+      y: position[1] + vy * delta,
+      z: position[2],
+    });
 
-const eventMapping = {
-  handleAddBlockToWorld,
-  getBodyProperties,
-  handleJumpBody,
-};
+    if (vy > raw) {
+      vy -= 1;
+    }
 
-self.onmessage = (
-  e: MessageEvent<{
-    type: keyof typeof eventMapping;
-    payload: any;
-  }>
-) => {
-  eventMapping[e.data.type](e.data.payload);
-};
+    // let hit = world.castRayAndGetNormal(ray, maxToi, solid);
+    let hitWithNormal = world.castRayAndGetNormal(ray, maxToi, solid);
+    if (hitWithNormal != null) {
+      // The first collider hit has the handle `hit.colliderHandle` and it hit after
+      // the ray travelled a distance equal to `ray.dir * toi`.
+      let hitPoint = ray.pointAt(hitWithNormal.toi);
+      console.log(
+        "Collider",
+        hitWithNormal
+      );
+    }
+
+    const correctMovement = characterController.computedMovement();
+
+    const newPos = characterBody.translation();
+
+    newPos.x += correctMovement.x;
+    newPos.y += correctMovement.y;
+    newPos.z += correctMovement.z;
+
+    characterBody.setNextKinematicTranslation(newPos);
+
+    let { x, y, z } = characterBody.translation();
+
+    position[0] = x;
+    position[1] = y;
+    position[2] = z;
+
+    ray.origin = { x, y, z };
+    ray.dir = { x, y: y - 3, z };
+
+    self.postMessage({ position, delta });
+
+    world.step();
+  };
+
+  const handleJumpBody = () => {
+    vy = 20;
+  };
+
+  const handleAddBlockToWorld = ({ position }: { position: Float32Array }) => {
+    let grounddesc = RAPIER.RigidBodyDesc.fixed().setTranslation(
+      position[0],
+      position[1],
+      position[2]
+    );
+    let groundBody = world.createRigidBody(grounddesc);
+
+    let groundColliderDesc = RAPIER.ColliderDesc.cuboid(1, 1, 1);
+    world.createCollider(groundColliderDesc, groundBody);
+  };
+
+  const eventMapping = {
+    handleAddBlockToWorld,
+    getBodyProperties,
+    handleJumpBody,
+  };
+
+  self.onmessage = (
+    e: MessageEvent<{
+      type: keyof typeof eventMapping;
+      payload: any;
+    }>
+  ) => {
+    eventMapping[e.data.type]?.(e.data.payload);
+  };
+});

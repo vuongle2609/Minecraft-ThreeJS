@@ -5,10 +5,16 @@ import {
   Object3DEventMap,
   MeshStandardMaterial,
   Vector2,
+  InstancedMesh,
+  TextureLoader,
+  NearestFilter,
 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
+import Terrant from "./terrant";
+import blocks from "@/constants/blocks";
+import nameFromCoordinate from "@/helpers/nameFromCoordinate";
 
 interface PropsType {
   inventoryManager: InventoryManager;
@@ -24,6 +30,9 @@ export default class BlockManager extends BaseEntity {
     Object3DEventMap
   > | null = null;
 
+  geometryBlock = new BoxGeometry(2, 2, 2);
+  blocks: InstancedMesh<BoxGeometry, MeshStandardMaterial[]>[] = [];
+
   constructor(props: BasePropsType & PropsType) {
     super(props);
 
@@ -32,7 +41,16 @@ export default class BlockManager extends BaseEntity {
     this.initialize();
   }
 
-  initialize() {
+  async initialize() {
+    new Terrant({
+      scene: this.scene,
+      worker: this.worker,
+    });
+
+    const placeBlock = blocks["grass"];
+
+    const textures = placeBlock.texture;
+
     document.addEventListener("mousedown", (e) => {
       this.onMouseDown(e);
     });
@@ -51,42 +69,44 @@ export default class BlockManager extends BaseEntity {
   }
 
   handleHoverBlock() {
-    const { raycaster } = this.mouseControl! || {};
+    // const { raycaster } = this.mouseControl! || {};
 
-    if (!this.camera || !this.scene) return;
+    // if (!this.camera || !this.scene) return;
 
-    raycaster.setFromCamera(new Vector2(), this.camera);
+    // raycaster.setFromCamera(new Vector2(), this.camera);
 
-    const intersects = raycaster.intersectObjects(this.scene.children, false);
+    // const intersects = raycaster.intersectObjects(this.scene.children, false);
 
-    const object = intersects[0]?.object as Mesh<
-      BoxGeometry,
-      MeshStandardMaterial[],
-      Object3DEventMap
-    >;
+    // if (intersects[0]?.distance > 12) return;
 
-    if (this.prevHoverBlock?.material?.length) {
-      this.prevHoverBlock.material = this.prevHoverBlock.material.map(
-        (item) => {
-          item.emissive.setHex(this.prevHoverBlockHex as number);
+    // const object = intersects[0]?.object as Mesh<
+    //   BoxGeometry,
+    //   MeshStandardMaterial[],
+    //   Object3DEventMap
+    // >;
 
-          return item;
-        }
-      );
-    }
+    // if (this.prevHoverBlock?.material?.length) {
+    //   this.prevHoverBlock.material = this.prevHoverBlock.material.map(
+    //     (item) => {
+    //       item.emissive.setHex(this.prevHoverBlockHex as number);
 
-    if (!object) return;
+    //       return item;
+    //     }
+    //   );
+    // }
 
-    if (object.material?.length)
-      object.material = object.material.map((item) => {
-        this.prevHoverBlockHex = item.emissive.getHex();
-        // random hex for block lighter
-        item.emissive.setHex(0x6e6e6e50);
+    // if (!object) return;
 
-        return item;
-      });
+    // if (object.material?.length)
+    //   object.material = object.material.map((item) => {
+    //     this.prevHoverBlockHex = item.emissive.getHex();
+    //     // random hex for block lighter
+    //     item.emissive.setHex(0x6e6e6e50);
 
-    this.prevHoverBlock = object;
+    //     return item;
+    //   });
+
+    // this.prevHoverBlock = object;
   }
 
   handleBreakBlock() {
@@ -98,11 +118,13 @@ export default class BlockManager extends BaseEntity {
 
     const intersects = raycaster.intersectObjects(this.scene.children, false);
 
+    if (intersects[0]?.distance > 12) return;
+
     for (let i = 0; i < intersects.length; i++) {
       // console.log("break block", intersects[i].object);
     }
   }
-
+  // in = 2;
   handlePlaceBlock() {
     const { raycaster } = this.mouseControl! || {};
 
@@ -111,6 +133,8 @@ export default class BlockManager extends BaseEntity {
     raycaster.setFromCamera(new Vector2(), this.camera);
 
     const intersects = raycaster.intersectObjects(this.scene.children, false);
+
+    if (intersects[0]?.distance > 12) return;
 
     const clickedFace = Math.floor((intersects[0].faceIndex ?? 2) / 2);
 
@@ -146,6 +170,19 @@ export default class BlockManager extends BaseEntity {
         type: this.inventoryManager.currentFocus,
         worker: this.worker,
       });
+    // for (let i = -10; i < 10; i++) {
+    //   for (let j = -10; j < 10; j++) {
+    //     if (this.inventoryManager.currentFocus)
+    //       new Block({
+    //         position: new Vector3(i * 2, this.in, j * 2),
+    //         scene: this.scene,
+    //         type: this.inventoryManager.currentFocus,
+    //         worker: this.worker,
+    //         geometryBlock: this.geometryBlock,
+    //       });
+    //   }
+    // }
+    // this.in += 2;
   }
 
   update() {
