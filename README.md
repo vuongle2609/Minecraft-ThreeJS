@@ -7,3 +7,6 @@
 - Inventory
 - Setting FOV, shadow, ...vv
 - F2 to show coordinate
+- Breath effect while walk and idle
+- Steve
+- Sound effect
