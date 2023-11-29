@@ -20,6 +20,8 @@ const oakPlanksSideTexture = textureLoader.load(oakPlanksSide);
 
 const diamondBlockSideTexture = textureLoader.load(diamondBlockSide);
 
+// it's good to set both to nearest?
+
 grassTopGreenTexture.magFilter = NearestFilter;
 grassSideTexture.magFilter = NearestFilter;
 dirtTexture.magFilter = NearestFilter;

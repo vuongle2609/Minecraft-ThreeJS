@@ -41,8 +41,6 @@ export default class BlockManager extends BaseEntity {
   async initialize() {
     const placeBlock = blocks["grass"];
 
-    const textures = placeBlock.texture;
-
     document.addEventListener("mousedown", (e) => {
       this.onMouseDown(e);
     });

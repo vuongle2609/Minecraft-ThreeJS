@@ -131,6 +131,8 @@ export default class Player extends BaseEntity {
   updateCamera() {
     const { x, y, z } = this.player.position;
 
+    // for debug
+
     //constant lerp and diff y
 
     // this.camera?.lookAt(0, 0, 0);
