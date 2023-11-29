@@ -9,6 +9,7 @@ import {
   SIN_Y_MULTIPLY_LENGTH,
   SPEED,
 } from "@/constants/player";
+import calculateNextMovement from "@/helpers/calculateNextMovement";
 import {
   Collider,
   KinematicCharacterController,
@@ -21,6 +22,7 @@ import {
   Mesh,
   MeshStandardMaterial,
   Raycaster,
+  Scene,
   Vector3,
 } from "three";
 import { lerp } from "three/src/math/MathUtils";
@@ -63,6 +65,7 @@ export default class Player extends BaseEntity {
 
     this.player.receiveShadow = true;
     this.player.castShadow = true;
+    this.player.position.y = 20
 
     if (!this.physicsEngine) return;
 
@@ -121,7 +124,7 @@ export default class Player extends BaseEntity {
       directionVector.z -= 1;
     }
 
-    if (keys.space && this.onGround) {
+    if (keys.space) {
       this.onGround = false;
       this.vy = JUMP_FORCE;
     }
@@ -151,6 +154,13 @@ export default class Player extends BaseEntity {
       z: moveVector.z,
     });
 
+    const calculatedMoveVector = calculateNextMovement(
+      new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z),
+      this.player.position.clone(),
+      this.scene as Scene
+    );
+    console.log("🚀 ~ file: character.ts:162 ~ Player ~ handleMovement ~ calculatedMoveVector:", calculatedMoveVector)
+
     if (this.vy > this.originalVy) {
       this.vy -= GRAVITY * GRAVITY_SCALE * delta;
     }
@@ -167,7 +177,7 @@ export default class Player extends BaseEntity {
 
     let { x, y, z } = this.characterBody.translation();
 
-    this.player.position.set(x, y + 0.05, z);
+    this.player.position.add(calculatedMoveVector);
   }
 
   trackingOnGround() {
@@ -185,10 +195,10 @@ export default class Player extends BaseEntity {
   breathingEffect(delta: number) {
     this.tCounter += 1;
 
-    // keo dai duong sin x bang cach chia cho 4
-    // cho duong sin y ngan lai bang cach chia tat ca cho 2.5
+    // keo dai duong sin x bang cach nhan cho 1 / x
+    // cho duong sin y ngan lai bang cach nhan tat ca cho y
     // de cho muot thi noi suy no voi offset truoc
-    // 1/2.5 * sin(t * 1/4)
+    // Y * sin(t * X)
 
     if (this.onGround && this.isWalk) {
       this.cameraOffset =
@@ -214,7 +224,8 @@ export default class Player extends BaseEntity {
 
     // this.camera?.position.set(10, 10, 10);
 
-    this.camera?.position.copy(new Vector3(x, y + 1.4 - this.cameraOffset, z));
+    // this.camera?.position.copy(new Vector3(x, y + 1.4 - this.cameraOffset, z));
+    this.camera?.position.copy(new Vector3(x, y , z));
   }
 
   update(delta: number, t: number) {

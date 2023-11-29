@@ -61,7 +61,7 @@ export default class GameScene extends RenderPage {
         <div class="flex flex-col w-full h-full backdrop-blur-md items-center justify-center px-[200px]">
             <img src="/assets/home/minecraft-logo-8.png" class="max-w-[800px] w-full mb-20"/>
 
-            <button class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full max-w-[500px]" id="focus">Focus</button>
+            <button class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full max-w-[500px]" id="focus">Play Game</button>
         </div>
       </div>
 
