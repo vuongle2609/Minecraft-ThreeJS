@@ -1,6 +1,12 @@
 import BasicCharacterControllerInput from "@/action/input";
 import BaseEntity, { BasePropsType } from "@/classes/baseEntity";
-import { JUMP_FORCE, SPEED } from "@/constants/player";
+import {
+  JUMP_FORCE,
+  LERP_CAMERA_BREATH,
+  SIN_X_REDUCE_LENGTH,
+  SIN_Y_REDUCE_LENGTH,
+  SPEED,
+} from "@/constants/player";
 import {
   Collider,
   KinematicCharacterController,
@@ -15,6 +21,7 @@ import {
   Raycaster,
   Vector3,
 } from "three";
+import { lerp } from "three/src/math/MathUtils";
 
 export default class Player extends BaseEntity {
   input = new BasicCharacterControllerInput();
@@ -32,6 +39,11 @@ export default class Player extends BaseEntity {
   originalVy = -20;
   vy = this.originalVy;
   onGround = true;
+
+  isWalk = false;
+
+  tCounter = 0;
+  cameraOffset = 0;
 
   raycaster = new Raycaster();
 
@@ -78,22 +90,36 @@ export default class Player extends BaseEntity {
     this.characterController.setUp({ x: 0, y: 1, z: 0 });
 
     this.raycaster.near = 0;
-    this.raycaster.far = 1;
+    this.raycaster.far = 2.3;
 
     this.scene?.add(this.player);
   }
 
   handleMovement(delta: number) {
+    this.isWalk = false;
+
     const { keys } = this.input;
 
     const directionVector = new Vector3();
 
-    if (keys.left) directionVector.x += 1;
-    if (keys.right) directionVector.x -= 1;
-    if (keys.forward) directionVector.z += 1;
-    if (keys.backward) directionVector.z -= 1;
+    if (keys.left) {
+      this.isWalk = true;
+      directionVector.x += 1;
+    }
+    if (keys.right) {
+      this.isWalk = true;
+      directionVector.x -= 1;
+    }
+    if (keys.forward) {
+      this.isWalk = true;
+      directionVector.z += 1;
+    }
+    if (keys.backward) {
+      this.isWalk = true;
+      directionVector.z -= 1;
+    }
 
-    if (keys.space) {
+    if (keys.space && this.onGround) {
       this.onGround = false;
       this.vy = JUMP_FORCE;
     }
@@ -139,40 +165,38 @@ export default class Player extends BaseEntity {
 
     let { x, y, z } = this.characterBody.translation();
 
-    this.player.position.set(x, y + 0.2, z);
+    this.player.position.set(x, y + 0.05, z);
   }
 
-  arrow = new ArrowHelper(
-    this.raycaster.ray.direction,
-    this.raycaster.ray.origin,
-    this.raycaster.far,
-    0xff0000
-  );
-
   trackingOnGround() {
-    this.scene?.remove(this.arrow);
-
-    const playerVectorC = this.player.position.clone()
-
     this.raycaster.set(this.player.position, new Vector3(0, -1, 0));
 
-    this.arrow = new ArrowHelper(
-      this.raycaster.ray.direction,
-      this.raycaster.ray.origin,
-      this.raycaster.far,
-      0xff0000
-    );
-
-    this.scene?.add(this.arrow);
-
     const intersects = this.raycaster.intersectObjects(
-      this.scene?.children || []
+      this.blockManager?.blocks || []
     );
 
-    console.log(
-      "🚀 ~ file: character.ts:166 ~ Player ~ trackingOnGround ~ intersects[0].distance:",
-      intersects[0]
-    );
+    if (intersects[0]) {
+      this.onGround = true;
+    }
+  }
+
+  breathingEffect(t: number) {
+    this.tCounter += 1;
+
+    // keo dai duong sin x bang cach chia cho 4
+    // cho duong sin y ngan lai bang cach chia tat ca cho 2.5
+    // de cho muot thi noi suy no voi offset truoc
+    // 1/2.5 * sin(t * 1/4)
+
+    if (this.onGround && this.isWalk) {
+      this.cameraOffset = lerp(
+        this.cameraOffset,
+        Math.sin(this.tCounter / SIN_X_REDUCE_LENGTH) / SIN_Y_REDUCE_LENGTH,
+        LERP_CAMERA_BREATH
+      );
+    } else {
+      this.cameraOffset = 0;
+    }
   }
 
   updateCamera() {
@@ -182,16 +206,17 @@ export default class Player extends BaseEntity {
 
     //constant lerp and diff y
 
-    this.camera?.lookAt(0, 0, 0);
+    // this.camera?.lookAt(0, 0, 0);
 
-    this.camera?.position.set(10, 10, 10);
+    // this.camera?.position.set(10, 10, 10);
 
-    // this.camera?.position.copy(new Vector3(x, y + 2, z));
+    this.camera?.position.copy(new Vector3(x, y + 1.4 - this.cameraOffset, z));
   }
 
-  update(delta: number) {
+  update(delta: number, t: number) {
     this.handleMovement(delta);
     this.trackingOnGround();
+    this.breathingEffect(t);
     this.updateCamera();
   }
 }

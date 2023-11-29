@@ -99,6 +99,13 @@ export default class GameScene extends RenderPage {
       physicsEngine: this.physicsEngine,
     });
 
+    this.player = new Player({
+      scene: this.scene,
+      camera: this.camera,
+      physicsEngine: this.physicsEngine,
+      blockManager: this.blockManager,
+    });
+
     this.inventoryManager.renderInventory();
   };
 
@@ -130,12 +137,6 @@ export default class GameScene extends RenderPage {
 
     this.scene.background = new THREE.Color("#87CEEB");
 
-    this.player = new Player({
-      scene: this.scene,
-      camera: this.camera,
-      physicsEngine: this.physicsEngine,
-    });
-
     new Light({
       scene: this.scene,
     });
@@ -152,10 +153,12 @@ export default class GameScene extends RenderPage {
   }
 
   renderCoordinate() {
-    const { x, y, z } = this.player.player.position;
+    const { x, y, z } = this.player?.player.position || {};
 
     if (this.coordinateElement)
-      this.coordinateElement.innerHTML = `x: ${x.toFixed(3)}, y: ${y.toFixed(3)}, z: ${z.toFixed(3)}`;
+      this.coordinateElement.innerHTML = `x: ${x.toFixed(3)}, y: ${y.toFixed(
+        3
+      )}, z: ${z.toFixed(3)}`;
   }
 
   RAF(t: number) {
@@ -172,7 +175,7 @@ export default class GameScene extends RenderPage {
 
       this.renderCoordinate();
 
-      this.player.update(delta);
+      this.player?.update(delta, t);
 
       this.blockManager?.update();
 

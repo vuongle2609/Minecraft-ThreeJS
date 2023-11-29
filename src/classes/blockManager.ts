@@ -39,8 +39,6 @@ export default class BlockManager extends BaseEntity {
   }
 
   async initialize() {
-    const placeBlock = blocks["grass"];
-
     document.addEventListener("mousedown", (e) => {
       this.onMouseDown(e);
     });
@@ -48,6 +46,7 @@ export default class BlockManager extends BaseEntity {
     new Terrant({
       scene: this.scene,
       physicsEngine: this.physicsEngine,
+      blocks: this.blocks,
     });
   }
 
@@ -153,6 +152,7 @@ export default class BlockManager extends BaseEntity {
         scene: this.scene,
         type: this.inventoryManager.currentFocus,
         physicsEngine: this.physicsEngine,
+        blocks: this.blocks,
       });
   }
 
