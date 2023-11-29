@@ -1,10 +1,12 @@
 import BasicCharacterControllerInput from "@/action/input";
 import BaseEntity, { BasePropsType } from "@/classes/baseEntity";
 import {
+  GRAVITY,
+  GRAVITY_SCALE,
   JUMP_FORCE,
   LERP_CAMERA_BREATH,
-  SIN_X_REDUCE_LENGTH,
-  SIN_Y_REDUCE_LENGTH,
+  SIN_X_MULTIPLY_LENGTH,
+  SIN_Y_MULTIPLY_LENGTH,
   SPEED,
 } from "@/constants/player";
 import {
@@ -36,7 +38,7 @@ export default class Player extends BaseEntity {
   characterController: KinematicCharacterController;
 
   // for jumping
-  originalVy = -20;
+  originalVy = -25;
   vy = this.originalVy;
   onGround = true;
 
@@ -150,7 +152,7 @@ export default class Player extends BaseEntity {
     });
 
     if (this.vy > this.originalVy) {
-      this.vy -= 1;
+      this.vy -= GRAVITY * GRAVITY_SCALE * delta;
     }
 
     const correctMovement = this.characterController.computedMovement();
@@ -180,7 +182,7 @@ export default class Player extends BaseEntity {
     }
   }
 
-  breathingEffect(t: number) {
+  breathingEffect(delta: number) {
     this.tCounter += 1;
 
     // keo dai duong sin x bang cach chia cho 4
@@ -189,11 +191,13 @@ export default class Player extends BaseEntity {
     // 1/2.5 * sin(t * 1/4)
 
     if (this.onGround && this.isWalk) {
-      this.cameraOffset = lerp(
-        this.cameraOffset,
-        Math.sin(this.tCounter / SIN_X_REDUCE_LENGTH) / SIN_Y_REDUCE_LENGTH,
-        LERP_CAMERA_BREATH
-      );
+      this.cameraOffset =
+        lerp(
+          this.cameraOffset,
+          Math.sin(this.tCounter * SIN_X_MULTIPLY_LENGTH) *
+            SIN_Y_MULTIPLY_LENGTH,
+          LERP_CAMERA_BREATH
+        ) * delta;
     } else {
       this.cameraOffset = 0;
     }
@@ -216,7 +220,7 @@ export default class Player extends BaseEntity {
   update(delta: number, t: number) {
     this.handleMovement(delta);
     this.trackingOnGround();
-    this.breathingEffect(t);
+    this.breathingEffect(delta);
     this.updateCamera();
   }
 }

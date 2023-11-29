@@ -10,9 +10,6 @@ import InventoryManager from "./inventoryManager";
 import Light from "./light";
 import { RenderPage } from "./renderPage";
 import { $ } from "@/utils/selector";
-export const physicsMaterial = new Material("physics");
-
-export const humanMaterial = new Material("human");
 
 export default class GameScene extends RenderPage {
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -33,8 +30,11 @@ export default class GameScene extends RenderPage {
   gui = new GUI({});
 
   coordinateElement: HTMLElement;
+  fpsElement: HTMLElement;
 
   clock = new THREE.Clock();
+  frames = 0;
+  prevTime = performance.now();
 
   player: Player;
 
@@ -66,7 +66,11 @@ export default class GameScene extends RenderPage {
       </div>
 
       <div id="modal_game" class="fixed top-0 bottom-0 left-0 right-0 hidden items-center justify-center">
-        <div id="coordinate" class="text-white font-medium fixed top-2 left-2"></div>
+        <div class="text-white font-medium fixed top-2 left-2">
+          <span id="coordinate"></span>
+          <br/>
+          <span id="fps"></span>
+        </div>
 
         <div class="relative shadow-md">
           <div class="w-1 h-5 bg-gray-500 absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2"></div>
@@ -85,6 +89,7 @@ export default class GameScene extends RenderPage {
     );
 
     this.coordinateElement = $("#coordinate");
+    this.fpsElement = $("#fps");
 
     this.mouseControl = new MouseControl({
       control: this.control,
@@ -156,9 +161,24 @@ export default class GameScene extends RenderPage {
     const { x, y, z } = this.player?.player.position || {};
 
     if (this.coordinateElement)
-      this.coordinateElement.innerHTML = `x: ${x.toFixed(3)}, y: ${y.toFixed(
+      this.coordinateElement.innerHTML = `X: ${x.toFixed(3)}, Y: ${y.toFixed(
         3
-      )}, z: ${z.toFixed(3)}`;
+      )}, Z: ${z.toFixed(3)}`;
+  }
+
+  renderFps() {
+    this.frames++;
+    const time = performance.now();
+
+    if (time >= this.prevTime + 1000) {
+      if (this.fpsElement)
+        this.fpsElement.innerHTML =
+          "FPS: " +
+          String(Math.round((this.frames * 1000) / (time - this.prevTime)));
+
+      this.frames = 0;
+      this.prevTime = time;
+    }
   }
 
   RAF(t: number) {
@@ -174,6 +194,8 @@ export default class GameScene extends RenderPage {
       if (delta > 0.1) return;
 
       this.renderCoordinate();
+
+      this.renderFps();
 
       this.player?.update(delta, t);
 
