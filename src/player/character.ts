@@ -1,32 +1,39 @@
 import BasicCharacterControllerInput from "@/action/input";
 import BaseEntity, { BasePropsType } from "@/classes/baseEntity";
-import { SPEED } from "@/constants/player";
+import { JUMP_FORCE, SPEED } from "@/constants/player";
 import {
   Collider,
   KinematicCharacterController,
   RigidBody,
 } from "@dimforge/rapier3d";
 import { Body } from "cannon-es";
-import { CapsuleGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
+import {
+  ArrowHelper,
+  CapsuleGeometry,
+  Mesh,
+  MeshStandardMaterial,
+  Raycaster,
+  Vector3,
+} from "three";
 
 export default class Player extends BaseEntity {
+  input = new BasicCharacterControllerInput();
+
+  // render body
   player: Mesh;
   playerPhysicBody: Body;
 
-  jumpVelocity = 30;
-  canJump = true;
-
-  input = new BasicCharacterControllerInput();
-
-  worldBodiesPositionsSend = new Float32Array(3);
-  lines: any;
-
-  originalVy = -20;
-  vy = this.originalVy;
-
+  // physics body
   characterBody: RigidBody;
   characterCollider: Collider;
   characterController: KinematicCharacterController;
+
+  // for jumping
+  originalVy = -20;
+  vy = this.originalVy;
+  onGround = true;
+
+  raycaster = new Raycaster();
 
   constructor(props: BasePropsType) {
     super(props);
@@ -34,6 +41,7 @@ export default class Player extends BaseEntity {
   }
 
   initialize() {
+    // init player render
     this.player = new Mesh(
       new CapsuleGeometry(1, 2),
       new MeshStandardMaterial({})
@@ -46,7 +54,7 @@ export default class Player extends BaseEntity {
 
     const RAPIER = this.physicsEngine.RAPIER;
 
-    // init player
+    // init player physics body
     const rigidBodyDesc = new RAPIER.RigidBodyDesc(
       RAPIER.RigidBodyType.KinematicPositionBased
     ).setTranslation(0, 20, 0);
@@ -55,16 +63,22 @@ export default class Player extends BaseEntity {
       this.physicsEngine.world.createRigidBody(rigidBodyDesc);
 
     const colliderDescCharacter = RAPIER.ColliderDesc.capsule(1, 1);
+
     this.characterCollider = this.physicsEngine.world.createCollider(
       colliderDescCharacter,
       this.characterBody
     );
 
     const offset = 0.01;
+
     this.characterController =
       this.physicsEngine.world.createCharacterController(offset);
+
     this.characterController.disableAutostep();
     this.characterController.setUp({ x: 0, y: 1, z: 0 });
+
+    this.raycaster.near = 0;
+    this.raycaster.far = 1;
 
     this.scene?.add(this.player);
   }
@@ -80,8 +94,8 @@ export default class Player extends BaseEntity {
     if (keys.backward) directionVector.z -= 1;
 
     if (keys.space) {
-      this.canJump = false;
-      this.vy = 20;
+      this.onGround = false;
+      this.vy = JUMP_FORCE;
     }
 
     const forwardVector = new Vector3();
@@ -125,7 +139,40 @@ export default class Player extends BaseEntity {
 
     let { x, y, z } = this.characterBody.translation();
 
-    this.player.position.set(x, y, z);
+    this.player.position.set(x, y + 0.2, z);
+  }
+
+  arrow = new ArrowHelper(
+    this.raycaster.ray.direction,
+    this.raycaster.ray.origin,
+    this.raycaster.far,
+    0xff0000
+  );
+
+  trackingOnGround() {
+    this.scene?.remove(this.arrow);
+
+    const playerVectorC = this.player.position.clone()
+
+    this.raycaster.set(this.player.position, new Vector3(0, -1, 0));
+
+    this.arrow = new ArrowHelper(
+      this.raycaster.ray.direction,
+      this.raycaster.ray.origin,
+      this.raycaster.far,
+      0xff0000
+    );
+
+    this.scene?.add(this.arrow);
+
+    const intersects = this.raycaster.intersectObjects(
+      this.scene?.children || []
+    );
+
+    console.log(
+      "🚀 ~ file: character.ts:166 ~ Player ~ trackingOnGround ~ intersects[0].distance:",
+      intersects[0]
+    );
   }
 
   updateCamera() {
@@ -135,15 +182,16 @@ export default class Player extends BaseEntity {
 
     //constant lerp and diff y
 
-    // this.camera?.lookAt(0, 0, 0);
+    this.camera?.lookAt(0, 0, 0);
 
-    // this.camera?.position.set(10, 10, 10);
+    this.camera?.position.set(10, 10, 10);
 
-    this.camera?.position.copy(new Vector3(x, y + 2, z));
+    // this.camera?.position.copy(new Vector3(x, y + 2, z));
   }
 
   update(delta: number) {
     this.handleMovement(delta);
+    this.trackingOnGround();
     this.updateCamera();
   }
 }

@@ -122,7 +122,7 @@ export default class BlockManager extends BaseEntity {
 
     const clickedFace = Math.floor((intersects[0].faceIndex ?? 2) / 2);
 
-    const { x, y, z }: any = intersects[0].object.position;
+    const { x, y, z } = intersects[0].object.position;
 
     const blockPosition = new Vector3();
 

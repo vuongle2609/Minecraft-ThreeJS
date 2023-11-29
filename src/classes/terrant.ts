@@ -11,8 +11,10 @@ export default class Terrant extends BaseEntity {
   }
 
   async initialize() {
-    for (let i = -7; i < 7; i++) {
-      for (let j = -7; j < 7; j++) {
+    const halfWidth = 7;
+
+    for (let i = -halfWidth; i < halfWidth; i++) {
+      for (let j = -halfWidth; j < halfWidth; j++) {
         new Block({
           position: new Vector3(i * 2, 0, j * 2),
           scene: this.scene,
