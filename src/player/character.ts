@@ -1,17 +1,13 @@
 import BasicCharacterControllerInput from "@/action/input";
 import BaseEntity, { BasePropsType } from "@/classes/baseEntity";
-import Terrant from "@/classes/terrant";
 import { SPEED } from "@/constants/player";
-import { Body } from "cannon-es";
 import {
-  BufferGeometry,
-  CapsuleGeometry,
-  LineBasicMaterial,
-  LineSegments,
-  Mesh,
-  MeshStandardMaterial,
-  Vector3,
-} from "three";
+  Collider,
+  KinematicCharacterController,
+  RigidBody,
+} from "@dimforge/rapier3d";
+import { Body } from "cannon-es";
+import { CapsuleGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
 
 export default class Player extends BaseEntity {
   player: Mesh;
@@ -24,6 +20,13 @@ export default class Player extends BaseEntity {
 
   worldBodiesPositionsSend = new Float32Array(3);
   lines: any;
+
+  originalVy = -20;
+  vy = this.originalVy;
+
+  characterBody: RigidBody;
+  characterCollider: Collider;
+  characterController: KinematicCharacterController;
 
   constructor(props: BasePropsType) {
     super(props);
@@ -39,38 +42,29 @@ export default class Player extends BaseEntity {
     this.player.receiveShadow = true;
     this.player.castShadow = true;
 
-    if (!this.lines) {
-      let material = new LineBasicMaterial({
-        color: 0xffffff,
-        vertexColors: true,
-      });
-      let geometry = new BufferGeometry();
-      this.lines = new LineSegments(geometry, material);
-      this.scene?.add(this.lines);
-    }
+    if (!this.physicsEngine) return;
 
-    if (this.worker)
-      this.worker.onmessage = (e) => {
-        if (e.data === "done_jump") {
-          this.canJump = true;
-          return;
-        }
+    const RAPIER = this.physicsEngine.RAPIER;
 
-        if (e.data === "loaded") {
-          new Terrant({
-            scene: this.scene,
-            worker: this.worker,
-          });
+    // init player
+    const rigidBodyDesc = new RAPIER.RigidBodyDesc(
+      RAPIER.RigidBodyType.KinematicPositionBased
+    ).setTranslation(0, 20, 0);
 
-          return;
-        }
+    this.characterBody =
+      this.physicsEngine.world.createRigidBody(rigidBodyDesc);
 
-        if (e.data.position) {
-          const [x, y, z] = e.data.position;
+    const colliderDescCharacter = RAPIER.ColliderDesc.capsule(1, 1);
+    this.characterCollider = this.physicsEngine.world.createCollider(
+      colliderDescCharacter,
+      this.characterBody
+    );
 
-          this.player.position.copy(new Vector3(x, y, z));
-        }
-      };
+    const offset = 0.01;
+    this.characterController =
+      this.physicsEngine.world.createCharacterController(offset);
+    this.characterController.disableAutostep();
+    this.characterController.setUp({ x: 0, y: 1, z: 0 });
 
     this.scene?.add(this.player);
   }
@@ -87,9 +81,7 @@ export default class Player extends BaseEntity {
 
     if (keys.space) {
       this.canJump = false;
-      this.worker?.postMessage({
-        type: "handleJumpBody",
-      });
+      this.vy = 20;
     }
 
     const forwardVector = new Vector3();
@@ -111,17 +103,29 @@ export default class Player extends BaseEntity {
     moveVector.normalize().multiplyScalar(delta * SPEED);
     //https://www.cgtrader.com/free-3d-models/character/man/minecraft-steve-low-poly-rigged
 
-    this.worldBodiesPositionsSend[0] = moveVector.x;
-    this.worldBodiesPositionsSend[1] = 0;
-    this.worldBodiesPositionsSend[2] = moveVector.z;
-
-    this.worker?.postMessage({
-      type: "getBodyProperties",
-      payload: {
-        position: this.worldBodiesPositionsSend,
-        delta,
-      },
+    this.characterController.computeColliderMovement(this.characterCollider, {
+      x: moveVector.x,
+      y: moveVector.y + this.vy * delta,
+      z: moveVector.z,
     });
+
+    if (this.vy > this.originalVy) {
+      this.vy -= 1;
+    }
+
+    const correctMovement = this.characterController.computedMovement();
+
+    const newPos = this.characterBody.translation();
+
+    newPos.x += correctMovement.x;
+    newPos.y += correctMovement.y;
+    newPos.z += correctMovement.z;
+
+    this.characterBody?.setNextKinematicTranslation(newPos);
+
+    let { x, y, z } = this.characterBody.translation();
+
+    this.player.position.set(x, y, z);
   }
 
   updateCamera() {

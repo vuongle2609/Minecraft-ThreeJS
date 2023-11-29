@@ -3,6 +3,7 @@ import { PointerLockControls } from "three/examples/jsm/controls/PointerLockCont
 import { GUI } from "dat.gui";
 import { World } from "cannon-es";
 import MouseControl from "@/action/mouseControl";
+import PhysicsEngine from "@/physics";
 
 export interface BasePropsType {
   scene?: Scene;
@@ -10,7 +11,7 @@ export interface BasePropsType {
   mouseControl?: MouseControl;
   gui?: GUI;
   camera?: Camera;
-  worker?: Worker;
+  physicsEngine?: PhysicsEngine;
 }
 
 export default class BaseEntity {
@@ -19,15 +20,16 @@ export default class BaseEntity {
   gui?: GUI;
   camera?: Camera;
   mouseControl?: MouseControl;
-  worker?: Worker;
+  physicsEngine?: PhysicsEngine;
 
   constructor(props?: BasePropsType) {
-    const { control, gui, scene, camera, mouseControl, worker } = props || {};
+    const { control, gui, scene, camera, mouseControl, physicsEngine } =
+      props || {};
     this.control = control;
     this.gui = gui;
     this.scene = scene;
     this.camera = camera;
     this.mouseControl = mouseControl;
-    this.worker = worker;
+    this.physicsEngine = physicsEngine;
   }
 }

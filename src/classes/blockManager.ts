@@ -6,7 +6,7 @@ import {
   MeshStandardMaterial,
   Object3DEventMap,
   Vector2,
-  Vector3
+  Vector3,
 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
@@ -39,14 +39,17 @@ export default class BlockManager extends BaseEntity {
   }
 
   async initialize() {
-   
-
     const placeBlock = blocks["grass"];
 
     const textures = placeBlock.texture;
 
     document.addEventListener("mousedown", (e) => {
       this.onMouseDown(e);
+    });
+
+    new Terrant({
+      scene: this.scene,
+      physicsEngine: this.physicsEngine,
     });
   }
 
@@ -107,7 +110,7 @@ export default class BlockManager extends BaseEntity {
       // console.log("break block", intersects[i].object);
     }
   }
-  // in = 2;
+
   handlePlaceBlock() {
     const { raycaster } = this.mouseControl! || {};
 
@@ -151,21 +154,8 @@ export default class BlockManager extends BaseEntity {
         position: blockPosition,
         scene: this.scene,
         type: this.inventoryManager.currentFocus,
-        worker: this.worker,
+        physicsEngine: this.physicsEngine,
       });
-    // for (let i = -10; i < 10; i++) {
-    //   for (let j = -10; j < 10; j++) {
-    //     if (this.inventoryManager.currentFocus)
-    //       new Block({
-    //         position: new Vector3(i * 2, this.in, j * 2),
-    //         scene: this.scene,
-    //         type: this.inventoryManager.currentFocus,
-    //         worker: this.worker,
-    //         geometryBlock: this.geometryBlock,
-    //       });
-    //   }
-    // }
-    // this.in += 2;
   }
 
   update() {

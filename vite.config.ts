@@ -4,8 +4,9 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 import viteWasm from "vite-plugin-wasm";
+import topLevelAwait from "vite-plugin-top-level-await";
 
 // @see https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [tsconfigPaths(), viteWasm()],
+  plugins: [tsconfigPaths(), viteWasm(), topLevelAwait()],
 });

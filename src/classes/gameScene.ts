@@ -1,7 +1,7 @@
 import MouseControl from "@/action/mouseControl";
+import PhysicsEngine from "@/physics";
 import Player from "@/player/character";
 import { Material } from "cannon-es";
-import CannonDebugger from "cannon-es-debugger";
 import { GUI } from "dat.gui";
 import * as THREE from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
@@ -19,14 +19,7 @@ export default class GameScene extends RenderPage {
 
   scene = new THREE.Scene();
 
-  worker = new Worker(new URL("../physics/index", import.meta.url), {
-    type: "module",
-  });
-
-  worldBodiesPositions = new Float32Array(3);
-
-  //@ts-ignore
-  cannonDebugger = new CannonDebugger(this.scene, this.world, {});
+  physicsEngine: PhysicsEngine;
 
   camera = new THREE.PerspectiveCamera(
     80,
@@ -97,15 +90,20 @@ export default class GameScene extends RenderPage {
       scene: this.scene,
       camera: this.camera,
       inventoryManager: this.inventoryManager,
-      worker: this.worker,
+      physicsEngine: this.physicsEngine,
     });
 
     this.inventoryManager.renderInventory();
   };
 
-  constructor() {
+  constructor(physicsEngine: PhysicsEngine) {
     super();
+
+    this.physicsEngine = physicsEngine;
+
     this.initialize();
+
+    this.afterRender();
   }
 
   initialize() {
@@ -129,7 +127,7 @@ export default class GameScene extends RenderPage {
     this.player = new Player({
       scene: this.scene,
       camera: this.camera,
-      worker: this.worker,
+      physicsEngine: this.physicsEngine,
     });
 
     new Light({
@@ -159,16 +157,9 @@ export default class GameScene extends RenderPage {
 
       this.blockManager?.update();
 
-      // this.cannonDebugger.update();
+      this.physicsEngine.update();
 
       this.renderer.render(this.scene, this.camera);
     }
   }
 }
-
-const gameScene = new GameScene();
-export { gameScene };
-
-export const scene = gameScene.scene;
-export const control = gameScene.control;
-export const gui = gameScene.gui;

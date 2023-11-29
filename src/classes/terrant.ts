@@ -17,7 +17,7 @@ export default class Terrant extends BaseEntity {
           position: new Vector3(i * 2, 0, j * 2),
           scene: this.scene,
           type: "grass",
-          worker: this.worker,
+          physicsEngine: this.physicsEngine,
           geometryBlock: this.geometryBlock,
         });
       }
