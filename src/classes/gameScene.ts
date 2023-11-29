@@ -9,7 +9,7 @@ import BlockManager from "./blockManager";
 import InventoryManager from "./inventoryManager";
 import Light from "./light";
 import { RenderPage } from "./renderPage";
-
+import { $ } from "@/utils/selector";
 export const physicsMaterial = new Material("physics");
 
 export const humanMaterial = new Material("human");
@@ -31,6 +31,8 @@ export default class GameScene extends RenderPage {
   control = new PointerLockControls(this.camera, document.body);
 
   gui = new GUI({});
+
+  coordinateElement: HTMLElement;
 
   clock = new THREE.Clock();
 
@@ -64,6 +66,8 @@ export default class GameScene extends RenderPage {
       </div>
 
       <div id="modal_game" class="fixed top-0 bottom-0 left-0 right-0 hidden items-center justify-center">
+        <div id="coordinate" class="text-white font-medium fixed top-2 left-2"></div>
+
         <div class="relative shadow-md">
           <div class="w-1 h-5 bg-gray-500 absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2"></div>
           <div class="w-5 h-1 bg-gray-500 absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2"></div>
@@ -80,6 +84,8 @@ export default class GameScene extends RenderPage {
       `
     );
 
+    this.coordinateElement = $("#coordinate");
+
     this.mouseControl = new MouseControl({
       control: this.control,
       camera: this.camera,
@@ -91,6 +97,13 @@ export default class GameScene extends RenderPage {
       camera: this.camera,
       inventoryManager: this.inventoryManager,
       physicsEngine: this.physicsEngine,
+    });
+
+    this.player = new Player({
+      scene: this.scene,
+      camera: this.camera,
+      physicsEngine: this.physicsEngine,
+      blockManager: this.blockManager,
     });
 
     this.inventoryManager.renderInventory();
@@ -124,12 +137,6 @@ export default class GameScene extends RenderPage {
 
     this.scene.background = new THREE.Color("#87CEEB");
 
-    this.player = new Player({
-      scene: this.scene,
-      camera: this.camera,
-      physicsEngine: this.physicsEngine,
-    });
-
     new Light({
       scene: this.scene,
     });
@@ -145,6 +152,15 @@ export default class GameScene extends RenderPage {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
+  renderCoordinate() {
+    const { x, y, z } = this.player?.player.position || {};
+
+    if (this.coordinateElement)
+      this.coordinateElement.innerHTML = `x: ${x.toFixed(3)}, y: ${y.toFixed(
+        3
+      )}, z: ${z.toFixed(3)}`;
+  }
+
   RAF(t: number) {
     requestAnimationFrame((t) => {
       this.RAF(t);
@@ -157,7 +173,9 @@ export default class GameScene extends RenderPage {
       // miss calculate player init position :))
       if (delta > 0.1) return;
 
-      this.player.update(delta);
+      this.renderCoordinate();
+
+      this.player?.update(delta, t);
 
       this.blockManager?.update();
 

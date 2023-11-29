@@ -1,32 +1,51 @@
 import BasicCharacterControllerInput from "@/action/input";
 import BaseEntity, { BasePropsType } from "@/classes/baseEntity";
-import { SPEED } from "@/constants/player";
+import {
+  JUMP_FORCE,
+  LERP_CAMERA_BREATH,
+  SIN_X_REDUCE_LENGTH,
+  SIN_Y_REDUCE_LENGTH,
+  SPEED,
+} from "@/constants/player";
 import {
   Collider,
   KinematicCharacterController,
   RigidBody,
 } from "@dimforge/rapier3d";
 import { Body } from "cannon-es";
-import { CapsuleGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
+import {
+  ArrowHelper,
+  CapsuleGeometry,
+  Mesh,
+  MeshStandardMaterial,
+  Raycaster,
+  Vector3,
+} from "three";
+import { lerp } from "three/src/math/MathUtils";
 
 export default class Player extends BaseEntity {
+  input = new BasicCharacterControllerInput();
+
+  // render body
   player: Mesh;
   playerPhysicBody: Body;
 
-  jumpVelocity = 30;
-  canJump = true;
-
-  input = new BasicCharacterControllerInput();
-
-  worldBodiesPositionsSend = new Float32Array(3);
-  lines: any;
-
-  originalVy = -20;
-  vy = this.originalVy;
-
+  // physics body
   characterBody: RigidBody;
   characterCollider: Collider;
   characterController: KinematicCharacterController;
+
+  // for jumping
+  originalVy = -20;
+  vy = this.originalVy;
+  onGround = true;
+
+  isWalk = false;
+
+  tCounter = 0;
+  cameraOffset = 0;
+
+  raycaster = new Raycaster();
 
   constructor(props: BasePropsType) {
     super(props);
@@ -34,6 +53,7 @@ export default class Player extends BaseEntity {
   }
 
   initialize() {
+    // init player render
     this.player = new Mesh(
       new CapsuleGeometry(1, 2),
       new MeshStandardMaterial({})
@@ -46,7 +66,7 @@ export default class Player extends BaseEntity {
 
     const RAPIER = this.physicsEngine.RAPIER;
 
-    // init player
+    // init player physics body
     const rigidBodyDesc = new RAPIER.RigidBodyDesc(
       RAPIER.RigidBodyType.KinematicPositionBased
     ).setTranslation(0, 20, 0);
@@ -55,33 +75,53 @@ export default class Player extends BaseEntity {
       this.physicsEngine.world.createRigidBody(rigidBodyDesc);
 
     const colliderDescCharacter = RAPIER.ColliderDesc.capsule(1, 1);
+
     this.characterCollider = this.physicsEngine.world.createCollider(
       colliderDescCharacter,
       this.characterBody
     );
 
     const offset = 0.01;
+
     this.characterController =
       this.physicsEngine.world.createCharacterController(offset);
+
     this.characterController.disableAutostep();
     this.characterController.setUp({ x: 0, y: 1, z: 0 });
+
+    this.raycaster.near = 0;
+    this.raycaster.far = 2.3;
 
     this.scene?.add(this.player);
   }
 
   handleMovement(delta: number) {
+    this.isWalk = false;
+
     const { keys } = this.input;
 
     const directionVector = new Vector3();
 
-    if (keys.left) directionVector.x += 1;
-    if (keys.right) directionVector.x -= 1;
-    if (keys.forward) directionVector.z += 1;
-    if (keys.backward) directionVector.z -= 1;
+    if (keys.left) {
+      this.isWalk = true;
+      directionVector.x += 1;
+    }
+    if (keys.right) {
+      this.isWalk = true;
+      directionVector.x -= 1;
+    }
+    if (keys.forward) {
+      this.isWalk = true;
+      directionVector.z += 1;
+    }
+    if (keys.backward) {
+      this.isWalk = true;
+      directionVector.z -= 1;
+    }
 
-    if (keys.space) {
-      this.canJump = false;
-      this.vy = 20;
+    if (keys.space && this.onGround) {
+      this.onGround = false;
+      this.vy = JUMP_FORCE;
     }
 
     const forwardVector = new Vector3();
@@ -125,7 +165,38 @@ export default class Player extends BaseEntity {
 
     let { x, y, z } = this.characterBody.translation();
 
-    this.player.position.set(x, y, z);
+    this.player.position.set(x, y + 0.05, z);
+  }
+
+  trackingOnGround() {
+    this.raycaster.set(this.player.position, new Vector3(0, -1, 0));
+
+    const intersects = this.raycaster.intersectObjects(
+      this.blockManager?.blocks || []
+    );
+
+    if (intersects[0]) {
+      this.onGround = true;
+    }
+  }
+
+  breathingEffect(t: number) {
+    this.tCounter += 1;
+
+    // keo dai duong sin x bang cach chia cho 4
+    // cho duong sin y ngan lai bang cach chia tat ca cho 2.5
+    // de cho muot thi noi suy no voi offset truoc
+    // 1/2.5 * sin(t * 1/4)
+
+    if (this.onGround && this.isWalk) {
+      this.cameraOffset = lerp(
+        this.cameraOffset,
+        Math.sin(this.tCounter / SIN_X_REDUCE_LENGTH) / SIN_Y_REDUCE_LENGTH,
+        LERP_CAMERA_BREATH
+      );
+    } else {
+      this.cameraOffset = 0;
+    }
   }
 
   updateCamera() {
@@ -139,11 +210,13 @@ export default class Player extends BaseEntity {
 
     // this.camera?.position.set(10, 10, 10);
 
-    this.camera?.position.copy(new Vector3(x, y + 2, z));
+    this.camera?.position.copy(new Vector3(x, y + 1.4 - this.cameraOffset, z));
   }
 
-  update(delta: number) {
+  update(delta: number, t: number) {
     this.handleMovement(delta);
+    this.trackingOnGround();
+    this.breathingEffect(t);
     this.updateCamera();
   }
 }

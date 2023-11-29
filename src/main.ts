@@ -15,7 +15,7 @@ class Three {
   async initialize() {
     const physicsEngine = new PhysicsEngine({});
 
-    await physicsEngine.initialize()
+    await physicsEngine.initialize();
 
     this.gameScene = new GameScene(physicsEngine);
   }

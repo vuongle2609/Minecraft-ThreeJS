@@ -6,7 +6,7 @@
 - World generation
 - Inventory
 - Setting FOV, shadow, ...vv
-- F2 to show coordinate
-- Breath effect while walk and idle
+- F2 to show coordinate (done)
+- Breath effect while walk (done)
 - Steve
 - Sound effect
