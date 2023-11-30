@@ -6,8 +6,9 @@ const calculateNextMovement = (
   playerPosition: Vector3,
   scene: Scene
 ) => {
-  //   console.log("🚀 ~ file: calculateNextMovement.ts:9 ~ playerPosition:", playerPosition)
-  playerPosition.y -= 2
+  playerPosition.y -= 2;
+
+  const a = vectorMove.x > 0 ? 1 : -1
 
   const nextPosition = playerPosition.add(vectorMove);
 
@@ -23,7 +24,7 @@ const calculateNextMovement = (
   const currentPositionZFloor = Math.floor(playerPosition.z);
 
   roundedNextPosition.x =
-    nextPositionXFloor % 2 == 0 ? nextPositionXFloor : nextPositionXFloor - 1;
+    nextPositionXFloor % 2 == 0 ? nextPositionXFloor : nextPositionXFloor + a;
   roundedNextPosition.y =
     nextPositionYFloor % 2 == 0 ? nextPositionYFloor : nextPositionYFloor - 1;
   roundedNextPosition.z =
@@ -32,7 +33,7 @@ const calculateNextMovement = (
   roundedCurrentPosition.x =
     currentPositionXFloor % 2 == 0
       ? currentPositionXFloor
-      : currentPositionXFloor + 1;
+      : currentPositionXFloor - a;
   roundedCurrentPosition.y =
     currentPositionYFloor % 2 == 0
       ? currentPositionYFloor
@@ -44,11 +45,20 @@ const calculateNextMovement = (
 
   const nextObjectX = scene.getObjectByName(
     nameFromCoordinate(
-      roundedNextPosition.x,
+      Math.abs(roundedNextPosition.x),
       roundedCurrentPosition.y,
       roundedCurrentPosition.z
     )
   );
+  // console.log(
+  //   "🚀 ~ file: calculateNextMovement.ts:51 ~ nextObjectX:",
+  //   nextObjectX,
+  //   nameFromCoordinate(
+  //     roundedNextPosition.x,
+  //     roundedCurrentPosition.y,
+  //     roundedCurrentPosition.z
+  //   )
+  // );
 
   const nextObjectY = scene.getObjectByName(
     nameFromCoordinate(

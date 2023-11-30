@@ -159,7 +159,6 @@ export default class Player extends BaseEntity {
       this.player.position.clone(),
       this.scene as Scene
     );
-    console.log("🚀 ~ file: character.ts:162 ~ Player ~ handleMovement ~ calculatedMoveVector:", calculatedMoveVector)
 
     if (this.vy > this.originalVy) {
       this.vy -= GRAVITY * GRAVITY_SCALE * delta;
