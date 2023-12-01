@@ -9,6 +9,7 @@ import {
   SIN_Y_MULTIPLY_LENGTH,
   SPEED,
 } from "@/constants/player";
+import Physics from "@/physics/physics2";
 import {
   Collider,
   KinematicCharacterController,
@@ -49,6 +50,10 @@ export default class Player extends BaseEntity {
 
   raycaster = new Raycaster();
 
+  physicsTest = new Physics({
+    scene: this.scene,
+  });
+
   constructor(props: BasePropsType) {
     super(props);
     this.initialize();
@@ -57,7 +62,7 @@ export default class Player extends BaseEntity {
   initialize() {
     // init player render
     this.player = new Mesh(
-      new CapsuleGeometry(1, 2),
+      new CapsuleGeometry(0.8, 2),
       new MeshStandardMaterial({})
     );
 
@@ -156,6 +161,12 @@ export default class Player extends BaseEntity {
     }
 
     const correctMovement = this.characterController.computedMovement();
+
+    const a = this.physicsTest.calculateCorrectMovement(
+      delta,
+      this.player.position,
+      new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z)
+    );
 
     const newPos = this.characterBody.translation();
 
