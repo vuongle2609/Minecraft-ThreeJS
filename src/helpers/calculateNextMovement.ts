@@ -8,9 +8,11 @@ const calculateNextMovement = (
 ) => {
   playerPosition.y -= 2;
 
-  const a = vectorMove.x > 0 ? 1 : -1
+  const nextPosition = playerPosition.clone().add(vectorMove);
 
-  const nextPosition = playerPosition.add(vectorMove);
+  const a = vectorMove.x > 0 ? 1 : -1;
+  const b = vectorMove.y > 0 ? 1 : -1;
+  const c = vectorMove.z > 0 ? 1 : -1;
 
   const roundedNextPosition = new Vector3();
   const roundedCurrentPosition = new Vector3();
@@ -26,61 +28,34 @@ const calculateNextMovement = (
   roundedNextPosition.x =
     nextPositionXFloor % 2 == 0 ? nextPositionXFloor : nextPositionXFloor + a;
   roundedNextPosition.y =
-    nextPositionYFloor % 2 == 0 ? nextPositionYFloor : nextPositionYFloor - 1;
+    nextPositionYFloor % 2 == 0 ? nextPositionYFloor : nextPositionYFloor + b;
   roundedNextPosition.z =
-    nextPositionZFloor % 2 == 0 ? nextPositionZFloor : nextPositionZFloor - 1;
+    nextPositionZFloor % 2 == 0 ? nextPositionZFloor : nextPositionZFloor + c;
 
   roundedCurrentPosition.x =
     currentPositionXFloor % 2 == 0
       ? currentPositionXFloor
-      : currentPositionXFloor - a;
+      : currentPositionXFloor - 1;
   roundedCurrentPosition.y =
     currentPositionYFloor % 2 == 0
       ? currentPositionYFloor
-      : currentPositionYFloor + 1;
+      : currentPositionYFloor - 1;
   roundedCurrentPosition.z =
     currentPositionZFloor % 2 == 0
       ? currentPositionZFloor
-      : currentPositionZFloor + 1;
+      : currentPositionZFloor - 1;
 
-  const nextObjectX = scene.getObjectByName(
-    nameFromCoordinate(
-      Math.abs(roundedNextPosition.x),
-      roundedCurrentPosition.y,
-      roundedCurrentPosition.z
-    )
-  );
-  // console.log(
-  //   "🚀 ~ file: calculateNextMovement.ts:51 ~ nextObjectX:",
-  //   nextObjectX,
+  // const nextObjectX = scene.getObjectByName(
   //   nameFromCoordinate(
-  //     roundedNextPosition.x,
+  //     Math.abs(roundedNextPosition.x),
   //     roundedCurrentPosition.y,
   //     roundedCurrentPosition.z
   //   )
   // );
 
-  const nextObjectY = scene.getObjectByName(
-    nameFromCoordinate(
-      roundedCurrentPosition.x,
-      roundedNextPosition.y,
-      roundedCurrentPosition.z
-    )
-  );
-
-  const nextObjectZ = scene.getObjectByName(
-    nameFromCoordinate(
-      roundedCurrentPosition.x,
-      roundedCurrentPosition.y,
-      roundedNextPosition.z
-    )
-  );
+  console.log(roundedCurrentPosition)
 
   const calculatedMoveVector = new Vector3();
-
-  calculatedMoveVector.x = nextObjectX ? 0 : vectorMove.x;
-  calculatedMoveVector.y = nextObjectY ? 0 : vectorMove.y;
-  calculatedMoveVector.z = nextObjectZ ? 0 : vectorMove.z;
 
   return calculatedMoveVector;
 };

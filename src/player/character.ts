@@ -65,7 +65,7 @@ export default class Player extends BaseEntity {
 
     this.player.receiveShadow = true;
     this.player.castShadow = true;
-    this.player.position.y = 20
+    this.player.position.y = 20;
 
     if (!this.physicsEngine) return;
 
@@ -176,7 +176,8 @@ export default class Player extends BaseEntity {
 
     let { x, y, z } = this.characterBody.translation();
 
-    this.player.position.add(calculatedMoveVector);
+    // this.player.position.add(calculatedMoveVector);
+    this.player.position.add(new Vector3(x, y, z));
   }
 
   trackingOnGround() {
@@ -224,7 +225,7 @@ export default class Player extends BaseEntity {
     // this.camera?.position.set(10, 10, 10);
 
     // this.camera?.position.copy(new Vector3(x, y + 1.4 - this.cameraOffset, z));
-    this.camera?.position.copy(new Vector3(x, y , z));
+    this.camera?.position.copy(new Vector3(x, y, z));
   }
 
   update(delta: number, t: number) {
