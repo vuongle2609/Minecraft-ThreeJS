@@ -1,5 +1,4 @@
 import MouseControl from "@/action/mouseControl";
-import PhysicsEngine from "@/physics";
 import Player from "@/player/character";
 import { $ } from "@/utils/selector";
 import { GUI } from "dat.gui";
@@ -11,7 +10,10 @@ import Light from "./light";
 import { RenderPage } from "./renderPage";
 
 export default class GameScene extends RenderPage {
-  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    canvas: document.querySelector("#gameScene") as HTMLCanvasElement,
+  });
 
   scene = new THREE.Scene();
 
