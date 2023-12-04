@@ -1,4 +1,4 @@
-import { MeshStandardMaterial, NearestFilter, TextureLoader } from "three";
+import { MeshBasicMaterial, MeshStandardMaterial, NearestFilter, TextureLoader } from "three";
 
 import grassTopGreen from "@/assets/block/grass_top_green.png";
 import grassSide from "@/assets/block/grass_block_side.png";
@@ -36,31 +36,34 @@ diamondBlockSideTexture.minFilter = NearestFilter;
 
 //texture format: side side top bottom side side
 
+const worldMaterial = MeshStandardMaterial
+// const worldMaterial = MeshBasicMaterial
+
 const blocks = {
   grass: {
     name: "Grass",
     texture: [
-      new MeshStandardMaterial({
+      new worldMaterial({
         map: grassSideTexture,
         side: 0,
       }),
-      new MeshStandardMaterial({
+      new worldMaterial({
         map: grassSideTexture,
         side: 0,
       }),
-      new MeshStandardMaterial({
+      new worldMaterial({
         map: grassTopGreenTexture,
         side: 0,
       }),
-      new MeshStandardMaterial({
+      new worldMaterial({
         map: dirtTexture,
         side: 0,
       }),
-      new MeshStandardMaterial({
+      new worldMaterial({
         map: grassSideTexture,
         side: 0,
       }),
-      new MeshStandardMaterial({
+      new worldMaterial({
         map: grassSideTexture,
         side: 0,
       }),
@@ -69,29 +72,29 @@ const blocks = {
   oak_planks: {
     name: "Oak Wood Planks",
     texture: [
-      new MeshStandardMaterial({
+      new worldMaterial({
         map: oakPlanksSideTexture,
         side: 0,
       }),
 
-      new MeshStandardMaterial({
+      new worldMaterial({
         map: oakPlanksSideTexture,
         side: 0,
       }),
 
-      new MeshStandardMaterial({
+      new worldMaterial({
         map: oakPlanksSideTexture,
         side: 0,
       }),
-      new MeshStandardMaterial({
+      new worldMaterial({
         map: oakPlanksSideTexture,
         side: 0,
       }),
-      new MeshStandardMaterial({
+      new worldMaterial({
         map: oakPlanksSideTexture,
         side: 0,
       }),
-      new MeshStandardMaterial({
+      new worldMaterial({
         map: oakPlanksSideTexture,
         side: 0,
       }),
@@ -100,27 +103,27 @@ const blocks = {
   block_of_diamond: {
     name: "Block of Diamond",
     texture: [
-      new MeshStandardMaterial({
+      new worldMaterial({
         map: diamondBlockSideTexture,
         side: 0,
       }),
-      new MeshStandardMaterial({
+      new worldMaterial({
         map: diamondBlockSideTexture,
         side: 0,
       }),
-      new MeshStandardMaterial({
+      new worldMaterial({
         map: diamondBlockSideTexture,
         side: 0,
       }),
-      new MeshStandardMaterial({
+      new worldMaterial({
         map: diamondBlockSideTexture,
         side: 0,
       }),
-      new MeshStandardMaterial({
+      new worldMaterial({
         map: diamondBlockSideTexture,
         side: 0,
       }),
-      new MeshStandardMaterial({
+      new worldMaterial({
         map: diamondBlockSideTexture,
         side: 0,
       }),

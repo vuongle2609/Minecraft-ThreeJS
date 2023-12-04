@@ -38,26 +38,5 @@ export default class Block extends BaseEntity {
     blockArr?.push(newBlock);
 
     this.scene?.add(newBlock);
-
-    const blockDesc =
-      this.physicsEngine?.RAPIER.RigidBodyDesc.fixed().setTranslation(
-        position.x,
-        position.y,
-        position.z
-      );
-
-    if (!blockDesc) return;
-
-    const blockBody = this.physicsEngine?.world.createRigidBody(blockDesc);
-
-    const blockColliderDesc = this.physicsEngine?.RAPIER.ColliderDesc.cuboid(
-      1,
-      1,
-      1
-    );
-
-    if (!blockBody || !blockColliderDesc) return;
-
-    this.physicsEngine?.world.createCollider(blockColliderDesc, blockBody);
   }
 }

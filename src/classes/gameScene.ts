@@ -1,7 +1,7 @@
 import MouseControl from "@/action/mouseControl";
 import PhysicsEngine from "@/physics";
 import Player from "@/player/character";
-import { Material } from "cannon-es";
+import { $ } from "@/utils/selector";
 import { GUI } from "dat.gui";
 import * as THREE from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
@@ -9,14 +9,11 @@ import BlockManager from "./blockManager";
 import InventoryManager from "./inventoryManager";
 import Light from "./light";
 import { RenderPage } from "./renderPage";
-import { $ } from "@/utils/selector";
 
 export default class GameScene extends RenderPage {
   renderer = new THREE.WebGLRenderer({ antialias: true });
 
   scene = new THREE.Scene();
-
-  physicsEngine: PhysicsEngine;
 
   camera = new THREE.PerspectiveCamera(
     80,
@@ -101,23 +98,19 @@ export default class GameScene extends RenderPage {
       scene: this.scene,
       camera: this.camera,
       inventoryManager: this.inventoryManager,
-      physicsEngine: this.physicsEngine,
     });
 
     this.player = new Player({
       scene: this.scene,
       camera: this.camera,
-      physicsEngine: this.physicsEngine,
       blockManager: this.blockManager,
     });
 
     this.inventoryManager.renderInventory();
   };
 
-  constructor(physicsEngine: PhysicsEngine) {
+  constructor() {
     super();
-
-    this.physicsEngine = physicsEngine;
 
     this.initialize();
 
@@ -200,8 +193,6 @@ export default class GameScene extends RenderPage {
       this.player?.update(delta, t);
 
       this.blockManager?.update();
-
-      this.physicsEngine.update();
 
       this.renderer.render(this.scene, this.camera);
     }

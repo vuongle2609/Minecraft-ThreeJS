@@ -9,15 +9,8 @@ import {
   SIN_Y_MULTIPLY_LENGTH,
   SPEED,
 } from "@/constants/player";
-import Physics from "@/physics/physics2";
+import Physics from "@/physics";
 import {
-  Collider,
-  KinematicCharacterController,
-  RigidBody,
-} from "@dimforge/rapier3d";
-import { Body } from "cannon-es";
-import {
-  ArrowHelper,
   CapsuleGeometry,
   Mesh,
   MeshStandardMaterial,
@@ -32,11 +25,6 @@ export default class Player extends BaseEntity {
   // render body
   player: Mesh;
   playerPhysicBody: Body;
-
-  // physics body
-  characterBody: RigidBody;
-  characterCollider: Collider;
-  characterController: KinematicCharacterController;
 
   // for jumping
   originalVy = -25;
@@ -68,33 +56,7 @@ export default class Player extends BaseEntity {
 
     this.player.receiveShadow = true;
     this.player.castShadow = true;
-
-    if (!this.physicsEngine) return;
-
-    const RAPIER = this.physicsEngine.RAPIER;
-
-    // init player physics body
-    const rigidBodyDesc = new RAPIER.RigidBodyDesc(
-      RAPIER.RigidBodyType.KinematicPositionBased
-    ).setTranslation(0, 20, 0);
-
-    this.characterBody =
-      this.physicsEngine.world.createRigidBody(rigidBodyDesc);
-
-    const colliderDescCharacter = RAPIER.ColliderDesc.capsule(1, 1);
-
-    this.characterCollider = this.physicsEngine.world.createCollider(
-      colliderDescCharacter,
-      this.characterBody
-    );
-
-    const offset = 0.01;
-
-    this.characterController =
-      this.physicsEngine.world.createCharacterController(offset);
-
-    this.characterController.disableAutostep();
-    this.characterController.setUp({ x: 0, y: 1, z: 0 });
+    this.player.position.set(0, 10, 0);
 
     this.raycaster.near = 0;
     this.raycaster.far = 2.3;
@@ -150,35 +112,16 @@ export default class Player extends BaseEntity {
     moveVector.normalize().multiplyScalar(delta * SPEED);
     //https://www.cgtrader.com/free-3d-models/character/man/minecraft-steve-low-poly-rigged
 
-    this.characterController.computeColliderMovement(this.characterCollider, {
-      x: moveVector.x,
-      y: moveVector.y + this.vy * delta,
-      z: moveVector.z,
-    });
-
     if (this.vy > this.originalVy) {
       this.vy -= GRAVITY * GRAVITY_SCALE * delta;
     }
 
-    const correctMovement = this.characterController.computedMovement();
-
     const a = this.physicsTest.calculateCorrectMovement(
-      delta,
-      this.player.position,
-      new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z)
+      new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z),
+      this.player.position.clone()
     );
 
-    const newPos = this.characterBody.translation();
-
-    newPos.x += correctMovement.x;
-    newPos.y += correctMovement.y;
-    newPos.z += correctMovement.z;
-
-    this.characterBody?.setNextKinematicTranslation(newPos);
-
-    let { x, y, z } = this.characterBody.translation();
-
-    this.player.position.set(x, y + 0.05, z);
+    this.player.position.add(new Vector3(a.x, a.y, a.z));
   }
 
   trackingOnGround() {

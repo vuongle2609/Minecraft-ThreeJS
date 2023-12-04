@@ -1,7 +1,6 @@
-import GameScene from "./classes/gameScene";
-import PhysicsEngine from "./physics";
-import "./style.css";
 import { Cache } from "three";
+import GameScene from "./classes/gameScene";
+import "./style.css";
 
 Cache.enabled = true;
 
@@ -13,11 +12,7 @@ class Three {
   }
 
   async initialize() {
-    const physicsEngine = new PhysicsEngine({});
-
-    await physicsEngine.initialize();
-
-    this.gameScene = new GameScene(physicsEngine);
+    this.gameScene = new GameScene();
   }
 }
 

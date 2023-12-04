@@ -1,9 +1,8 @@
-import { Camera, Scene } from "three";
-import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
-import { GUI } from "dat.gui";
-import { World } from "cannon-es";
 import MouseControl from "@/action/mouseControl";
 import PhysicsEngine from "@/physics";
+import { GUI } from "dat.gui";
+import { Camera, Scene } from "three";
+import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import BlockManager from "./blockManager";
 
 export interface BasePropsType {
@@ -22,25 +21,16 @@ export default class BaseEntity {
   gui?: GUI;
   camera?: Camera;
   mouseControl?: MouseControl;
-  physicsEngine?: PhysicsEngine;
   blockManager?: BlockManager;
 
   constructor(props?: BasePropsType) {
-    const {
-      control,
-      gui,
-      scene,
-      camera,
-      mouseControl,
-      physicsEngine,
-      blockManager,
-    } = props || {};
+    const { control, gui, scene, camera, mouseControl, blockManager } =
+      props || {};
     this.control = control;
     this.gui = gui;
     this.scene = scene;
     this.camera = camera;
     this.mouseControl = mouseControl;
-    this.physicsEngine = physicsEngine;
     this.blockManager = blockManager;
   }
 }

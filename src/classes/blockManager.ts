@@ -1,4 +1,3 @@
-import blocks from "@/constants/blocks";
 import {
   BoxGeometry,
   InstancedMesh,
@@ -45,7 +44,6 @@ export default class BlockManager extends BaseEntity {
 
     new Terrant({
       scene: this.scene,
-      physicsEngine: this.physicsEngine,
       blocks: this.blocks,
     });
   }
@@ -151,7 +149,6 @@ export default class BlockManager extends BaseEntity {
         position: blockPosition,
         scene: this.scene,
         type: this.inventoryManager.currentFocus,
-        physicsEngine: this.physicsEngine,
         blocks: this.blocks,
       });
   }
