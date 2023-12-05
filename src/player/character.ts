@@ -116,12 +116,12 @@ export default class Player extends BaseEntity {
       this.vy -= GRAVITY * GRAVITY_SCALE * delta;
     }
 
-    const a = this.physicsTest.calculateCorrectMovement(
+    const correctMovement = this.physicsTest.calculateCorrectMovement(
       new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z),
       this.player.position.clone()
     );
 
-    this.player.position.add(new Vector3(a.x, a.y, a.z));
+    this.player.position.add(correctMovement);
   }
 
   trackingOnGround() {

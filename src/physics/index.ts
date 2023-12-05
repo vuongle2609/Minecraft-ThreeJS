@@ -5,11 +5,7 @@ import { Vector3 } from "three";
 export default class Physics extends BaseEntity {
   constructor(props: BasePropsType) {
     super(props);
-
-    this.initialize();
   }
-
-  initialize() {}
 
   // getBlockCandicate(entityPosition: Vector3, moveVector: Vector3) {
   //   const newEntityPosition = entityPosition.add(moveVector);
@@ -93,65 +89,250 @@ export default class Physics extends BaseEntity {
   //   };
   // }
 
+  roundedPosition(position: Vector3) {
+    const positionXFloor = 2 * Math.round((position.x + 0.8) / 2);
+    const positionYFloor = 2 * Math.round(position.y / 2);
+    const positionZFloor = 2 * Math.round((position.z + 0.8) / 2);
+
+    const roundedPosition = new Vector3(
+      positionXFloor,
+      positionYFloor,
+      positionZFloor
+    );
+
+    return roundedPosition;
+  }
+
+  roundedPosition1(position: Vector3) {
+    const positionXFloor = 2 * Math.round((position.x - 0.8) / 2);
+    const positionYFloor = 2 * Math.round(position.y / 2);
+    const positionZFloor = 2 * Math.round((position.z - 0.8) / 2);
+
+    const roundedPosition = new Vector3(
+      positionXFloor,
+      positionYFloor,
+      positionZFloor
+    );
+
+    return roundedPosition;
+  }
+
+  roundedPosition2(position: Vector3) {
+    const positionXFloor = 2 * Math.round((position.x + 0.8) / 2);
+    const positionYFloor = 2 * Math.round(position.y / 2);
+    const positionZFloor = 2 * Math.round((position.z - 0.8) / 2);
+
+    const roundedPosition = new Vector3(
+      positionXFloor,
+      positionYFloor,
+      positionZFloor
+    );
+
+    return roundedPosition;
+  }
+
+  roundedPosition3(position: Vector3) {
+    const positionXFloor = 2 * Math.round((position.x - 0.8) / 2);
+    const positionYFloor = 2 * Math.round(position.y / 2);
+    const positionZFloor = 2 * Math.round((position.z + 0.8) / 2);
+
+    const roundedPosition = new Vector3(
+      positionXFloor,
+      positionYFloor,
+      positionZFloor
+    );
+
+    return roundedPosition;
+  }
+
   calculateCorrectMovement(vectorMove: Vector3, playerPosition: Vector3) {
     playerPosition.y -= 2;
 
     const nextPosition = playerPosition.clone().add(vectorMove);
 
-    const roundedNextPosition = new Vector3();
-    const roundedCurrentPosition = new Vector3();
+    const roundedNextPosition = this.roundedPosition(nextPosition);
+    const roundedNextPosition1 = this.roundedPosition1(nextPosition);
+    const roundedNextPosition2 = this.roundedPosition2(nextPosition);
+    const roundedNextPosition3 = this.roundedPosition3(nextPosition);
 
-    const nextPositionXFloor = 2 * Math.round(nextPosition.x / 2);
-    const nextPositionYFloor = 2 * Math.round(nextPosition.y / 2);
-    const nextPositionZFloor = 2 * Math.round(nextPosition.z / 2);
+    const roundedCurrentPosition = this.roundedPosition(playerPosition);
+    const roundedCurrentPosition1 = this.roundedPosition1(playerPosition);
+    const roundedCurrentPosition2 = this.roundedPosition2(playerPosition);
+    const roundedCurrentPosition3 = this.roundedPosition3(playerPosition);
 
-    const currentPositionXFloor = 2 * Math.round(playerPosition.x / 2);
-    const currentPositionYFloor = 2 * Math.round(playerPosition.y / 2);
-    const currentPositionZFloor = 2 * Math.round(playerPosition.z / 2);
+    const nextObjectX =
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedNextPosition.x,
+          roundedCurrentPosition.y,
+          roundedCurrentPosition.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedNextPosition.x,
+          roundedCurrentPosition.y + 2,
+          roundedCurrentPosition.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedNextPosition1.x,
+          roundedCurrentPosition1.y,
+          roundedCurrentPosition1.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedNextPosition1.x,
+          roundedCurrentPosition1.y + 2,
+          roundedCurrentPosition1.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedNextPosition2.x,
+          roundedCurrentPosition2.y,
+          roundedCurrentPosition2.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedNextPosition2.x,
+          roundedCurrentPosition2.y + 2,
+          roundedCurrentPosition2.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedNextPosition3.x,
+          roundedCurrentPosition3.y,
+          roundedCurrentPosition3.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedNextPosition3.x,
+          roundedCurrentPosition3.y + 2,
+          roundedCurrentPosition3.z
+        )
+      );
 
-    roundedNextPosition.x =
-      nextPositionXFloor % 2 == 0 ? nextPositionXFloor : nextPositionXFloor - 1;
-    roundedNextPosition.y =
-      nextPositionYFloor % 2 == 0 ? nextPositionYFloor : nextPositionYFloor - 1;
-    roundedNextPosition.z =
-      nextPositionZFloor % 2 == 0 ? nextPositionZFloor : nextPositionZFloor - 1;
+    const nextObjectY =
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedCurrentPosition.x,
+          roundedNextPosition.y,
+          roundedCurrentPosition.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedCurrentPosition.x,
+          roundedNextPosition.y + 4,
+          roundedCurrentPosition.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedCurrentPosition1.x,
+          roundedNextPosition1.y,
+          roundedCurrentPosition1.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedCurrentPosition1.x,
+          roundedNextPosition1.y + 4,
+          roundedCurrentPosition1.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedCurrentPosition2.x,
+          roundedNextPosition2.y,
+          roundedCurrentPosition2.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedCurrentPosition2.x,
+          roundedNextPosition2.y + 4,
+          roundedCurrentPosition2.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedCurrentPosition3.x,
+          roundedNextPosition3.y,
+          roundedCurrentPosition3.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedCurrentPosition3.x,
+          roundedNextPosition3.y + 4,
+          roundedCurrentPosition3.z
+        )
+      );
 
-    roundedCurrentPosition.x =
-      currentPositionXFloor % 2 == 0
-        ? currentPositionXFloor
-        : currentPositionXFloor + 1;
-    roundedCurrentPosition.y =
-      currentPositionYFloor % 2 == 0
-        ? currentPositionYFloor
-        : currentPositionYFloor + 1;
-    roundedCurrentPosition.z =
-      currentPositionZFloor % 2 == 0
-        ? currentPositionZFloor
-        : currentPositionZFloor + 1;
-
-    const nextObjectX = this.scene?.getObjectByName(
-      nameFromCoordinate(
-        roundedNextPosition.x,
-        roundedCurrentPosition.y,
-        roundedCurrentPosition.z
-      )
-    );
-
-    const nextObjectY = this.scene?.getObjectByName(
-      nameFromCoordinate(
-        roundedCurrentPosition.x,
-        roundedNextPosition.y,
-        roundedCurrentPosition.z
-      )
-    );
-
-    const nextObjectZ = this.scene?.getObjectByName(
-      nameFromCoordinate(
-        roundedCurrentPosition.x,
-        roundedCurrentPosition.y,
-        roundedNextPosition.z
-      )
-    );
+    const nextObjectZ =
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedCurrentPosition.x,
+          roundedCurrentPosition.y,
+          roundedNextPosition.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedCurrentPosition.x,
+          roundedCurrentPosition.y + 2,
+          roundedNextPosition.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedCurrentPosition1.x,
+          roundedCurrentPosition1.y,
+          roundedNextPosition1.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedCurrentPosition1.x,
+          roundedCurrentPosition1.y + 2,
+          roundedNextPosition1.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedCurrentPosition2.x,
+          roundedCurrentPosition2.y,
+          roundedNextPosition2.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedCurrentPosition2.x,
+          roundedCurrentPosition2.y + 2,
+          roundedNextPosition2.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedCurrentPosition3.x,
+          roundedCurrentPosition3.y,
+          roundedNextPosition3.z
+        )
+      ) ||
+      this.scene?.getObjectByName(
+        nameFromCoordinate(
+          roundedCurrentPosition3.x,
+          roundedCurrentPosition3.y + 2,
+          roundedNextPosition3.z
+        )
+      );
 
     const calculatedMoveVector = new Vector3();
 

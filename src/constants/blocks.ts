@@ -1,4 +1,9 @@
-import { MeshBasicMaterial, MeshStandardMaterial, NearestFilter, TextureLoader } from "three";
+import {
+  MeshBasicMaterial,
+  MeshStandardMaterial,
+  NearestFilter,
+  TextureLoader,
+} from "three";
 
 import grassTopGreen from "@/assets/block/grass_top_green.png";
 import grassSide from "@/assets/block/grass_block_side.png";
@@ -20,7 +25,7 @@ const oakPlanksSideTexture = textureLoader.load(oakPlanksSide);
 
 const diamondBlockSideTexture = textureLoader.load(diamondBlockSide);
 
-// it's good to set both to nearest?
+// is it good to set both to nearest?
 
 grassTopGreenTexture.magFilter = NearestFilter;
 grassSideTexture.magFilter = NearestFilter;
@@ -36,8 +41,8 @@ diamondBlockSideTexture.minFilter = NearestFilter;
 
 //texture format: side side top bottom side side
 
-const worldMaterial = MeshStandardMaterial
-// const worldMaterial = MeshBasicMaterial
+const worldMaterial = MeshStandardMaterial;
+// const worldMaterial = MeshBasicMaterial;
 
 const blocks = {
   grass: {
@@ -45,27 +50,21 @@ const blocks = {
     texture: [
       new worldMaterial({
         map: grassSideTexture,
-        side: 0,
       }),
       new worldMaterial({
         map: grassSideTexture,
-        side: 0,
       }),
       new worldMaterial({
         map: grassTopGreenTexture,
-        side: 0,
       }),
       new worldMaterial({
         map: dirtTexture,
-        side: 0,
       }),
       new worldMaterial({
         map: grassSideTexture,
-        side: 0,
       }),
       new worldMaterial({
         map: grassSideTexture,
-        side: 0,
       }),
     ],
   },
@@ -74,29 +73,21 @@ const blocks = {
     texture: [
       new worldMaterial({
         map: oakPlanksSideTexture,
-        side: 0,
-      }),
-
-      new worldMaterial({
-        map: oakPlanksSideTexture,
-        side: 0,
-      }),
-
-      new worldMaterial({
-        map: oakPlanksSideTexture,
-        side: 0,
       }),
       new worldMaterial({
         map: oakPlanksSideTexture,
-        side: 0,
       }),
       new worldMaterial({
         map: oakPlanksSideTexture,
-        side: 0,
       }),
       new worldMaterial({
         map: oakPlanksSideTexture,
-        side: 0,
+      }),
+      new worldMaterial({
+        map: oakPlanksSideTexture,
+      }),
+      new worldMaterial({
+        map: oakPlanksSideTexture,
       }),
     ],
   },
@@ -105,27 +96,21 @@ const blocks = {
     texture: [
       new worldMaterial({
         map: diamondBlockSideTexture,
-        side: 0,
       }),
       new worldMaterial({
         map: diamondBlockSideTexture,
-        side: 0,
       }),
       new worldMaterial({
         map: diamondBlockSideTexture,
-        side: 0,
       }),
       new worldMaterial({
         map: diamondBlockSideTexture,
-        side: 0,
       }),
       new worldMaterial({
         map: diamondBlockSideTexture,
-        side: 0,
       }),
       new worldMaterial({
         map: diamondBlockSideTexture,
-        side: 0,
       }),
     ],
   },
