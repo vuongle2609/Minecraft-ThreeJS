@@ -21,6 +21,12 @@ export default class Block extends BaseEntity {
   }
 
   async initialize({ position, type, blocks: blockArr }: PropsType) {
+    if (position.x % 2 || position.y % 2 || position.z % 2) return;
+
+    const name = nameFromCoordinate(position.x, position.y, position.z);
+
+    if (this.scene?.getObjectByName(name)) return;
+
     const placeBlock = blocks[type];
 
     const textures = placeBlock.texture;
@@ -29,7 +35,7 @@ export default class Block extends BaseEntity {
 
     const newBlock = new Mesh(boxGeometry, textures);
 
-    newBlock.name = nameFromCoordinate(position.x, position.y, position.z);
+    newBlock.name = name;
     newBlock.castShadow = true;
     newBlock.receiveShadow = true;
 
@@ -38,26 +44,5 @@ export default class Block extends BaseEntity {
     blockArr?.push(newBlock);
 
     this.scene?.add(newBlock);
-
-    const blockDesc =
-      this.physicsEngine?.RAPIER.RigidBodyDesc.fixed().setTranslation(
-        position.x,
-        position.y,
-        position.z
-      );
-
-    if (!blockDesc) return;
-
-    const blockBody = this.physicsEngine?.world.createRigidBody(blockDesc);
-
-    const blockColliderDesc = this.physicsEngine?.RAPIER.ColliderDesc.cuboid(
-      1,
-      1,
-      1
-    );
-
-    if (!blockBody || !blockColliderDesc) return;
-
-    this.physicsEngine?.world.createCollider(blockColliderDesc, blockBody);
   }
 }
