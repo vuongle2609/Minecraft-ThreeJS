@@ -1,4 +1,9 @@
 import BaseEntity, { BasePropsType } from "@/classes/baseEntity";
+import {
+  CHARACTER_LENGTH_CEIL,
+  CHARACTER_MIDDLE_LENGTH,
+  CHARACTER_RADIUS,
+} from "@/constants/player";
 import nameFromCoordinate from "@/helpers/nameFromCoordinate";
 import { Vector3 } from "three";
 
@@ -90,9 +95,9 @@ export default class Physics extends BaseEntity {
   // }
 
   roundedPosition(position: Vector3) {
-    const positionXFloor = 2 * Math.round((position.x + 0.8) / 2);
+    const positionXFloor = 2 * Math.round((position.x + CHARACTER_RADIUS) / 2);
     const positionYFloor = 2 * Math.round(position.y / 2);
-    const positionZFloor = 2 * Math.round((position.z + 0.8) / 2);
+    const positionZFloor = 2 * Math.round((position.z + CHARACTER_RADIUS) / 2);
 
     const roundedPosition = new Vector3(
       positionXFloor,
@@ -104,9 +109,9 @@ export default class Physics extends BaseEntity {
   }
 
   roundedPosition1(position: Vector3) {
-    const positionXFloor = 2 * Math.round((position.x - 0.8) / 2);
+    const positionXFloor = 2 * Math.round((position.x - CHARACTER_RADIUS) / 2);
     const positionYFloor = 2 * Math.round(position.y / 2);
-    const positionZFloor = 2 * Math.round((position.z - 0.8) / 2);
+    const positionZFloor = 2 * Math.round((position.z - CHARACTER_RADIUS) / 2);
 
     const roundedPosition = new Vector3(
       positionXFloor,
@@ -118,9 +123,9 @@ export default class Physics extends BaseEntity {
   }
 
   roundedPosition2(position: Vector3) {
-    const positionXFloor = 2 * Math.round((position.x + 0.8) / 2);
+    const positionXFloor = 2 * Math.round((position.x + CHARACTER_RADIUS) / 2);
     const positionYFloor = 2 * Math.round(position.y / 2);
-    const positionZFloor = 2 * Math.round((position.z - 0.8) / 2);
+    const positionZFloor = 2 * Math.round((position.z - CHARACTER_RADIUS) / 2);
 
     const roundedPosition = new Vector3(
       positionXFloor,
@@ -132,9 +137,9 @@ export default class Physics extends BaseEntity {
   }
 
   roundedPosition3(position: Vector3) {
-    const positionXFloor = 2 * Math.round((position.x - 0.8) / 2);
+    const positionXFloor = 2 * Math.round((position.x - CHARACTER_RADIUS) / 2);
     const positionYFloor = 2 * Math.round(position.y / 2);
-    const positionZFloor = 2 * Math.round((position.z + 0.8) / 2);
+    const positionZFloor = 2 * Math.round((position.z + CHARACTER_RADIUS) / 2);
 
     const roundedPosition = new Vector3(
       positionXFloor,
@@ -171,7 +176,7 @@ export default class Physics extends BaseEntity {
       this.scene?.getObjectByName(
         nameFromCoordinate(
           roundedNextPosition.x,
-          roundedCurrentPosition.y + 2,
+          roundedCurrentPosition.y + CHARACTER_MIDDLE_LENGTH,
           roundedCurrentPosition.z
         )
       ) ||
@@ -185,7 +190,7 @@ export default class Physics extends BaseEntity {
       this.scene?.getObjectByName(
         nameFromCoordinate(
           roundedNextPosition1.x,
-          roundedCurrentPosition1.y + 2,
+          roundedCurrentPosition1.y + CHARACTER_MIDDLE_LENGTH,
           roundedCurrentPosition1.z
         )
       ) ||
@@ -199,7 +204,7 @@ export default class Physics extends BaseEntity {
       this.scene?.getObjectByName(
         nameFromCoordinate(
           roundedNextPosition2.x,
-          roundedCurrentPosition2.y + 2,
+          roundedCurrentPosition2.y + CHARACTER_MIDDLE_LENGTH,
           roundedCurrentPosition2.z
         )
       ) ||
@@ -213,7 +218,7 @@ export default class Physics extends BaseEntity {
       this.scene?.getObjectByName(
         nameFromCoordinate(
           roundedNextPosition3.x,
-          roundedCurrentPosition3.y + 2,
+          roundedCurrentPosition3.y + CHARACTER_MIDDLE_LENGTH,
           roundedCurrentPosition3.z
         )
       );
@@ -229,7 +234,7 @@ export default class Physics extends BaseEntity {
       this.scene?.getObjectByName(
         nameFromCoordinate(
           roundedCurrentPosition.x,
-          roundedNextPosition.y + 4,
+          roundedNextPosition.y + CHARACTER_LENGTH_CEIL,
           roundedCurrentPosition.z
         )
       ) ||
@@ -243,7 +248,7 @@ export default class Physics extends BaseEntity {
       this.scene?.getObjectByName(
         nameFromCoordinate(
           roundedCurrentPosition1.x,
-          roundedNextPosition1.y + 4,
+          roundedNextPosition1.y + CHARACTER_LENGTH_CEIL,
           roundedCurrentPosition1.z
         )
       ) ||
@@ -257,7 +262,7 @@ export default class Physics extends BaseEntity {
       this.scene?.getObjectByName(
         nameFromCoordinate(
           roundedCurrentPosition2.x,
-          roundedNextPosition2.y + 4,
+          roundedNextPosition2.y + CHARACTER_LENGTH_CEIL,
           roundedCurrentPosition2.z
         )
       ) ||
@@ -271,7 +276,7 @@ export default class Physics extends BaseEntity {
       this.scene?.getObjectByName(
         nameFromCoordinate(
           roundedCurrentPosition3.x,
-          roundedNextPosition3.y + 4,
+          roundedNextPosition3.y + CHARACTER_LENGTH_CEIL,
           roundedCurrentPosition3.z
         )
       );
@@ -287,7 +292,7 @@ export default class Physics extends BaseEntity {
       this.scene?.getObjectByName(
         nameFromCoordinate(
           roundedCurrentPosition.x,
-          roundedCurrentPosition.y + 2,
+          roundedCurrentPosition.y + CHARACTER_MIDDLE_LENGTH,
           roundedNextPosition.z
         )
       ) ||
@@ -301,7 +306,7 @@ export default class Physics extends BaseEntity {
       this.scene?.getObjectByName(
         nameFromCoordinate(
           roundedCurrentPosition1.x,
-          roundedCurrentPosition1.y + 2,
+          roundedCurrentPosition1.y + CHARACTER_MIDDLE_LENGTH,
           roundedNextPosition1.z
         )
       ) ||
@@ -315,7 +320,7 @@ export default class Physics extends BaseEntity {
       this.scene?.getObjectByName(
         nameFromCoordinate(
           roundedCurrentPosition2.x,
-          roundedCurrentPosition2.y + 2,
+          roundedCurrentPosition2.y + CHARACTER_MIDDLE_LENGTH,
           roundedNextPosition2.z
         )
       ) ||
@@ -329,7 +334,7 @@ export default class Physics extends BaseEntity {
       this.scene?.getObjectByName(
         nameFromCoordinate(
           roundedCurrentPosition3.x,
-          roundedCurrentPosition3.y + 2,
+          roundedCurrentPosition3.y + CHARACTER_MIDDLE_LENGTH,
           roundedNextPosition3.z
         )
       );

@@ -1,6 +1,8 @@
 import BasicCharacterControllerInput from "@/action/input";
 import BaseEntity, { BasePropsType } from "@/classes/baseEntity";
 import {
+  CHARACTER_MIDDLE_LENGTH,
+  CHARACTER_RADIUS,
   GRAVITY,
   GRAVITY_SCALE,
   JUMP_FORCE,
@@ -50,8 +52,8 @@ export default class Player extends BaseEntity {
   initialize() {
     // init player render
     this.player = new Mesh(
-      new CapsuleGeometry(0.8, 2),
-      new MeshStandardMaterial({})
+      new CapsuleGeometry(CHARACTER_RADIUS, CHARACTER_MIDDLE_LENGTH),
+      new MeshStandardMaterial()
     );
 
     this.player.receiveShadow = true;
@@ -75,14 +77,17 @@ export default class Player extends BaseEntity {
       this.isWalk = true;
       directionVector.x += 1;
     }
+
     if (keys.right) {
       this.isWalk = true;
       directionVector.x -= 1;
     }
+
     if (keys.forward) {
       this.isWalk = true;
       directionVector.z += 1;
     }
+
     if (keys.backward) {
       this.isWalk = true;
       directionVector.z -= 1;
