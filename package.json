@@ -10,8 +10,7 @@
   },
   "dependencies": {
     "dat.gui": "^0.7.9",
-    "stats.js": "^0.17.0",
-    "xstate": "^5.0.0"
+    "stats.js": "^0.17.0"
   },
   "devDependencies": {
     "@types/dat.gui": "^0.7.7",
