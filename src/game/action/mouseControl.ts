@@ -1,5 +1,5 @@
-import BaseEntity, { BasePropsType } from "@/classes/baseEntity";
-import { $ } from "@/utils/selector";
+import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
+import { $ } from "@/UI/utils/selector";
 import { Raycaster, Vector2 } from "three";
 
 export default class MouseControl extends BaseEntity {

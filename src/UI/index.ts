@@ -1,11 +1,13 @@
-import MainScreen from "./mainScreen";
+import Router from "./router";
 
 export default class UI {
-  mainScreen = new MainScreen();
+  router = new Router();
 
   constructor() {
     this.initialize();
   }
 
-  initialize() {}
+  initialize() {
+    this.router.navigate("mainScreen");
+  }
 }
