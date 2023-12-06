@@ -43,6 +43,8 @@ export default class GameScene extends RenderPage {
   inventoryManager: InventoryManager;
 
   lastCallTime = 0;
+  
+  boxGeometry = new THREE.BoxGeometry(2,2,2)
 
   afterRender = () => {
     // focus section -->
@@ -64,6 +66,7 @@ export default class GameScene extends RenderPage {
       camera: this.camera,
       inventoryManager: this.inventoryManager,
       control: this.control,
+      boxGeometry: this.boxGeometry
     });
 
     this.player = new Player({

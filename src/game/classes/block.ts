@@ -1,14 +1,14 @@
 import blocks from "@/constants/blocks";
 import nameFromCoordinate from "@/game/helpers/nameFromCoordinate";
-import { BoxGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
+import { BoxGeometry, Mesh, Material, Vector3, InstancedMesh } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 
 interface PropsType {
   position: Vector3;
   type: keyof typeof blocks;
-  blocks?: Mesh<BoxGeometry, MeshStandardMaterial[]>[];
+  blocks?: Mesh<BoxGeometry, Material[]>[];
+  boxGeometry: BoxGeometry
 }
-
 export default class Block extends BaseEntity {
   constructor(props: BasePropsType & PropsType) {
     super(props);
@@ -17,10 +17,11 @@ export default class Block extends BaseEntity {
       position: props.position,
       type: props.type,
       blocks: props.blocks,
+      boxGeometry: props.boxGeometry
     });
   }
 
-  async initialize({ position, type, blocks: blockArr }: PropsType) {
+  async initialize({ position, type, blocks: blockArr, boxGeometry }: PropsType) {
     if (position.x % 2 || position.y % 2 || position.z % 2) return;
 
     const name = nameFromCoordinate(position.x, position.y, position.z);
@@ -31,13 +32,15 @@ export default class Block extends BaseEntity {
 
     const textures = placeBlock.texture;
 
-    const boxGeometry = new BoxGeometry(2, 2, 2);
-
-    const newBlock = new Mesh(boxGeometry, textures);
+    const newBlock = new InstancedMesh(
+      boxGeometry,
+      textures,
+      2304
+    );
 
     newBlock.name = name;
-    newBlock.castShadow = true;
-    newBlock.receiveShadow = true;
+    // newBlock.castShadow = true;
+    // newBlock.receiveShadow = true;
 
     newBlock.position.set(position.x, position.y, position.z);
 

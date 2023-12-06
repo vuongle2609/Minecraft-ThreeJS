@@ -14,6 +14,7 @@ import InventoryManager from "./inventoryManager";
 import Terrant from "./terrant";
 
 interface PropsType {
+  boxGeometry: BoxGeometry
   inventoryManager: InventoryManager;
 }
 
@@ -29,11 +30,13 @@ export default class BlockManager extends BaseEntity {
 
   geometryBlock = new BoxGeometry(2, 2, 2);
   blocks: InstancedMesh<BoxGeometry, MeshStandardMaterial[]>[] = [];
+  boxGeometry: BoxGeometry
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
 
     this.inventoryManager = props.inventoryManager;
+    this.boxGeometry = props.boxGeometry
 
     this.initialize();
   }
@@ -46,6 +49,7 @@ export default class BlockManager extends BaseEntity {
     new Terrant({
       scene: this.scene,
       blocks: this.blocks,
+      boxGeometry: this.boxGeometry
     });
   }
 
@@ -157,6 +161,7 @@ export default class BlockManager extends BaseEntity {
         scene: this.scene,
         type: this.inventoryManager.currentFocus,
         blocks: this.blocks,
+        boxGeometry: this.boxGeometry
       });
   }
 

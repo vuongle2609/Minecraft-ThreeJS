@@ -1,19 +1,20 @@
-import { BoxGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
+import { BoxGeometry, Material, Mesh, MeshStandardMaterial, Vector3 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 
 export default class Terrant extends BaseEntity {
   constructor(
     props: BasePropsType & {
-      blocks: Mesh<BoxGeometry, MeshStandardMaterial[]>[];
+      blocks: Mesh<BoxGeometry, Material[]>[];
+      boxGeometry:BoxGeometry
     }
   ) {
     super(props);
-    this.initialize(props.blocks);
+    this.initialize(props.blocks, props.boxGeometry);
   }
 
-  async initialize(blocks: Mesh<BoxGeometry, MeshStandardMaterial[]>[]) {
-    const halfWidth = 8;
+  async initialize(blocks: Mesh<BoxGeometry, Material[]>[], boxGeometry: BoxGeometry) {
+    const halfWidth = 8 * 3;
 
     for (let i = -halfWidth; i < halfWidth; i++) {
       for (let j = -halfWidth; j < halfWidth; j++) {
@@ -22,6 +23,7 @@ export default class Terrant extends BaseEntity {
           scene: this.scene,
           type: "grass",
           blocks: blocks,
+          boxGeometry
         });
       }
     }

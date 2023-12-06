@@ -1,7 +1,7 @@
-import MainScreen from "../pages/mainScreen";
-import CreateWorld from "../pages/createWorld";
-import SelectWorld from "../pages/selectWorld";
-import GameRender from "../pages/gameRender";
+import MainScreen from "@/UI/pages/mainScreen";
+import CreateWorld from "@/UI/pages/createWorld";
+import SelectWorld from "@/UI/pages/selectWorld";
+import GameRender from "@/UI/pages/gameRender";
 
 export default class Router {
   routes = {

@@ -41,8 +41,8 @@ diamondBlockSideTexture.minFilter = NearestFilter;
 
 //texture format: side side top bottom side side
 
-const worldMaterial = MeshStandardMaterial;
-// const worldMaterial = MeshBasicMaterial;
+// const worldMaterial = MeshStandardMaterial;
+const worldMaterial = MeshBasicMaterial;
 
 const blocks = {
   grass: {
