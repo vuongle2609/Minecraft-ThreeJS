@@ -5,6 +5,7 @@ import GameScene from "@/game/classes/gameScene";
 
 export default class GameRender extends RenderPage {
   router: Router;
+  gameScene: GameScene;
 
   constructor(router: Router) {
     super();
@@ -13,11 +14,13 @@ export default class GameRender extends RenderPage {
   }
 
   element = String.raw` 
-      <div id="modal_focus" class="fixed top-0 bottom-0 left-0 right-0 items-center justify-center bg-blue-500 flex flex-col" style="background-image: url('/assets/home/bg.jpg')">
-        <div class="flex flex-col w-full h-full backdrop-blur-md items-center justify-center px-[200px]">
-          <h2 class="text-white text-lg">Pause menu</h2>
+      <div id="modal_focus" class="fixed top-0 bottom-0 left-0 right-0 items-center justify-center bg-gray-900/70 flex flex-col">
+        <div class="flex flex-col w-full h-full items-center justify-center px-[200px] gap-4">
+          <h2 class="text-white text-lg">Game Menu</h2>
 
-          <button class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full max-w-[500px]" id="focus">Focus</button>
+          <button class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full max-w-[500px]" id="focus">Back To Game</button>
+
+          <button class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full max-w-[500px]" id="quit">Save and Quit to Title</button>
         </div>
       </div>
 
@@ -52,6 +55,14 @@ export default class GameRender extends RenderPage {
   }
 
   afterRender = () => {
-    new GameScene();
+    this.gameScene = new GameScene();
+
+    $("#quit").onclick = () => {
+      $("#gameScene").remove();
+
+      this.gameScene.disposeRender()
+
+      this.router.navigate("mainScreen");
+    };
   };
 }

@@ -94,7 +94,7 @@ export default class BlockManager extends BaseEntity {
   handleBreakBlock() {
     const { raycaster } = this.mouseControl! || {};
 
-    if (!this.camera || !this.scene) return;
+    if (!this.camera || !this.scene || !this.control?.isLocked) return;
 
     raycaster.setFromCamera(new Vector2(), this.camera);
 
@@ -116,7 +116,7 @@ export default class BlockManager extends BaseEntity {
   handlePlaceBlock() {
     const { raycaster } = this.mouseControl! || {};
 
-    if (!this.camera || !this.scene) return;
+    if (!this.camera || !this.scene || !this.control?.isLocked) return;
 
     raycaster.setFromCamera(new Vector2(), this.camera);
 

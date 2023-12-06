@@ -1,7 +1,6 @@
 import MouseControl from "@/game/action/mouseControl";
 import Player from "@/game/player/character";
 import { $ } from "@/UI/utils/selector";
-import { GUI } from "dat.gui";
 import * as THREE from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import BlockManager from "./blockManager";
@@ -10,6 +9,8 @@ import Light from "./light";
 import { RenderPage } from "./renderPage";
 
 export default class GameScene extends RenderPage {
+  removedWindow = false;
+
   renderer = new THREE.WebGLRenderer({
     antialias: true,
     canvas: document.querySelector("#gameScene") as HTMLCanvasElement,
@@ -25,8 +26,6 @@ export default class GameScene extends RenderPage {
   );
 
   control = new PointerLockControls(this.camera, document.body);
-
-  gui = new GUI({});
 
   coordinateElement: HTMLElement;
   fpsElement: HTMLElement;
@@ -46,25 +45,10 @@ export default class GameScene extends RenderPage {
   lastCallTime = 0;
 
   afterRender = () => {
-    const app = document.querySelector("#app");
-
     // focus section -->
 
     // planing: make custom cursor -->
     // cursor section -->
-
-    // app?.insertAdjacentHTML(
-    //   "beforeend",
-    //   `
-    //   <div id="modal_focus" class="fixed top-0 bottom-0 left-0 right-0 items-center justify-center bg-blue-500 flex flex-col" style="background-image: url('/assets/home/bg.jpg')">
-    //     <div class="flex flex-col w-full h-full backdrop-blur-md items-center justify-center px-[200px]">
-    //         <img src="/assets/home/minecraft-logo-8.png" class="max-w-[800px] w-full mb-20"/>
-
-    //         <button class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full max-w-[500px]" id="focus">Focus</button>
-    //     </div>
-    //   </div>
-    //   `
-    // );
 
     this.coordinateElement = $("#coordinate");
     this.fpsElement = $("#fps");
@@ -79,6 +63,7 @@ export default class GameScene extends RenderPage {
       scene: this.scene,
       camera: this.camera,
       inventoryManager: this.inventoryManager,
+      control: this.control,
     });
 
     this.player = new Player({
@@ -157,8 +142,15 @@ export default class GameScene extends RenderPage {
     }
   }
 
+  disposeRender() {
+    this.renderer.dispose();
+    this.removedWindow = true;
+  }
+
   RAF(t: number) {
     requestAnimationFrame((t) => {
+      if (this.removedWindow) return;
+
       this.RAF(t);
     });
 
