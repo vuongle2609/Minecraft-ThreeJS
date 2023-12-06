@@ -1,4 +1,4 @@
-import { PlayerInput } from "../type";
+import { PlayerInput } from "../../type";
 
 export default class BasicCharacterControllerInput {
   keys: PlayerInput;

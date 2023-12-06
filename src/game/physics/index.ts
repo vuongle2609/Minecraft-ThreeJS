@@ -1,10 +1,10 @@
-import BaseEntity, { BasePropsType } from "@/classes/baseEntity";
+import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
 import {
   CHARACTER_LENGTH_CEIL,
   CHARACTER_MIDDLE_LENGTH,
   CHARACTER_RADIUS,
 } from "@/constants/player";
-import nameFromCoordinate from "@/helpers/nameFromCoordinate";
+import nameFromCoordinate from "@/game/helpers/nameFromCoordinate";
 import { Vector3 } from "three";
 
 export default class Physics extends BaseEntity {

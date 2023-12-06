@@ -1,3 +1,4 @@
+import nameFromCoordinate from "@/game/helpers/nameFromCoordinate";
 import {
   BoxGeometry,
   InstancedMesh,
@@ -101,9 +102,15 @@ export default class BlockManager extends BaseEntity {
 
     if (intersects[0]?.distance > 12) return;
 
-    for (let i = 0; i < intersects.length; i++) {
-      // console.log("break block", intersects[i].object);
-    }
+    const { x, y, z } = intersects[0].object.position;
+
+    const objectClicked = this.scene.getObjectByName(
+      nameFromCoordinate(x, y, z)
+    );
+
+    if (!objectClicked) return;
+
+    this.scene.remove(objectClicked);
   }
 
   handlePlaceBlock() {

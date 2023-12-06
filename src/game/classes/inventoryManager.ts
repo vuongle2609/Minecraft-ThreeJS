@@ -1,5 +1,5 @@
 import blocks from "@/constants/blocks";
-import { $ } from "@/utils/selector";
+import { $ } from "@/UI/utils/selector";
 
 export default class InventoryManager {
   inventory: (keyof typeof blocks | null)[] = [

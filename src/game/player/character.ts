@@ -1,5 +1,5 @@
-import BasicCharacterControllerInput from "@/action/input";
-import BaseEntity, { BasePropsType } from "@/classes/baseEntity";
+import BasicCharacterControllerInput from "@/game/action/input";
+import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
 import {
   CHARACTER_MIDDLE_LENGTH,
   CHARACTER_RADIUS,
@@ -11,7 +11,7 @@ import {
   SIN_Y_MULTIPLY_LENGTH,
   SPEED,
 } from "@/constants/player";
-import Physics from "@/physics";
+import Physics from "@/game/physics";
 import {
   CapsuleGeometry,
   Mesh,

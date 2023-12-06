@@ -13,4 +13,6 @@ body {
 
 * {
   font-family: minecraft;
+  letter-spacing: 0.5px;
+  font-weight: 300;
 }
