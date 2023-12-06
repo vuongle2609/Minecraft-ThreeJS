@@ -30,6 +30,7 @@ export default class BlockManager extends BaseEntity {
 
   geometryBlock = new BoxGeometry(2, 2, 2);
   blocks: InstancedMesh<BoxGeometry, MeshStandardMaterial[]>[] = [];
+  // blocksTypeCount
   boxGeometry: BoxGeometry
 
   constructor(props: BasePropsType & PropsType) {
@@ -166,6 +167,6 @@ export default class BlockManager extends BaseEntity {
   }
 
   update() {
-    this.handleHoverBlock();
+    // this.handleHoverBlock();
   }
 }

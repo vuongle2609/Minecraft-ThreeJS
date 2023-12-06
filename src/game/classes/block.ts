@@ -32,10 +32,9 @@ export default class Block extends BaseEntity {
 
     const textures = placeBlock.texture;
 
-    const newBlock = new InstancedMesh(
-      boxGeometry,
+    const newBlock = new Mesh(
+      new BoxGeometry(2,2,2),
       textures,
-      2304
     );
 
     newBlock.name = name;
