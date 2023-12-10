@@ -13,7 +13,7 @@ export default class Terrant extends BaseEntity {
   }
 
   async initialize(blocks: Mesh<BoxGeometry, MeshStandardMaterial[]>[]) {
-    const halfWidth = 8;
+    const halfWidth = 5 * 2;
 
     for (let i = -halfWidth; i < halfWidth; i++) {
       for (let j = -halfWidth; j < halfWidth; j++) {

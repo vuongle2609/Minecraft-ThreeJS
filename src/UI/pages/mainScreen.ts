@@ -66,5 +66,7 @@ export default class MainScreen extends RenderPage {
     $("#singleplayer").onclick = () => {
       this.router.navigate("selectWorld");
     };
+
+    this.router.soundManager.changeActiveTheme("mainScreen");
   };
 }
