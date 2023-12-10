@@ -7,6 +7,7 @@ import BlockManager from "./blockManager";
 import InventoryManager from "./inventoryManager";
 import Light from "./light";
 import { RenderPage } from "./renderPage";
+import PhysicsWorker from "../physics/worker?worker";
 
 export default class GameScene extends RenderPage {
   removedWindow = false;
@@ -15,6 +16,8 @@ export default class GameScene extends RenderPage {
     antialias: true,
     canvas: document.querySelector("#gameScene") as HTMLCanvasElement,
   });
+
+  worker = new PhysicsWorker();
 
   scene = new THREE.Scene();
 
@@ -44,45 +47,10 @@ export default class GameScene extends RenderPage {
 
   lastCallTime = 0;
 
-  afterRender = () => {
-    // focus section -->
-
-    // planing: make custom cursor -->
-    // cursor section -->
-
-    this.coordinateElement = $("#coordinate");
-    this.fpsElement = $("#fps");
-
-    this.mouseControl = new MouseControl({
-      control: this.control,
-      camera: this.camera,
-    });
-
-    this.blockManager = new BlockManager({
-      mouseControl: this.mouseControl,
-      scene: this.scene,
-      camera: this.camera,
-      inventoryManager: this.inventoryManager,
-      control: this.control,
-    });
-
-    this.player = new Player({
-      scene: this.scene,
-      camera: this.camera,
-      blockManager: this.blockManager,
-    });
-
-    this.inventoryManager.renderInventory();
-
-    this.control?.lock();
-  };
-
   constructor() {
     super();
 
     this.initialize();
-
-    this.afterRender();
   }
 
   initialize() {
@@ -108,6 +76,34 @@ export default class GameScene extends RenderPage {
     });
 
     this.inventoryManager = new InventoryManager();
+
+    this.coordinateElement = $("#coordinate");
+    this.fpsElement = $("#fps");
+
+    this.mouseControl = new MouseControl({
+      control: this.control,
+      camera: this.camera,
+    });
+
+    this.blockManager = new BlockManager({
+      mouseControl: this.mouseControl,
+      scene: this.scene,
+      camera: this.camera,
+      inventoryManager: this.inventoryManager,
+      control: this.control,
+      worker: this.worker,
+    });
+
+    this.player = new Player({
+      scene: this.scene,
+      camera: this.camera,
+      blockManager: this.blockManager,
+      worker: this.worker,
+    });
+
+    this.inventoryManager.renderInventory();
+
+    this.control?.lock();
 
     this.RAF(0);
   }

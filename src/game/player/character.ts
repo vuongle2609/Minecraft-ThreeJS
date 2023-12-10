@@ -1,17 +1,6 @@
+import { CHARACTER_MIDDLE_LENGTH, CHARACTER_RADIUS } from "@/constants/player";
 import BasicCharacterControllerInput from "@/game/action/input";
 import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
-import {
-  CHARACTER_MIDDLE_LENGTH,
-  CHARACTER_RADIUS,
-  GRAVITY,
-  GRAVITY_SCALE,
-  JUMP_FORCE,
-  LERP_CAMERA_BREATH,
-  SIN_X_MULTIPLY_LENGTH,
-  SIN_Y_MULTIPLY_LENGTH,
-  SPEED,
-} from "@/constants/player";
-import Physics from "@/game/physics";
 import {
   CapsuleGeometry,
   Mesh,
@@ -19,7 +8,6 @@ import {
   Raycaster,
   Vector3,
 } from "three";
-import { lerp } from "three/src/math/MathUtils";
 
 export default class Player extends BaseEntity {
   input = new BasicCharacterControllerInput();
@@ -28,21 +16,12 @@ export default class Player extends BaseEntity {
   player: Mesh;
   playerPhysicBody: Body;
 
-  // for jumping
-  originalVy = -25;
-  vy = this.originalVy;
-  onGround = true;
-
   isWalk = false;
 
   tCounter = 0;
   cameraOffset = 0;
 
   raycaster = new Raycaster();
-
-  physicsTest = new Physics({
-    scene: this.scene,
-  });
 
   constructor(props: BasePropsType) {
     super(props);
@@ -64,6 +43,18 @@ export default class Player extends BaseEntity {
     this.raycaster.far = 2.3;
 
     this.scene?.add(this.player);
+
+    if (this.worker)
+      this.worker.addEventListener("message", (e) => {
+        if (e.data.type === "updatePosition")
+          this.player.position.add(
+            new Vector3(
+              e.data.position[0],
+              e.data.position[1],
+              e.data.position[2]
+            )
+          );
+      });
   }
 
   handleMovement(delta: number) {
@@ -93,73 +84,67 @@ export default class Player extends BaseEntity {
       directionVector.z -= 1;
     }
 
-    if (keys.space && this.onGround) {
-      this.onGround = false;
-      this.vy = JUMP_FORCE;
+    // if (keys.space && this.onGround) {
+    // this.onGround = false;
+    // this.vy = JUMP_FORCE;
+    // }
+
+    if (keys.space) {
+      this.worker?.postMessage({
+        type: "jumpCharacter",
+      });
     }
 
     const forwardVector = new Vector3();
 
     this.camera?.getWorldDirection(forwardVector);
 
-    forwardVector.y = 0;
-    forwardVector.normalize();
-
-    const vectorUp = new Vector3(0, 1, 0);
-
-    const vectorRight = vectorUp.clone().crossVectors(vectorUp, forwardVector);
-
-    const moveVector = new Vector3().addVectors(
-      forwardVector.clone().multiplyScalar(directionVector.z),
-      vectorRight.multiplyScalar(directionVector.x)
-    );
-
-    moveVector.normalize().multiplyScalar(delta * SPEED);
-    //https://www.cgtrader.com/free-3d-models/character/man/minecraft-steve-low-poly-rigged
-
-    if (this.vy > this.originalVy) {
-      this.vy -= GRAVITY * GRAVITY_SCALE * delta;
-    }
-
-    const correctMovement = this.physicsTest.calculateCorrectMovement(
-      new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z),
-      this.player.position.clone()
-    );
-
-    this.player.position.add(correctMovement);
+    this.worker?.postMessage({
+      type: "calculateMovement",
+      data: {
+        directionVectorArr: [
+          directionVector.x,
+          directionVector.y,
+          directionVector.z,
+        ],
+        forwardVectorArr: [forwardVector.x, forwardVector.y, forwardVector.z],
+        position: [
+          this.player.position.x,
+          this.player.position.y,
+          this.player.position.z,
+        ],
+        delta,
+      },
+    });
   }
 
   trackingOnGround() {
-    this.raycaster.set(this.player.position, new Vector3(0, -1, 0));
-
-    const intersects = this.raycaster.intersectObjects(
-      this.blockManager?.blocks || []
-    );
-
-    if (intersects[0]) {
-      this.onGround = true;
-    }
+    // this.raycaster.set(this.player.position, new Vector3(0, -1, 0));
+    // const intersects = this.raycaster.intersectObjects(
+    //   this.blockManager?.blocks || []
+    // );
+    // if (intersects[0]) {
+    //   this.onGround = true;
+    // }
   }
 
   breathingEffect(delta: number) {
-    this.tCounter += 1;
-
-    // keo dai duong sin x bang cach chia cho 4
-    // cho duong sin y ngan lai bang cach chia tat ca cho 2.5
-    // de cho muot thi noi suy no voi offset truoc
-    // 1/2.5 * sin(t * 1/4)
-
-    if (this.onGround && this.isWalk) {
-      this.cameraOffset =
-        lerp(
-          this.cameraOffset,
-          Math.sin(this.tCounter * SIN_X_MULTIPLY_LENGTH) *
-            SIN_Y_MULTIPLY_LENGTH,
-          LERP_CAMERA_BREATH
-        ) * delta;
-    } else {
-      this.cameraOffset = 0;
-    }
+    // this.tCounter += 1;
+    // // keo dai duong sin x bang cach chia cho 4
+    // // cho duong sin y ngan lai bang cach chia tat ca cho 2.5
+    // // de cho muot thi noi suy no voi offset truoc
+    // // 1/2.5 * sin(t * 1/4)
+    // if (this.onGround && this.isWalk) {
+    //   this.cameraOffset =
+    //     lerp(
+    //       this.cameraOffset,
+    //       Math.sin(this.tCounter * SIN_X_MULTIPLY_LENGTH) *
+    //         SIN_Y_MULTIPLY_LENGTH,
+    //       LERP_CAMERA_BREATH
+    //     ) * delta;
+    // } else {
+    //   this.cameraOffset = 0;
+    // }
   }
 
   updateCamera() {

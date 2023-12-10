@@ -3,7 +3,7 @@ import {
   BoxGeometry,
   InstancedMesh,
   Mesh,
-  MeshStandardMaterial,
+  Material,
   Object3DEventMap,
   Vector2,
   Vector3,
@@ -21,14 +21,12 @@ export default class BlockManager extends BaseEntity {
   inventoryManager: InventoryManager;
 
   prevHoverBlockHex: number | null = null;
-  prevHoverBlock: Mesh<
-    BoxGeometry,
-    MeshStandardMaterial[],
-    Object3DEventMap
-  > | null = null;
+  prevHoverBlock: Mesh<BoxGeometry, Material[], Object3DEventMap> | null = null;
 
   geometryBlock = new BoxGeometry(2, 2, 2);
-  blocks: InstancedMesh<BoxGeometry, MeshStandardMaterial[]>[] = [];
+
+  blocksMapping: Record<string, Mesh<BoxGeometry, Material[]>> = {};
+  blocks: Mesh<BoxGeometry, Material[]>[] = [];
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
@@ -43,10 +41,16 @@ export default class BlockManager extends BaseEntity {
       this.onMouseDown(e);
     });
 
-    new Terrant({
+    const blocksTerrant = new Terrant({
       scene: this.scene,
       blocks: this.blocks,
+      worker: this.worker,
     });
+
+    this.blocksMapping = {
+      ...this.blocksMapping,
+      ...blocksTerrant.get(),
+    };
   }
 
   onMouseDown(e: MouseEvent) {
@@ -69,7 +73,7 @@ export default class BlockManager extends BaseEntity {
     // if (intersects[0]?.distance > 12) return;
     // const object = intersects[0]?.object as Mesh<
     //   BoxGeometry,
-    //   MeshStandardMaterial[],
+    //   Material[],
     //   Object3DEventMap
     // >;
     // if (this.prevHoverBlock?.material?.length) {
@@ -104,13 +108,19 @@ export default class BlockManager extends BaseEntity {
 
     const { x, y, z } = intersects[0].object.position;
 
-    const objectClicked = this.scene.getObjectByName(
-      nameFromCoordinate(x, y, z)
-    );
+    const name = nameFromCoordinate(x, y, z);
+
+    const objectClicked = this.blocksMapping[name];
 
     if (!objectClicked) return;
 
     this.scene.remove(objectClicked);
+
+    delete this.blocksMapping[name];
+    
+    this.removeBlockWorker({
+      position: [x, y, z],
+    });
   }
 
   handlePlaceBlock() {
@@ -151,13 +161,44 @@ export default class BlockManager extends BaseEntity {
         break;
     }
 
-    if (this.inventoryManager.currentFocus)
-      new Block({
+    if (this.inventoryManager.currentFocus) {
+      const block = new Block({
         position: blockPosition,
         scene: this.scene,
         type: this.inventoryManager.currentFocus,
         blocks: this.blocks,
       });
+
+      this.blocksMapping = {
+        ...this.blocksMapping,
+        [nameFromCoordinate(blockPosition.x, blockPosition.y, blockPosition.z)]:
+          block.get(),
+      };
+
+      this.updateBlockWorker({
+        position: [blockPosition.x, blockPosition.y, blockPosition.z],
+        type: this.inventoryManager.currentFocus,
+      });
+    }
+  }
+
+  removeBlockWorker({ position }: { position: number[] }) {
+    this.worker?.postMessage({
+      type: "removeBlock",
+      data: {
+        position,
+      },
+    });
+  }
+
+  updateBlockWorker({ position, type }: { position: number[]; type: string }) {
+    this.worker?.postMessage({
+      type: "addBlock",
+      data: {
+        position,
+        type,
+      },
+    });
   }
 
   update() {
