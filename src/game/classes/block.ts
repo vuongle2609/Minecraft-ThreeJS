@@ -1,12 +1,12 @@
 import blocks from "@/constants/blocks";
 import nameFromCoordinate from "@/game/helpers/nameFromCoordinate";
-import { BoxGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
+import { BoxGeometry, Mesh, Material, Vector3 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 
 interface PropsType {
   position: Vector3;
   type: keyof typeof blocks;
-  blocks?: Mesh<BoxGeometry, MeshStandardMaterial[]>[];
+  blocks?: Mesh<BoxGeometry, Material[]>[];
 }
 
 export default class Block extends BaseEntity {
@@ -36,8 +36,8 @@ export default class Block extends BaseEntity {
     const newBlock = new Mesh(boxGeometry, textures);
 
     newBlock.name = name;
-    newBlock.castShadow = true;
-    newBlock.receiveShadow = true;
+    // newBlock.castShadow = true;
+    // newBlock.receiveShadow = true;
 
     newBlock.position.set(position.x, position.y, position.z);
 

@@ -3,7 +3,9 @@ import { $$ } from "@/UI/utils/selector";
 export default class SoundManager {
   soundsBackground = {
     mainScreen: new Audio("assets/sound/main_screen.mp3"),
+    mice_on_venus: new Audio("assets/sound/mice_on_venus.mp3"),
   };
+  
   currentActiveTheme: keyof typeof this.soundsBackground | null = null;
 
   clickSound = new Audio("assets/sound/button_click.mp3");
