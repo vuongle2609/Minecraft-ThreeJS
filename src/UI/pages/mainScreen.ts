@@ -26,34 +26,33 @@ export default class MainScreen extends RenderPage {
 
           <div class="w-full flex flex-col gap-4">
             <button
-              class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full"
+              class="mc-button"
               id="singleplayer"
             >
-              Singleplayer
+              <div class="title">Singleplayer</div>
             </button>
 
             <button
-              class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full"
+              class="mc-button"
               id="multiplayer"
             >
-              Multiplayer
+              <div class="title">Multiplayer</div>
             </button>
           </div>
 
           <div class="w-full flex gap-4 mt-10">
             <button
-              class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full"
+              class="mc-button"
             >
-              Options...
+              <div class="title">Options...</div>
             </button>
 
             <button
-              class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full"
+              class="mc-button"
             >
-              Github
+              <div class="title">Github</div>
             </button>
           </div>
-
         </div>
       </div>
     `;

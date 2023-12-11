@@ -1,24 +1,14 @@
-import BasicCharacterControllerInput from "@/game/action/input";
-import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
+import blocks from "@/constants/blocks";
 import {
   CHARACTER_MIDDLE_LENGTH,
   CHARACTER_RADIUS,
-  GRAVITY,
-  GRAVITY_SCALE,
-  JUMP_FORCE,
   LERP_CAMERA_BREATH,
   SIN_X_MULTIPLY_LENGTH,
   SIN_Y_MULTIPLY_LENGTH,
-  SPEED,
 } from "@/constants/player";
-import Physics from "@/game/physics";
-import {
-  CapsuleGeometry,
-  Mesh,
-  MeshStandardMaterial,
-  Raycaster,
-  Vector3,
-} from "three";
+import BasicCharacterControllerInput from "@/game/action/input";
+import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
+import { CapsuleGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
 import { lerp } from "three/src/math/MathUtils";
 
 export default class Player extends BaseEntity {
@@ -26,23 +16,17 @@ export default class Player extends BaseEntity {
 
   // render body
   player: Mesh;
-  playerPhysicBody: Body;
-
-  // for jumping
-  originalVy = -25;
-  vy = this.originalVy;
-  onGround = true;
 
   isWalk = false;
+  onGround = true;
 
+  // for camera
   tCounter = 0;
   cameraOffset = 0;
 
-  raycaster = new Raycaster();
-
-  physicsTest = new Physics({
-    scene: this.scene,
-  });
+  currentStepKey: keyof typeof blocks | undefined = undefined;
+  prevStepKey: keyof typeof blocks | undefined = undefined;
+  currentStepSound: HTMLAudioElement;
 
   constructor(props: BasePropsType) {
     super(props);
@@ -60,10 +44,23 @@ export default class Player extends BaseEntity {
     this.player.castShadow = true;
     this.player.position.set(0, 10, 0);
 
-    this.raycaster.near = 0;
-    this.raycaster.far = 2.3;
-
     this.scene?.add(this.player);
+
+    if (this.worker)
+      this.worker.addEventListener("message", (e) => {
+        if (e.data.type === "updatePosition") {
+          const { position, onGround, collideObject } = e.data.data;
+
+          this.prevStepKey = this.currentStepKey;
+          this.currentStepKey = collideObject;
+
+          this.onGround = onGround;
+
+          this.player.position.add(
+            new Vector3(position[0], position[1], position[2])
+          );
+        }
+      });
   }
 
   handleMovement(delta: number) {
@@ -93,62 +90,60 @@ export default class Player extends BaseEntity {
       directionVector.z -= 1;
     }
 
-    if (keys.space && this.onGround) {
-      this.onGround = false;
-      this.vy = JUMP_FORCE;
+    if (keys.space) {
+      this.worker?.postMessage({
+        type: "jumpCharacter",
+      });
     }
 
     const forwardVector = new Vector3();
 
     this.camera?.getWorldDirection(forwardVector);
 
-    forwardVector.y = 0;
-    forwardVector.normalize();
-
-    const vectorUp = new Vector3(0, 1, 0);
-
-    const vectorRight = vectorUp.clone().crossVectors(vectorUp, forwardVector);
-
-    const moveVector = new Vector3().addVectors(
-      forwardVector.clone().multiplyScalar(directionVector.z),
-      vectorRight.multiplyScalar(directionVector.x)
-    );
-
-    moveVector.normalize().multiplyScalar(delta * SPEED);
-    //https://www.cgtrader.com/free-3d-models/character/man/minecraft-steve-low-poly-rigged
-
-    if (this.vy > this.originalVy) {
-      this.vy -= GRAVITY * GRAVITY_SCALE * delta;
-    }
-
-    const correctMovement = this.physicsTest.calculateCorrectMovement(
-      new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z),
-      this.player.position.clone()
-    );
-
-    this.player.position.add(correctMovement);
+    this.worker?.postMessage({
+      type: "calculateMovement",
+      data: {
+        directionVectorArr: [
+          directionVector.x,
+          directionVector.y,
+          directionVector.z,
+        ],
+        forwardVectorArr: [forwardVector.x, forwardVector.y, forwardVector.z],
+        position: [
+          this.player.position.x,
+          this.player.position.y,
+          this.player.position.z,
+        ],
+        delta,
+      },
+    });
   }
 
-  trackingOnGround() {
-    this.raycaster.set(this.player.position, new Vector3(0, -1, 0));
+  updateMovementSound() {
+    if (this.currentStepSound && this.currentStepSound.paused && this.isWalk) {
+      this.currentStepSound.play();
+    }
 
-    const intersects = this.raycaster.intersectObjects(
-      this.blockManager?.blocks || []
-    );
+    if ((!this.isWalk || !this.onGround) && this.currentStepSound) {
+      this.currentStepSound.pause();
+      this.currentStepSound.currentTime = 0;
+    }
 
-    if (intersects[0]) {
-      this.onGround = true;
+    if (this.currentStepKey && this.currentStepKey !== this.prevStepKey) {
+      if (this.currentStepSound) {
+        this.currentStepSound.pause();
+        this.currentStepSound.currentTime = 0;
+      }
+      this.currentStepSound = blocks[this.currentStepKey].step;
     }
   }
 
   breathingEffect(delta: number) {
     this.tCounter += 1;
-
     // keo dai duong sin x bang cach chia cho 4
     // cho duong sin y ngan lai bang cach chia tat ca cho 2.5
     // de cho muot thi noi suy no voi offset truoc
     // 1/2.5 * sin(t * 1/4)
-
     if (this.onGround && this.isWalk) {
       this.cameraOffset =
         lerp(
@@ -178,8 +173,8 @@ export default class Player extends BaseEntity {
 
   update(delta: number, t: number) {
     this.handleMovement(delta);
-    this.trackingOnGround();
     this.breathingEffect(delta);
+    this.updateMovementSound();
     this.updateCamera();
   }
 }

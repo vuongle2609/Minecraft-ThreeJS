@@ -21,10 +21,12 @@ export default class InitScreen extends RenderPage {
         >
           <div class="w-full flex flex-col gap-4">
             <button
-              class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full"
+              class="mc-button"
               id="confirm"
             >
-              Enable sound?
+              <div class="title">
+                Enable sound?
+              </div>
             </button>
           </div>
           </div>

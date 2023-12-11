@@ -18,9 +18,17 @@ export default class GameRender extends RenderPage {
         <div class="flex flex-col w-full h-full items-center justify-center px-[200px] gap-4">
           <h2 class="text-white text-lg">Game Menu</h2>
 
-          <button class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full max-w-[500px]" id="focus">Back To Game</button>
+          <button class="mc-button" id="focus">
+            <div class="title">
+              Back To Game
+            </div>
+          </button>
 
-          <button class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full max-w-[500px]" id="quit">Save and Quit to Title</button>
+          <button class="mc-button" id="quit">
+            <div class="title">
+              Save and Quit to Title
+            </div>
+          </button>
         </div>
       </div>
 
@@ -60,11 +68,11 @@ export default class GameRender extends RenderPage {
     $("#quit").onclick = () => {
       $("#gameScene").remove();
 
-      this.gameScene.disposeRender()
+      this.gameScene.disposeRender();
 
       this.router.navigate("mainScreen");
     };
 
-    this.router.soundManager.changeActiveTheme('mice_on_venus')
+    this.router.soundManager.changeActiveTheme("mice_on_venus");
   };
 }

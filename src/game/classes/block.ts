@@ -10,6 +10,7 @@ interface PropsType {
 }
 
 export default class Block extends BaseEntity {
+  block: Mesh<BoxGeometry, Material[]>;
   constructor(props: BasePropsType & PropsType) {
     super(props);
 
@@ -31,18 +32,27 @@ export default class Block extends BaseEntity {
 
     const textures = placeBlock.texture;
 
+    // textures.forEach(item => {
+    //   item.emis
+    // })
+
     const boxGeometry = new BoxGeometry(2, 2, 2);
 
-    const newBlock = new Mesh(boxGeometry, textures);
+    this.block = new Mesh(boxGeometry, textures);
 
-    newBlock.name = name;
-    // newBlock.castShadow = true;
-    // newBlock.receiveShadow = true;
+    this.block.name = name;
 
-    newBlock.position.set(position.x, position.y, position.z);
+    // this.block.castShadow = true;
+    // this.block.receiveShadow = true;
 
-    blockArr?.push(newBlock);
+    this.block.position.set(position.x, position.y, position.z);
 
-    this.scene?.add(newBlock);
+    blockArr?.push(this.block);
+
+    this.scene?.add(this.block);
+  }
+
+  get() {
+    return this.block;
   }
 }

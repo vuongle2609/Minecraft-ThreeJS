@@ -3,7 +3,7 @@ import {
   BoxGeometry,
   InstancedMesh,
   Mesh,
-  MeshStandardMaterial,
+  Material,
   Object3DEventMap,
   Vector2,
   Vector3,
@@ -12,6 +12,7 @@ import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
 import Terrant from "./terrant";
+import blocks from "@/constants/blocks";
 
 interface PropsType {
   inventoryManager: InventoryManager;
@@ -21,14 +22,16 @@ export default class BlockManager extends BaseEntity {
   inventoryManager: InventoryManager;
 
   prevHoverBlockHex: number | null = null;
-  prevHoverBlock: Mesh<
-    BoxGeometry,
-    MeshStandardMaterial[],
-    Object3DEventMap
-  > | null = null;
+  prevHoverBlock: Mesh<BoxGeometry, Material[], Object3DEventMap> | null = null;
 
   geometryBlock = new BoxGeometry(2, 2, 2);
-  blocks: InstancedMesh<BoxGeometry, MeshStandardMaterial[]>[] = [];
+
+  blocksMapping: Record<string, keyof typeof blocks> = {};
+  blocks: Mesh<BoxGeometry, Material[]>[] = [];
+
+  currentPlaceSound: HTMLAudioElement;
+
+  currentBreakSound: HTMLAudioElement;
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
@@ -43,10 +46,16 @@ export default class BlockManager extends BaseEntity {
       this.onMouseDown(e);
     });
 
-    new Terrant({
+    const blocksTerrant = new Terrant({
       scene: this.scene,
       blocks: this.blocks,
+      worker: this.worker,
     });
+
+    this.blocksMapping = {
+      ...this.blocksMapping,
+      ...blocksTerrant.get(),
+    };
   }
 
   onMouseDown(e: MouseEvent) {
@@ -62,6 +71,7 @@ export default class BlockManager extends BaseEntity {
   }
 
   handleHoverBlock() {
+    // using box 3 with outline helper to show focus
     // const { raycaster } = this.mouseControl! || {};
     // if (!this.camera || !this.scene) return;
     // raycaster.setFromCamera(new Vector2(), this.camera);
@@ -69,7 +79,7 @@ export default class BlockManager extends BaseEntity {
     // if (intersects[0]?.distance > 12) return;
     // const object = intersects[0]?.object as Mesh<
     //   BoxGeometry,
-    //   MeshStandardMaterial[],
+    //   Material[],
     //   Object3DEventMap
     // >;
     // if (this.prevHoverBlock?.material?.length) {
@@ -104,13 +114,33 @@ export default class BlockManager extends BaseEntity {
 
     const { x, y, z } = intersects[0].object.position;
 
-    const objectClicked = this.scene.getObjectByName(
-      nameFromCoordinate(x, y, z)
-    );
+    const name = nameFromCoordinate(x, y, z);
+
+    const objectClicked = this.scene.getObjectByName(name);
+    // const objectClicked = this.blocksMapping[name];
 
     if (!objectClicked) return;
 
     this.scene.remove(objectClicked);
+
+    if (this.currentBreakSound) {
+      this.currentBreakSound.pause();
+      this.currentBreakSound.currentTime = 0;
+    }
+
+    console.log(
+      "🚀 ~ file: blockManager.ts:132 ~ BlockManager ~ handleBreakBlock ~ this.currentBreakSound:",
+      this.blocksMapping[name]
+    );
+    this.currentBreakSound = blocks[this.blocksMapping[name]].break;
+
+    this.currentBreakSound.play();
+
+    delete this.blocksMapping[name];
+
+    this.removeBlockWorker({
+      position: [x, y, z],
+    });
   }
 
   handlePlaceBlock() {
@@ -151,13 +181,53 @@ export default class BlockManager extends BaseEntity {
         break;
     }
 
-    if (this.inventoryManager.currentFocus)
-      new Block({
+    if (this.inventoryManager.currentFocus) {
+      const block = new Block({
         position: blockPosition,
         scene: this.scene,
         type: this.inventoryManager.currentFocus,
         blocks: this.blocks,
       });
+
+      this.blocksMapping = {
+        ...this.blocksMapping,
+        [nameFromCoordinate(blockPosition.x, blockPosition.y, blockPosition.z)]:
+          this.inventoryManager.currentFocus,
+      };
+
+      this.updateBlockWorker({
+        position: [blockPosition.x, blockPosition.y, blockPosition.z],
+        type: this.inventoryManager.currentFocus,
+      });
+
+      if (this.currentPlaceSound) {
+        this.currentPlaceSound.pause();
+        this.currentPlaceSound.currentTime = 0;
+      }
+
+      this.currentPlaceSound = blocks[this.inventoryManager.currentFocus].place;
+
+      this.currentPlaceSound.play();
+    }
+  }
+
+  removeBlockWorker({ position }: { position: number[] }) {
+    this.worker?.postMessage({
+      type: "removeBlock",
+      data: {
+        position,
+      },
+    });
+  }
+
+  updateBlockWorker({ position, type }: { position: number[]; type: string }) {
+    this.worker?.postMessage({
+      type: "addBlock",
+      data: {
+        position,
+        type,
+      },
+    });
   }
 
   update() {
