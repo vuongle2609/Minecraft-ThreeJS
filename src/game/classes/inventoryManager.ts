@@ -46,14 +46,31 @@ export default class InventoryManager {
       },
       false
     );
+
+    document.addEventListener("wheel", (e) => {
+      this.handleChangeFocusItem(
+        this.currentFocusIndex - (e.deltaY < 0 ? -2 : 0)
+      );
+      e.stopImmediatePropagation();
+    });
   }
 
   handleChangeFocusItem(indexFocus: number) {
     this.currentFocusIndex = indexFocus - 1;
+
+    if (this.currentFocusIndex > 9) {
+      this.currentFocusIndex = 0;
+    }
+
+    if (this.currentFocusIndex < 0) {
+      this.currentFocusIndex = 9;
+    }
+
     this.currentFocus = this.inventory[this.currentFocusIndex];
 
     if (this.currentFocus)
       this.renderLabelFocusItem(blocks[this.currentFocus].name || "");
+    else this.renderLabelFocusItem("");
 
     this.renderInventory();
   }
@@ -61,7 +78,7 @@ export default class InventoryManager {
   renderLabelFocusItem(label: string) {
     const labelFocus = $("#itemLabel");
 
-    if (!labelFocus || !label) return;
+    if (!labelFocus) return;
 
     if (this.timeoutHideLabel) {
       clearTimeout(this.timeoutHideLabel);
@@ -69,7 +86,7 @@ export default class InventoryManager {
 
     labelFocus.style.opacity = "1";
 
-    labelFocus.innerHTML = `<span>${label}</span>`;
+    labelFocus.innerHTML = `<span>${label || ""}</span>`;
 
     this.timeoutHideLabel = setTimeout(() => {
       labelFocus.style.opacity = "0";
