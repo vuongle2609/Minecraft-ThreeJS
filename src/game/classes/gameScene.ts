@@ -7,7 +7,7 @@ import BlockManager from "./blockManager";
 import InventoryManager from "./inventoryManager";
 import Light from "./light";
 import { RenderPage } from "./renderPage";
-import PhysicsWorker from "../physics/worker?worker";
+// import PhysicsWorker from "../physics/worker?worker";
 
 export default class GameScene extends RenderPage {
   removedWindow = false;
@@ -17,7 +17,9 @@ export default class GameScene extends RenderPage {
     canvas: document.querySelector("#gameScene") as HTMLCanvasElement,
   });
 
-  worker = new PhysicsWorker();
+  worker = new Worker(new URL("../physics/worker", import.meta.url), {
+    type: "module",
+  });
 
   scene = new THREE.Scene();
 

@@ -1,6 +1,6 @@
 import { Vector3 } from "three";
 import nameFromCoordinate from "../helpers/nameFromCoordinate";
-import { SPEED, GRAVITY, GRAVITY_SCALE, JUMP_FORCE } from "@/constants/player";
+import { SPEED, GRAVITY, GRAVITY_SCALE, JUMP_FORCE } from "../../constants/player";
 import Physics from ".";
 
 let blocksMapping: Record<string, string> = {};
