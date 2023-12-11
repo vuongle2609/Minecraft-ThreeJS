@@ -73,6 +73,6 @@ export default class GameRender extends RenderPage {
       this.router.navigate("mainScreen");
     };
 
-    // this.router.soundManager.changeActiveTheme("mice_on_venus");
+    this.router.soundManager.changeActiveTheme("mice_on_venus");
   };
 }

@@ -66,6 +66,6 @@ export default class MainScreen extends RenderPage {
       this.router.navigate("selectWorld");
     };
 
-    // this.router.soundManager.changeActiveTheme("mainScreen");
+    this.router.soundManager.changeActiveTheme("mainScreen");
   };
 }
