@@ -10,7 +10,6 @@ export default class InitScreen extends RenderPage {
 
     this.router = router;
   }
-
   element = String.raw`
       <div
         class="w-full h-full items-center justify-center bg-cover flex flex-col"
@@ -29,7 +28,7 @@ export default class InitScreen extends RenderPage {
               </div>
             </button>
           </div>
-          </div>
+        </div>
       </div>
     `;
 

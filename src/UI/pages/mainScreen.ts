@@ -19,6 +19,8 @@ export default class MainScreen extends RenderPage {
         <div
           class="flex flex-col w-full h-full backdrop-blur-md items-center justify-center px-[200px]"
         >
+          <div class="w-screen mb-auto"></div>
+
           <img
             src="/assets/home/minecraft_logo_main.png"
             class="max-w-[800px] w-full mb-20"
@@ -49,9 +51,15 @@ export default class MainScreen extends RenderPage {
 
             <button
               class="mc-button"
+              id="github"
             >
               <div class="title">Github</div>
             </button>
+          </div>
+
+          <div class="w-screen mt-auto flex justify-between px-2 py-1">
+            <span class="text-white text-lg">Minecraft threejs</span>
+            <span class="text-white text-lg">Copyright Mojang AB</span>
           </div>
         </div>
       </div>
@@ -65,6 +73,12 @@ export default class MainScreen extends RenderPage {
     $("#singleplayer").onclick = () => {
       this.router.navigate("selectWorld");
     };
+
+    $("#github").onclick = () => {
+      window.open('https://github.com/vuongle2609/Minecraft')
+    };
+
+    // https://github.com/vuongle2609/Minecraft
 
     this.router.soundManager.changeActiveTheme("mainScreen");
   };

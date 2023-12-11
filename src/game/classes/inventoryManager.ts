@@ -1,7 +1,8 @@
 import blocks from "@/constants/blocks";
 import { $ } from "@/UI/utils/selector";
+import BaseEntity, { BasePropsType } from "./baseEntity";
 
-export default class InventoryManager {
+export default class InventoryManager extends BaseEntity {
   inventory: (keyof typeof blocks | null)[] = [
     "grass",
     "oak_planks",
@@ -20,26 +21,25 @@ export default class InventoryManager {
 
   timeoutHideLabel: NodeJS.Timeout | null = null;
 
-  constructor() {
+  isOpenInventory = false;
+
+  constructor(props: BasePropsType) {
+    super(props);
     this.initialize();
   }
 
   initialize() {
-    const keyMap: Record<string, number> = {
-      Digit1: 1,
-      Digit2: 2,
-      Digit3: 3,
-      Digit4: 4,
-      Digit5: 5,
-      Digit6: 6,
-      Digit7: 7,
-      Digit8: 8,
-      Digit9: 9,
-    };
-
     document.addEventListener(
       "keydown",
       (e) => {
+        if (e.key === "e") {
+          this.renderInventory();
+        }
+
+        // if (e.key === "Escape") {
+        //   this.renderInventory(true);
+        // }
+
         if (!!Number(e.key)) {
           this.handleChangeFocusItem(Number(e.key));
         }
@@ -72,7 +72,7 @@ export default class InventoryManager {
       this.renderLabelFocusItem(blocks[this.currentFocus].name || "");
     else this.renderLabelFocusItem("");
 
-    this.renderInventory();
+    this.renderHotbar();
   }
 
   renderLabelFocusItem(label: string) {
@@ -93,7 +93,215 @@ export default class InventoryManager {
     }, 1500);
   }
 
-  renderInventory() {
+  renderInventory(closeOnly?: boolean) {
+    if (this.isOpenInventory || closeOnly) {
+      $("#modal-inventory")?.remove();
+      this.control?.lock();
+      this.isOpenInventory = false;
+      return;
+    }
+
+    if (this.mouseControl?.paused) return;
+
+    this.isOpenInventory = true;
+    $("#app").insertAdjacentHTML(
+      "afterend",
+      `
+    <div class="fixed top-0 left-0 right-0 bottom-0 bg-black/80 flex items-center justify-center" id="modal-inventory">
+      <div class="pixel-corners--wrapper">
+        <div class="w-[500px] pixel-corners">
+          <div class="w-full h-full border-[5px] border-solid border-t-white border-l-white border-b-[#555555] border-r-[#555555]">
+            <div class="w-full h-full bg-[#c6c6c6] p-3 pt-1">
+              <div class="w-full">
+                <div class="flex items-center gap-4">
+                  <span class="text-2xl text-[#404040]">Search Items</span>
+
+                  <div class="grow box-with-shadow h-9">
+                    <input class="outline-none border-none bg-transparent w-full h-full px-1 text-white text-xl"/>
+                  </div>
+                </div>
+              </div>
+
+              <div class="w-full mt-2 flex">
+                <div class="flex flex-col gap-4 w-full">
+                  <div class="w-full flex flex-wrap">
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+                  </div>
+                  <div class="w-full flex">
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+
+                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    `
+    );
+
+    this.control?.unlock();
+  }
+
+  renderHotbar() {
     const inventoryContainer = $("#inventory_container");
 
     if (!inventoryContainer) return;
