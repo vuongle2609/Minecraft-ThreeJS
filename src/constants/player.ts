@@ -8,7 +8,7 @@ export const GRAVITY_SCALE = 4.2;
 
 export const SPEED = 10;
 
-export const JUMP_FORCE = 13;
+export const JUMP_FORCE = 14;
 
 export const SIN_X_MULTIPLY_LENGTH = 1 / 4;
 export const SIN_Y_MULTIPLY_LENGTH = 80;
