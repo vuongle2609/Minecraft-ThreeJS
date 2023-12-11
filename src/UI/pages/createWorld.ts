@@ -28,30 +28,38 @@ export default class CreateWorld extends RenderPage {
 
           <div class="w-full flex gap-3">
             <button
-              class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full"
+              class="mc-button"
             >
-              Game Mode: Creative
+              <div class="title">
+                Game Mode: Creative?
+              </div>
             </button>
 
             <button
-              class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full"
+              class="mc-button"
             >
-              World Type: Superflat
+              <div class="title">
+                World Type: Superflat
+              </div>
             </button>
           </div>
 
           <div class="w-full flex gap-3 mt-auto">
             <button
-              class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full"
+              class="mc-button"
             >
-              Create New World
+              <div class="title">
+                Create New World
+              </div>
             </button>
 
             <button
-              class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full"
+              class="mc-button"
               id="cancel"
             >
-              Cancel
+              <div class="title">
+                Cancel
+              </div>
             </button>
           </div>
         </div>

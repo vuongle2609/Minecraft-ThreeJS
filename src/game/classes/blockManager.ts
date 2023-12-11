@@ -12,6 +12,7 @@ import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
 import Terrant from "./terrant";
+import blocks from "@/constants/blocks";
 
 interface PropsType {
   inventoryManager: InventoryManager;
@@ -25,8 +26,12 @@ export default class BlockManager extends BaseEntity {
 
   geometryBlock = new BoxGeometry(2, 2, 2);
 
-  blocksMapping: Record<string, Mesh<BoxGeometry, Material[]>> = {};
+  blocksMapping: Record<string, keyof typeof blocks> = {};
   blocks: Mesh<BoxGeometry, Material[]>[] = [];
+
+  currentPlaceSound: HTMLAudioElement;
+
+  currentBreakSound: HTMLAudioElement;
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
@@ -66,6 +71,7 @@ export default class BlockManager extends BaseEntity {
   }
 
   handleHoverBlock() {
+    // using box 3 with outline helper to show focus
     // const { raycaster } = this.mouseControl! || {};
     // if (!this.camera || !this.scene) return;
     // raycaster.setFromCamera(new Vector2(), this.camera);
@@ -110,14 +116,28 @@ export default class BlockManager extends BaseEntity {
 
     const name = nameFromCoordinate(x, y, z);
 
-    const objectClicked = this.blocksMapping[name];
+    const objectClicked = this.scene.getObjectByName(name);
+    // const objectClicked = this.blocksMapping[name];
 
     if (!objectClicked) return;
 
     this.scene.remove(objectClicked);
 
+    if (this.currentBreakSound) {
+      this.currentBreakSound.pause();
+      this.currentBreakSound.currentTime = 0;
+    }
+
+    console.log(
+      "🚀 ~ file: blockManager.ts:132 ~ BlockManager ~ handleBreakBlock ~ this.currentBreakSound:",
+      this.blocksMapping[name]
+    );
+    this.currentBreakSound = blocks[this.blocksMapping[name]].break;
+
+    this.currentBreakSound.play();
+
     delete this.blocksMapping[name];
-    
+
     this.removeBlockWorker({
       position: [x, y, z],
     });
@@ -172,13 +192,22 @@ export default class BlockManager extends BaseEntity {
       this.blocksMapping = {
         ...this.blocksMapping,
         [nameFromCoordinate(blockPosition.x, blockPosition.y, blockPosition.z)]:
-          block.get(),
+          this.inventoryManager.currentFocus,
       };
 
       this.updateBlockWorker({
         position: [blockPosition.x, blockPosition.y, blockPosition.z],
         type: this.inventoryManager.currentFocus,
       });
+
+      if (this.currentPlaceSound) {
+        this.currentPlaceSound.pause();
+        this.currentPlaceSound.currentTime = 0;
+      }
+
+      this.currentPlaceSound = blocks[this.inventoryManager.currentFocus].place;
+
+      this.currentPlaceSound.play();
     }
   }
 

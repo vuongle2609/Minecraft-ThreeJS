@@ -32,44 +32,44 @@ export default class SelectWorld extends RenderPage {
           <div class="w-full flex flex-col gap-2 mt-auto">
             <div class="w-full flex gap-3">
                 <button
-                    class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full"
+                    class="mc-button"
                     id="play"
                 >
-                    Play Selected World
+                  <div class="title">Play Selected World</div>
                 </button>
 
                 <button
-                    class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full"
+                    class="mc-button"
                     id="create"
                 >
-                    Create New World
+                <div class="title">Create New World</div>
                 </button>
             </div>
 
             <div class="w-full flex gap-3">
                 <button
-                    class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full"
+                    class="mc-button"
                 >
-                    Edit
+                  <div class="title">Edit</div>
                 </button>
 
                 <button
-                    class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full"
+                    class="mc-button"
                 >
-                    Delete
+                  <div class="title">Delete</div>
                 </button>
 
                 <button
-                    class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full"
+                    class="mc-button"
                 >
-                    Re-Create
+                  <div class="title">Re-Create</div>
                 </button>
 
                 <button
-                    class="bg-[#717173] text-white border-[3px] border-solid border-black text-lg py-2 w-full"
+                    class="mc-button"
                     id="cancel"
                 >
-                    Cancel
+                  <div class="title">Cancel</div>
                 </button>
             </div>
           </div>

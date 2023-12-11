@@ -2,9 +2,10 @@ import { BoxGeometry, Mesh, Material, Vector3 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import nameFromCoordinate from "../helpers/nameFromCoordinate";
+import blocks from "@/constants/blocks";
 
 export default class Terrant extends BaseEntity {
-  blocksMapping: Record<string, Mesh<BoxGeometry, Material[]>> = {};
+  blocksMapping: Record<string, keyof typeof blocks> = {};
 
   constructor(
     props: BasePropsType & {
@@ -16,7 +17,7 @@ export default class Terrant extends BaseEntity {
   }
 
   async initialize(blocks: Mesh<BoxGeometry, Material[]>[]) {
-    const halfWidth = 5 * 2;
+    const halfWidth = 6 * 2;
 
     for (let i = -halfWidth; i < halfWidth; i++) {
       for (let j = -halfWidth; j < halfWidth; j++) {
@@ -30,7 +31,7 @@ export default class Terrant extends BaseEntity {
 
         this.blocksMapping = {
           ...this.blocksMapping,
-          [nameFromCoordinate(position.x, position.y, position.z)]: block.get(),
+          [nameFromCoordinate(position.x, position.y, position.z)]: "grass",
         };
 
         this.worker?.postMessage({

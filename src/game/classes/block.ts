@@ -32,6 +32,10 @@ export default class Block extends BaseEntity {
 
     const textures = placeBlock.texture;
 
+    // textures.forEach(item => {
+    //   item.emis
+    // })
+
     const boxGeometry = new BoxGeometry(2, 2, 2);
 
     this.block = new Mesh(boxGeometry, textures);

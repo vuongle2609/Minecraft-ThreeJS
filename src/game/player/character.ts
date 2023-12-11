@@ -1,27 +1,32 @@
-import { CHARACTER_MIDDLE_LENGTH, CHARACTER_RADIUS } from "@/constants/player";
+import blocks from "@/constants/blocks";
+import {
+  CHARACTER_MIDDLE_LENGTH,
+  CHARACTER_RADIUS,
+  LERP_CAMERA_BREATH,
+  SIN_X_MULTIPLY_LENGTH,
+  SIN_Y_MULTIPLY_LENGTH,
+} from "@/constants/player";
 import BasicCharacterControllerInput from "@/game/action/input";
 import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
-import {
-  CapsuleGeometry,
-  Mesh,
-  MeshStandardMaterial,
-  Raycaster,
-  Vector3,
-} from "three";
+import { CapsuleGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
+import { lerp } from "three/src/math/MathUtils";
 
 export default class Player extends BaseEntity {
   input = new BasicCharacterControllerInput();
 
   // render body
   player: Mesh;
-  playerPhysicBody: Body;
 
   isWalk = false;
+  onGround = true;
 
+  // for camera
   tCounter = 0;
   cameraOffset = 0;
 
-  raycaster = new Raycaster();
+  currentStepKey: keyof typeof blocks | undefined = undefined;
+  prevStepKey: keyof typeof blocks | undefined = undefined;
+  currentStepSound: HTMLAudioElement;
 
   constructor(props: BasePropsType) {
     super(props);
@@ -39,21 +44,22 @@ export default class Player extends BaseEntity {
     this.player.castShadow = true;
     this.player.position.set(0, 10, 0);
 
-    this.raycaster.near = 0;
-    this.raycaster.far = 2.3;
-
     this.scene?.add(this.player);
 
     if (this.worker)
       this.worker.addEventListener("message", (e) => {
-        if (e.data.type === "updatePosition")
+        if (e.data.type === "updatePosition") {
+          const { position, onGround, collideObject } = e.data.data;
+
+          this.prevStepKey = this.currentStepKey;
+          this.currentStepKey = collideObject;
+
+          this.onGround = onGround;
+
           this.player.position.add(
-            new Vector3(
-              e.data.position[0],
-              e.data.position[1],
-              e.data.position[2]
-            )
+            new Vector3(position[0], position[1], position[2])
           );
+        }
       });
   }
 
@@ -84,11 +90,6 @@ export default class Player extends BaseEntity {
       directionVector.z -= 1;
     }
 
-    // if (keys.space && this.onGround) {
-    // this.onGround = false;
-    // this.vy = JUMP_FORCE;
-    // }
-
     if (keys.space) {
       this.worker?.postMessage({
         type: "jumpCharacter",
@@ -118,33 +119,42 @@ export default class Player extends BaseEntity {
     });
   }
 
-  trackingOnGround() {
-    // this.raycaster.set(this.player.position, new Vector3(0, -1, 0));
-    // const intersects = this.raycaster.intersectObjects(
-    //   this.blockManager?.blocks || []
-    // );
-    // if (intersects[0]) {
-    //   this.onGround = true;
-    // }
+  updateMovementSound() {
+    if (this.currentStepSound && this.currentStepSound.paused && this.isWalk) {
+      this.currentStepSound.play();
+    }
+
+    if ((!this.isWalk || !this.onGround) && this.currentStepSound) {
+      this.currentStepSound.pause();
+      this.currentStepSound.currentTime = 0;
+    }
+
+    if (this.currentStepKey && this.currentStepKey !== this.prevStepKey) {
+      if (this.currentStepSound) {
+        this.currentStepSound.pause();
+        this.currentStepSound.currentTime = 0;
+      }
+      this.currentStepSound = blocks[this.currentStepKey].step;
+    }
   }
 
   breathingEffect(delta: number) {
-    // this.tCounter += 1;
-    // // keo dai duong sin x bang cach chia cho 4
-    // // cho duong sin y ngan lai bang cach chia tat ca cho 2.5
-    // // de cho muot thi noi suy no voi offset truoc
-    // // 1/2.5 * sin(t * 1/4)
-    // if (this.onGround && this.isWalk) {
-    //   this.cameraOffset =
-    //     lerp(
-    //       this.cameraOffset,
-    //       Math.sin(this.tCounter * SIN_X_MULTIPLY_LENGTH) *
-    //         SIN_Y_MULTIPLY_LENGTH,
-    //       LERP_CAMERA_BREATH
-    //     ) * delta;
-    // } else {
-    //   this.cameraOffset = 0;
-    // }
+    this.tCounter += 1;
+    // keo dai duong sin x bang cach chia cho 4
+    // cho duong sin y ngan lai bang cach chia tat ca cho 2.5
+    // de cho muot thi noi suy no voi offset truoc
+    // 1/2.5 * sin(t * 1/4)
+    if (this.onGround && this.isWalk) {
+      this.cameraOffset =
+        lerp(
+          this.cameraOffset,
+          Math.sin(this.tCounter * SIN_X_MULTIPLY_LENGTH) *
+            SIN_Y_MULTIPLY_LENGTH,
+          LERP_CAMERA_BREATH
+        ) * delta;
+    } else {
+      this.cameraOffset = 0;
+    }
   }
 
   updateCamera() {
@@ -163,8 +173,8 @@ export default class Player extends BaseEntity {
 
   update(delta: number, t: number) {
     this.handleMovement(delta);
-    this.trackingOnGround();
     this.breathingEffect(delta);
+    this.updateMovementSound();
     this.updateCamera();
   }
 }

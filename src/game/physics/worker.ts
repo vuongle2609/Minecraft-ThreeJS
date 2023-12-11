@@ -1,7 +1,7 @@
 import { Vector3 } from "three";
 import nameFromCoordinate from "../helpers/nameFromCoordinate";
 import { SPEED, GRAVITY, GRAVITY_SCALE, JUMP_FORCE } from "@/constants/player";
-import Physics from "./sad";
+import Physics from ".";
 
 let blocksMapping: Record<string, string> = {};
 
@@ -68,20 +68,32 @@ const calculateMovement = ({
     vy -= GRAVITY * GRAVITY_SCALE * delta;
   }
 
-  const correctMovement = physicsTest.calculateCorrectMovement(
-    new Vector3(moveVector.x, moveVector.y + vy * delta, moveVector.z),
-    playerPostion,
-    blocksMapping
-  );
+  const { calculatedMoveVector: correctMovement, collideObject } =
+    physicsTest.calculateCorrectMovement(
+      new Vector3(moveVector.x, moveVector.y + vy * delta, moveVector.z),
+      playerPostion,
+      blocksMapping
+    );
+
+  if (collideObject) {
+    onGround = true;
+  }
 
   self.postMessage({
     type: "updatePosition",
-    position: [correctMovement.x, correctMovement.y, correctMovement.z],
+    data: {
+      position: [correctMovement.x, correctMovement.y, correctMovement.z],
+      onGround,
+      collideObject,
+    },
   });
 };
 
 const jumpCharacter = () => {
-  vy = JUMP_FORCE;
+  if (onGround) {
+    vy = JUMP_FORCE;
+    onGround = false;
+  }
 };
 
 const eventMapping = {
