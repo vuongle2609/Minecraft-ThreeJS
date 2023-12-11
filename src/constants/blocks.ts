@@ -79,9 +79,26 @@ const blocks = {
     place: new Audio(placeWood),
     break: new Audio(breakWood),
     volume: 0.5,
-    texture: new worldMaterial({
-      map: oakPlanksSideTexture,
-    }),
+    texture: [
+      new worldMaterial({
+        map: oakPlanksSideTexture,
+      }),
+      new worldMaterial({
+        map: oakPlanksSideTexture,
+      }),
+      new worldMaterial({
+        map: oakPlanksSideTexture,
+      }),
+      new worldMaterial({
+        map: oakPlanksSideTexture,
+      }),
+      new worldMaterial({
+        map: oakPlanksSideTexture,
+      }),
+      new worldMaterial({
+        map: oakPlanksSideTexture,
+      }),
+    ],
   },
   block_of_diamond: {
     name: "Block of Diamond",
