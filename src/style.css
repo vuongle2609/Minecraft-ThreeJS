@@ -15,6 +15,7 @@ body {
   font-family: minecraft;
   letter-spacing: 0.5px;
   font-weight: 300;
+  user-select: none;
 }
 
 .mc-button {
@@ -150,6 +151,7 @@ body {
   display: block;
   pointer-events: none;
 }
+
 .pixel-corners::after {
   margin: -4px;
 }

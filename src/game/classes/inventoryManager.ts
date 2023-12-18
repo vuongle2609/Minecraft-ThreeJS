@@ -3,18 +3,27 @@ import { $ } from "@/UI/utils/selector";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 
 export default class InventoryManager extends BaseEntity {
-  inventory: (keyof typeof blocks | null)[] = [
-    "grass",
-    "oak_planks",
-    "block_of_diamond",
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-  ];
+  blocksList = [
+    ...Object.keys(blocks),
+    ...Array(45 - Object.keys(blocks).length).fill(null),
+  ] as (keyof typeof blocks | null)[];
+
+  inventory: (keyof typeof blocks | null)[] = Array(10).fill(null);
+
+  tooltipElement: HTMLDivElement | undefined;
+  inventoryContainerElement: HTMLDivElement | undefined;
+  //  inventory: (keyof typeof blocks | null)[] = [
+  //   "grass",
+  //   "oak_planks",
+  //   "block_of_diamond",
+  //   "furnace",
+  //   "cobblestone",
+  //   "dirt",
+  //   "block_of_iron",
+  //   "block_of_gold",
+  //   "block_of_lapis",
+  //   "block_of_emerald",
+  // ];
 
   currentFocusIndex = 0;
   currentFocus = this.inventory[this.currentFocusIndex];
@@ -49,10 +58,32 @@ export default class InventoryManager extends BaseEntity {
 
     document.addEventListener("wheel", (e) => {
       this.handleChangeFocusItem(
-        this.currentFocusIndex - (e.deltaY < 0 ? -2 : 0)
+        this.currentFocusIndex - (e.deltaY < 0 ? 0 : -2)
       );
       e.stopImmediatePropagation();
     });
+
+    document.addEventListener("mousemove", (e) => this.handleMouseMove(e));
+  }
+
+  handleMouseMove(e: MouseEvent) {
+    if (!this.tooltipElement || !this.inventoryContainerElement) return;
+
+    const hoverId = (e.target as HTMLImageElement).id as keyof typeof blocks;
+    const blockHover = blocks[hoverId];
+
+    if (!blockHover) {
+      this.tooltipElement.style.display = "none";
+      return;
+    }
+
+    const translateX = e.clientX + 12;
+
+    const translateY = e.clientY - 32;
+
+    this.tooltipElement.style.display = "block";
+    this.tooltipElement.style.transform = `translate(${translateX}px,${translateY}px)`;
+    this.tooltipElement.innerText = blockHover.name;
   }
 
   handleChangeFocusItem(indexFocus: number) {
@@ -98,6 +129,8 @@ export default class InventoryManager extends BaseEntity {
       $("#modal-inventory")?.remove();
       this.control?.lock();
       this.isOpenInventory = false;
+      this.tooltipElement = undefined;
+      this.inventoryContainerElement = undefined;
       return;
     }
 
@@ -108,6 +141,8 @@ export default class InventoryManager extends BaseEntity {
       "afterend",
       `
     <div class="fixed top-0 left-0 right-0 bottom-0 bg-black/80 flex items-center justify-center" id="modal-inventory">
+      <div id="tooltipName" class="border-2 border-solid border-[#25015b] absolute top-0 left-0 w-fit bg-[#170817] p-[2px] px-2 text-white z-10 hidden">
+      </div>
       <div class="pixel-corners--wrapper">
         <div class="w-[500px] pixel-corners">
           <div class="w-full h-full border-[5px] border-solid border-t-white border-l-white border-b-[#555555] border-r-[#555555]">
@@ -123,142 +158,10 @@ export default class InventoryManager extends BaseEntity {
               </div>
 
               <div class="w-full mt-2 flex">
-                <div class="flex flex-col gap-4 w-full">
-                  <div class="w-full flex flex-wrap">
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
+                <div class="flex flex-col gap-4 w-full relative" id="inventoryContainer">
+                  
 
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
+                  <div class="w-full flex flex-wrap" id="inventoryBlocks">
                   </div>
                   <div class="w-full flex">
                     <div class="w-[11.11%] aspect-square box-with-shadow bold">
@@ -298,6 +201,28 @@ export default class InventoryManager extends BaseEntity {
     `
     );
 
+    this.tooltipElement = $("#tooltipName") as HTMLDivElement;
+    this.inventoryContainerElement = $("#inventoryContainer") as HTMLDivElement;
+
+    $("#inventoryBlocks").innerHTML = this.blocksList
+      .map((itemKey) => {
+        const currentBlock = itemKey ? blocks[itemKey] : null;
+
+        const iconPath = currentBlock?.icon;
+        const name = currentBlock?.name;
+
+        return currentBlock
+          ? `
+        <div class="w-[11.11%] aspect-square box-with-shadow bold hover:brightness-150">
+          <img src="${iconPath}" alt="${name}" id="${itemKey}"/>
+        </div>
+        `
+          : `
+        <div class="w-[11.11%] aspect-square box-with-shadow bold hover:brightness-125"></div>
+        `;
+      })
+      .join("");
+
     this.control?.unlock();
   }
 
@@ -310,7 +235,7 @@ export default class InventoryManager extends BaseEntity {
       .map((itemKey, index) => {
         const currentBlock = itemKey ? blocks[itemKey] : null;
 
-        const iconPath = `/assets/${itemKey}/icon.jpg`;
+        const iconPath = currentBlock?.icon;
         const name = currentBlock?.name;
         const isItemActive = this.currentFocusIndex === index;
 
