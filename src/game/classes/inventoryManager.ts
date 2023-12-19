@@ -107,9 +107,9 @@ export default class InventoryManager extends BaseEntity {
     $("#app").insertAdjacentHTML(
       "afterend",
       `
-    <div class="fixed top-0 left-0 right-0 bottom-0 bg-black/80 flex items-center justify-center" id="modal-inventory">
-      <div class="pixel-corners--wrapper">
-        <div class="w-[500px] pixel-corners">
+    <div class="fixed top-0 left-0 right-0 bottom-0 w-screen h-screen bg-black/80 flex items-center justify-center" id="modal-inventory">
+      <div class="pixel-corners--wrapper" style="width: 40%;">
+        <div class="w-full pixel-corners">
           <div class="w-full h-full border-[5px] border-solid border-t-white border-l-white border-b-[#555555] border-r-[#555555]">
             <div class="w-full h-full bg-[#c6c6c6] p-3 pt-1">
               <div class="w-full">
