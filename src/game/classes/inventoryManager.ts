@@ -1,5 +1,5 @@
 import blocks from "@/constants/blocks";
-import { $ } from "@/UI/utils/selector";
+import { $, $$ } from "@/UI/utils/selector";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 
 export default class InventoryManager extends BaseEntity {
@@ -8,22 +8,13 @@ export default class InventoryManager extends BaseEntity {
     ...Array(45 - Object.keys(blocks).length).fill(null),
   ] as (keyof typeof blocks | null)[];
 
-  inventory: (keyof typeof blocks | null)[] = Array(10).fill(null);
+  inventory: (keyof typeof blocks | null)[] = Array(9).fill(null);
 
   tooltipElement: HTMLDivElement | undefined;
+  currentDragElement: HTMLImageElement | undefined;
   inventoryContainerElement: HTMLDivElement | undefined;
-  //  inventory: (keyof typeof blocks | null)[] = [
-  //   "grass",
-  //   "oak_planks",
-  //   "block_of_diamond",
-  //   "furnace",
-  //   "cobblestone",
-  //   "dirt",
-  //   "block_of_iron",
-  //   "block_of_gold",
-  //   "block_of_lapis",
-  //   "block_of_emerald",
-  // ];
+
+  currentDragItem: null | keyof typeof blocks;
 
   currentFocusIndex = 0;
   currentFocus = this.inventory[this.currentFocusIndex];
@@ -45,9 +36,9 @@ export default class InventoryManager extends BaseEntity {
           this.renderInventory();
         }
 
-        // if (e.key === "Escape") {
-        //   this.renderInventory(true);
-        // }
+        if (e.key === "Escape") {
+          this.renderInventory(true);
+        }
 
         if (!!Number(e.key)) {
           this.handleChangeFocusItem(Number(e.key));
@@ -67,12 +58,37 @@ export default class InventoryManager extends BaseEntity {
   }
 
   handleMouseMove(e: MouseEvent) {
+    this.handleMouseMoveHoverBlock(e);
+    this.handleMouseMoveDraggingBlock(e);
+  }
+
+  handleMouseMoveDraggingBlock(e: MouseEvent) {
+    if (!this.currentDragElement || !this.inventoryContainerElement) return;
+
+    if (!this.currentDragItem) {
+      this.currentDragElement.style.display = "none";
+      return;
+    }
+
+    const blockDragging = blocks[this.currentDragItem];
+
+    const translateX = e.clientX - 20;
+
+    const translateY = e.clientY - 20;
+
+    this.currentDragElement.style.display = "block";
+    this.currentDragElement.src = blockDragging.icon;
+    this.currentDragElement.style.transform = `translate(${translateX}px,${translateY}px)`;
+    this.currentDragElement.innerText = this.currentDragItem || "";
+  }
+
+  handleMouseMoveHoverBlock(e: MouseEvent) {
     if (!this.tooltipElement || !this.inventoryContainerElement) return;
 
     const hoverId = (e.target as HTMLImageElement).id as keyof typeof blocks;
     const blockHover = blocks[hoverId];
 
-    if (!blockHover) {
+    if (!blockHover || this.currentDragItem) {
       this.tooltipElement.style.display = "none";
       return;
     }
@@ -124,12 +140,54 @@ export default class InventoryManager extends BaseEntity {
     }, 1500);
   }
 
+  renderBlockList = (
+    listKey: (keyof typeof blocks | null)[],
+    elementSelector: string,
+    customClickClass: string,
+    customClickClassNull: string
+  ) => {
+    $(elementSelector).innerHTML = listKey
+      .map((itemKey) => {
+        const currentBlock = itemKey ? blocks[itemKey] : null;
+
+        const iconPath = currentBlock?.icon;
+        const name = currentBlock?.name;
+
+        return currentBlock
+          ? `
+        <div class="w-[11.11%] aspect-square box-with-shadow bold hover:brightness-150 ${customClickClass}" block_data="${itemKey}">
+          <img src="${iconPath}" alt="${name}" id="${itemKey}"/>
+        </div>
+        `
+          : `
+        <div class="w-[11.11%] aspect-square box-with-shadow bold hover:brightness-125 ${customClickClassNull}"></div>
+        `;
+      })
+      .join("");
+  };
+
+  renderBlockListInventoryHotBar() {
+    this.renderBlockList(
+      this.inventory,
+      "#inventoryHotbar",
+      "hotbarInventory",
+      "hotbarInventory"
+    );
+
+    $$<HTMLDivElement>(".hotbarInventory").forEach((item, index) => {
+      item.addEventListener("click", (e) => {
+        this.handleMouseDownHotbar(index);
+      });
+    });
+  }
+
   renderInventory(closeOnly?: boolean) {
     if (this.isOpenInventory || closeOnly) {
       $("#modal-inventory")?.remove();
       this.control?.lock();
       this.isOpenInventory = false;
       this.tooltipElement = undefined;
+      this.currentDragElement = undefined;
       this.inventoryContainerElement = undefined;
       return;
     }
@@ -143,6 +201,9 @@ export default class InventoryManager extends BaseEntity {
     <div class="fixed top-0 left-0 right-0 bottom-0 bg-black/80 flex items-center justify-center" id="modal-inventory">
       <div id="tooltipName" class="border-2 border-solid border-[#25015b] absolute top-0 left-0 w-fit bg-[#170817] p-[2px] px-2 text-white z-10 hidden">
       </div>
+
+      <img id="itemDragging" class="absolute top-0 left-0 z-10 hidden w-10 pointer-events-none" />
+
       <div class="pixel-corners--wrapper">
         <div class="w-[500px] pixel-corners">
           <div class="w-full h-full border-[5px] border-solid border-t-white border-l-white border-b-[#555555] border-r-[#555555]">
@@ -163,33 +224,8 @@ export default class InventoryManager extends BaseEntity {
 
                   <div class="w-full flex flex-wrap" id="inventoryBlocks">
                   </div>
-                  <div class="w-full flex">
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
 
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
-
-                    <div class="w-[11.11%] aspect-square box-with-shadow bold">
-                    </div>
+                  <div class="w-full flex" id="inventoryHotbar">
                   </div>
                 </div>
               </div>
@@ -202,28 +238,62 @@ export default class InventoryManager extends BaseEntity {
     );
 
     this.tooltipElement = $("#tooltipName") as HTMLDivElement;
+    this.currentDragElement = $("#itemDragging") as HTMLImageElement;
     this.inventoryContainerElement = $("#inventoryContainer") as HTMLDivElement;
 
-    $("#inventoryBlocks").innerHTML = this.blocksList
-      .map((itemKey) => {
-        const currentBlock = itemKey ? blocks[itemKey] : null;
+    this.renderBlockList(
+      this.blocksList,
+      "#inventoryBlocks",
+      "blockInventory",
+      "emptyInventory"
+    );
 
-        const iconPath = currentBlock?.icon;
-        const name = currentBlock?.name;
+    $$<HTMLDivElement>(".blockInventory").forEach((item) => {
+      item.addEventListener("click", (e) => {
+        this.handleMouseDownInventory(
+          item.getAttribute("block_data") as keyof typeof blocks
+        );
+      });
+    });
 
-        return currentBlock
-          ? `
-        <div class="w-[11.11%] aspect-square box-with-shadow bold hover:brightness-150">
-          <img src="${iconPath}" alt="${name}" id="${itemKey}"/>
-        </div>
-        `
-          : `
-        <div class="w-[11.11%] aspect-square box-with-shadow bold hover:brightness-125"></div>
-        `;
-      })
-      .join("");
+    $$<HTMLDivElement>(".emptyInventory").forEach((item) => {
+      item.addEventListener("click", (e) => {
+        this.currentDragItem = null;
+      });
+    });
+
+    this.renderBlockListInventoryHotBar();
 
     this.control?.unlock();
+  }
+
+  handleMouseDownInventory(itemKey: keyof typeof blocks) {
+    if (!this.currentDragItem) {
+      this.currentDragItem = itemKey;
+    } else {
+      this.currentDragItem = null;
+    }
+  }
+
+  handleMouseDownHotbar(index: number) {
+    if (this.currentDragItem) {
+      if (this.inventory[index]) {
+        const swapItem = this.inventory[index];
+
+        this.inventory[index] = this.currentDragItem;
+        this.currentDragItem = swapItem;
+      } else {
+        this.inventory[index] = this.currentDragItem;
+        this.currentDragItem = null;
+      }
+    } else if (this.inventory[index]) {
+      this.currentDragItem = this.inventory[index];
+      this.inventory[index] = null;
+    }
+
+    this.renderBlockListInventoryHotBar();
+
+    this.renderHotbar();
   }
 
   renderHotbar() {
