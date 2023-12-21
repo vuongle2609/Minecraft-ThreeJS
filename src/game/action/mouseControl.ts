@@ -69,14 +69,14 @@ export default class MouseControl extends BaseEntity {
       if ($('#modal-inventory')) return
 
       const modalFocus = $("#modal_focus");
-      const modalGame = $("#modal_game");
+      // const modalGame = $("#modal_game");
 
       this.paused = true;
 
       document.removeEventListener("mousemove", updatePosition, false);
 
       modalFocus.style.display = "flex";
-      modalGame.style.display = "none";
+      // modalGame.style.display = "none";
     });
   }
 

@@ -152,12 +152,67 @@ body {
   pointer-events: none;
 }
 
+.shadow-inset {
+  box-shadow: inset -2px -4px #0006, inset 2px 2px #fff7;
+  border-top: #939393 2px solid;
+  border-left: #939393 2px solid;
+}
+
 .pixel-corners::after {
   margin: -4px;
 }
 
 .box-with-shadow {
   @apply bg-[#8b8b8b] border-[3.2px] border-solid border-t-[#5d5d5d] border-l-[#5d5d5d] border-b-white border-r-white;
+}
+
+.box-with-shadow.hotbar {
+  @apply relative bg-transparent border-t-[#5d5d5d] border-l-[#5d5d5d] border-b-[#7f7f7f] border-r-[#7f7f7f];
+}
+
+.box-with-shadow.hotbar::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-image: url("../public/assets/home/button_bg.png");
+  background-size: cover;
+  background-position: center;
+  image-rendering: pixelated;
+  width: 100%;
+  height: 100%;
+  opacity: 0.4;
+  z-index: -1;
+}
+
+.focusHotbar {
+  position: absolute;
+  top: 47%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 3px solid black;
+  width: 150%;
+  height: 150%;
+  z-index: 2;
+}
+
+.focusHotbar div {
+  width: 100%;
+  height: 100%;
+  border-top: #fcfefc 1px solid;
+  border-left: #fcfefc 1px solid;
+  box-shadow: inset -2px -4px #9eaf9a, inset 2px 2px #5f6d5c;
+}
+
+.focusHotbar div div {
+  border: #acbda8 1px solid;
+}
+
+.focusHotbar div div div {
+  border-top: #606e5d 1px solid;
+  border-left: #606e5d 1px solid;
+  box-shadow: inset -2px -2px #daedd5, inset 2px 2px #daedd5;
 }
 
 .box-with-shadow.bold {

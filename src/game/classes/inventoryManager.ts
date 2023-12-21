@@ -1,6 +1,7 @@
 import blocks from "@/constants/blocks";
 import { $, $$ } from "@/UI/utils/selector";
 import BaseEntity, { BasePropsType } from "./baseEntity";
+import { HOTBAR_LENGTH } from "@/constants/player";
 
 export default class InventoryManager extends BaseEntity {
   blocksList = [
@@ -8,7 +9,7 @@ export default class InventoryManager extends BaseEntity {
     ...Array(45 - Object.keys(blocks).length).fill(null),
   ] as (keyof typeof blocks | null)[];
 
-  inventory: (keyof typeof blocks | null)[] = Array(9).fill(null);
+  inventory: (keyof typeof blocks | null)[] = Array(HOTBAR_LENGTH).fill(null);
 
   tooltipElement: HTMLDivElement | undefined;
   currentDragElement: HTMLImageElement | undefined;
@@ -105,12 +106,12 @@ export default class InventoryManager extends BaseEntity {
   handleChangeFocusItem(indexFocus: number) {
     this.currentFocusIndex = indexFocus - 1;
 
-    if (this.currentFocusIndex > 9) {
+    if (this.currentFocusIndex > HOTBAR_LENGTH - 1) {
       this.currentFocusIndex = 0;
     }
 
     if (this.currentFocusIndex < 0) {
-      this.currentFocusIndex = 9;
+      this.currentFocusIndex = HOTBAR_LENGTH - 1;
     }
 
     this.currentFocus = this.inventory[this.currentFocusIndex];
@@ -198,34 +199,33 @@ export default class InventoryManager extends BaseEntity {
     $("#app").insertAdjacentHTML(
       "afterend",
       `
-    <div class="fixed top-0 left-0 right-0 bottom-0 bg-black/80 flex items-center justify-center" id="modal-inventory">
-      <div id="tooltipName" class="border-2 border-solid border-[#25015b] absolute top-0 left-0 w-fit bg-[#170817] p-[2px] px-2 text-white z-10 hidden">
-      </div>
+      <div class="fixed top-0 left-0 right-0 bottom-0 bg-black/80 flex items-center justify-center z-20" id="modal-inventory">
+        <div id="tooltipName" class="border-2 border-solid border-[#25015b] absolute top-0 left-0 w-fit bg-[#170817] p-[2px] px-2 text-white z-30 hidden">
+        </div>
 
-      <img id="itemDragging" class="absolute top-0 left-0 z-10 hidden w-10 pointer-events-none" />
+        <img id="itemDragging" class="absolute top-0 left-0 z-30 hidden w-10 pointer-events-none" />
 
-      <div class="pixel-corners--wrapper">
-        <div class="w-[500px] pixel-corners">
-          <div class="w-full h-full border-[5px] border-solid border-t-white border-l-white border-b-[#555555] border-r-[#555555]">
-            <div class="w-full h-full bg-[#c6c6c6] p-3 pt-1">
-              <div class="w-full">
-                <div class="flex items-center gap-4">
-                  <span class="text-2xl text-[#404040]">Search Items</span>
+        <div class="pixel-corners--wrapper">
+          <div class="w-[500px] pixel-corners">
+            <div class="w-full h-full border-[5px] border-solid border-t-white border-l-white border-b-[#555555] border-r-[#555555]">
+              <div class="w-full h-full bg-[#c6c6c6] p-3 pt-1">
+                <div class="w-full">
+                  <div class="flex items-center gap-4">
+                    <span class="text-2xl text-[#404040]">Search Items</span>
 
-                  <div class="grow box-with-shadow h-9">
-                    <input class="outline-none border-none bg-transparent w-full h-full px-1 text-white text-xl"/>
+                    <div class="grow box-with-shadow h-9">
+                      <input class="outline-none border-none bg-transparent w-full h-full px-1 text-white text-xl"/>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div class="w-full mt-2 flex">
-                <div class="flex flex-col gap-4 w-full relative" id="inventoryContainer">
-                  
+                <div class="w-full mt-2 flex">
+                  <div class="flex flex-col gap-4 w-full relative" id="inventoryContainer">
+                    <div class="w-full flex flex-wrap" id="inventoryBlocks">
+                    </div>
 
-                  <div class="w-full flex flex-wrap" id="inventoryBlocks">
-                  </div>
-
-                  <div class="w-full flex" id="inventoryHotbar">
+                    <div class="w-full flex" id="inventoryHotbar">
+                    </div>
                   </div>
                 </div>
               </div>
@@ -233,8 +233,7 @@ export default class InventoryManager extends BaseEntity {
           </div>
         </div>
       </div>
-    </div>
-    `
+      `
     );
 
     this.tooltipElement = $("#tooltipName") as HTMLDivElement;
@@ -312,7 +311,7 @@ export default class InventoryManager extends BaseEntity {
         const borderColor = isItemActive ? "border-white" : "border-gray-600";
 
         return `
-        <div class="h-12 w-12 border-4 border-solid ${borderColor}">
+        <div class="h-10 w-10 box-with-shadow hotbar">
           ${
             currentBlock
               ? `
@@ -320,9 +319,26 @@ export default class InventoryManager extends BaseEntity {
               `
               : ""
           }
+
+          ${
+            isItemActive
+              ? `
+                <div class="focusHotbar">
+                  <div>
+                    <div>
+                      <div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `
+              : ""
+          }
         </div>
       `;
       })
       .join("");
+
+    this.currentFocus = this.inventory[this.currentFocusIndex];
   }
 }
