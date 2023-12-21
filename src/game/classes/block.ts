@@ -1,6 +1,6 @@
 import blocks from "@/constants/blocks";
 import nameFromCoordinate from "@/game/helpers/nameFromCoordinate";
-import { BoxGeometry, Mesh, Material, Vector3 } from "three";
+import { BoxGeometry, Material, Mesh, Vector3 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 
 interface PropsType {
@@ -31,10 +31,6 @@ export default class Block extends BaseEntity {
     const placeBlock = blocks[type];
 
     const textures = placeBlock.texture;
-
-    // textures.forEach(item => {
-    //   item.emis
-    // })
 
     const boxGeometry = new BoxGeometry(2, 2, 2);
 

@@ -77,14 +77,17 @@ export default class GameScene extends RenderPage {
       scene: this.scene,
     });
 
-    this.inventoryManager = new InventoryManager();
-
     this.coordinateElement = $("#coordinate");
     this.fpsElement = $("#fps");
 
     this.mouseControl = new MouseControl({
       control: this.control,
       camera: this.camera,
+    });
+
+    this.inventoryManager = new InventoryManager({
+      control: this.control,
+      mouseControl: this.mouseControl
     });
 
     this.blockManager = new BlockManager({
@@ -103,7 +106,7 @@ export default class GameScene extends RenderPage {
       worker: this.worker,
     });
 
-    this.inventoryManager.renderInventory();
+    this.inventoryManager.renderHotbar();
 
     this.control?.lock();
 

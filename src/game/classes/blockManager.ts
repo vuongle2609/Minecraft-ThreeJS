@@ -117,21 +117,17 @@ export default class BlockManager extends BaseEntity {
     const name = nameFromCoordinate(x, y, z);
 
     const objectClicked = this.scene.getObjectByName(name);
-    // const objectClicked = this.blocksMapping[name];
 
     if (!objectClicked) return;
 
     this.scene.remove(objectClicked);
 
+    // play sound
     if (this.currentBreakSound) {
       this.currentBreakSound.pause();
       this.currentBreakSound.currentTime = 0;
     }
 
-    console.log(
-      "🚀 ~ file: blockManager.ts:132 ~ BlockManager ~ handleBreakBlock ~ this.currentBreakSound:",
-      this.blocksMapping[name]
-    );
     this.currentBreakSound = blocks[this.blocksMapping[name]].break;
 
     this.currentBreakSound.play();
@@ -199,6 +195,8 @@ export default class BlockManager extends BaseEntity {
         position: [blockPosition.x, blockPosition.y, blockPosition.z],
         type: this.inventoryManager.currentFocus,
       });
+
+      // play sound
 
       if (this.currentPlaceSound) {
         this.currentPlaceSound.pause();

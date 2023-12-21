@@ -52,6 +52,8 @@ export default class MouseControl extends BaseEntity {
     });
 
     this.control?.addEventListener("lock", () => {
+      if ($('#modal-inventory')) return
+      
       const modalFocus = $("#modal_focus");
       const modalGame = $("#modal_game");
 
@@ -64,6 +66,8 @@ export default class MouseControl extends BaseEntity {
     });
 
     this.control?.addEventListener("unlock", () => {
+      if ($('#modal-inventory')) return
+
       const modalFocus = $("#modal_focus");
       const modalGame = $("#modal_game");
 
