@@ -36,8 +36,8 @@ export default class InitScreen extends RenderPage {
       </div>
     `;
 
-  render<T>(state?: T) {
-    super.render<T>(state);
+  render() {
+    super.render();
   }
 
   afterRender = () => {
