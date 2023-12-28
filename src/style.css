@@ -176,7 +176,7 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  background-image: url("../public/assets/home/button_bg.png");
+  background-image: url("/assets/home/button_bg.png");
   background-size: cover;
   background-position: center;
   image-rendering: pixelated;

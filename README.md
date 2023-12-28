@@ -1,4 +1,4 @@
-﻿![alt text](./public/assets/home/minecraft_logo_main.png)
+﻿![alt text](./public/assets/home/minecraft_logo_main.webp)
 
 ## TODO:
 

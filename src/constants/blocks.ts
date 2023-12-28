@@ -16,9 +16,9 @@ import lapisBlockSide from "@/assets/block/lapis_block.png";
 import emeraldBlockSide from "@/assets/block/emerald_block.png";
 
 //icon
-import blockOfDiamondIcon from "@/assets/blockIcon/block_of_diamond.jpg";
-import grassIcon from "@/assets/blockIcon/grass.jpg";
-import oakPlanksIcon from "@/assets/blockIcon/oak_planks.jpg";
+import blockOfDiamondIcon from "@/assets/blockIcon/block_of_diamond.webp";
+import grassIcon from "@/assets/blockIcon/Grass_Block.webp";
+import oakPlanksIcon from "@/assets/blockIcon/Oak_Planks.webp";
 import furnanceIcon from "@/assets/blockIcon/Furnace_29_JE4.webp";
 import cobblestoneIcon from "@/assets/blockIcon/Cobblestone.webp";
 import dirtIcon from "@/assets/blockIcon/Dirt.webp";

@@ -156,8 +156,8 @@ export default class InventoryManager extends BaseEntity {
 
         return currentBlock
           ? `
-        <div class="w-[11.11%] aspect-square box-with-shadow bold hover:brightness-150 ${customClickClass}" block_data="${itemKey}">
-          <img src="${iconPath}" alt="${name}" id="${itemKey}"/>
+        <div class="w-[11.11%] aspect-square box-with-shadow bold hover:brightness-150 ${customClickClass}" block_data="${itemKey}" draggable="false">
+          <img src="${iconPath}" alt="${name}" id="${itemKey}" draggable="false"/>
         </div>
         `
           : `
@@ -196,6 +196,7 @@ export default class InventoryManager extends BaseEntity {
     if (this.mouseControl?.paused) return;
 
     this.isOpenInventory = true;
+
     $("#app").insertAdjacentHTML(
       "afterend",
       `
@@ -307,8 +308,6 @@ export default class InventoryManager extends BaseEntity {
         const iconPath = currentBlock?.icon;
         const name = currentBlock?.name;
         const isItemActive = this.currentFocusIndex === index;
-
-        const borderColor = isItemActive ? "border-white" : "border-gray-600";
 
         return `
         <div class="h-10 w-10 box-with-shadow hotbar">
