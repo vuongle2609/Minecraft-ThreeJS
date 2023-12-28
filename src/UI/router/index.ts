@@ -20,8 +20,8 @@ export default class Router {
     this.soundManager = soundManager;
   }
 
-  navigate(path: keyof typeof this.routes) {
-    this.routes[path].render();
+  navigate<T>(path: keyof typeof this.routes, state?: T) {
+    this.routes[path].render<T>(state);
 
     this.soundManager.addButtonClick();
   }

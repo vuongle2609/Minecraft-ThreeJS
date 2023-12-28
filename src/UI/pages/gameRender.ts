@@ -58,7 +58,8 @@ export default class GameRender extends RenderPage {
       ></canvas>
     `;
 
-  render() {
+  render<T>(state?: T) {
+    console.log("🚀 ~ file: gameRender.ts:62 ~ GameRender ~ state:", state)
     super.render();
   }
 

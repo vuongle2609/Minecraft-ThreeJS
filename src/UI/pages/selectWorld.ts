@@ -3,10 +3,11 @@ import Router from "../router";
 import { $, $$ } from "../utils/selector";
 import { WorldsType } from "@/type";
 import { WORLD_TYPE_MAPPING } from "@/constants";
-import moment from "moment";
+import { format } from "date-fns";
 
 export default class SelectWorld extends RenderPage {
   router: Router;
+  selectedWorld: string | null = null;
 
   constructor(router: Router) {
     super();
@@ -30,7 +31,7 @@ export default class SelectWorld extends RenderPage {
           <div class="w-full flex flex-col gap-2 mt-auto px-[100px]">
             <div class="w-full flex gap-3">
                 <button
-                    class="mc-button"
+                    class="mc-button interactSelected disabled"
                     id="play"
                 >
                   <div class="title">Play Selected World</div>
@@ -46,19 +47,22 @@ export default class SelectWorld extends RenderPage {
 
             <div class="w-full flex gap-3">
                 <button
-                    class="mc-button"
+                    class="mc-button interactSelected disabled"
+                    id="edit"
                 >
                   <div class="title">Edit</div>
                 </button>
 
                 <button
-                    class="mc-button"
+                    class="mc-button interactSelected disabled"
+                    id="delete"
                 >
                   <div class="title">Delete</div>
                 </button>
 
                 <button
-                    class="mc-button"
+                    class="mc-button interactSelected disabled"
+                    id="reCreate"
                 >
                   <div class="title">Re-Create</div>
                 </button>
@@ -79,34 +83,71 @@ export default class SelectWorld extends RenderPage {
     super.render();
   }
 
-  afterRender = () => {
+  handleRenderWorld(id: string) {
+    this.router.navigate("gameRender", id);
+  }
+
+  deleteWorld() {
+    const worlds: Record<string, WorldsType> = JSON.parse(
+      localStorage.getItem("worlds") || "{}"
+    );
+
+    delete worlds[this.selectedWorld as keyof typeof worlds];
+
+    localStorage.setItem("worlds", JSON.stringify(worlds));
+
+    this.selectedWorld = null;
+    this.disableInteractButton();
+    this.renderWorlds();
+  }
+
+  disableInteractButton() {
+    $$<HTMLButtonElement>(".interactSelected").forEach((item) => {
+      item.classList.add("disabled");
+
+      item.setAttribute("onclick", "");
+    });
+  }
+
+  initSelectedWorld() {
+    $$<HTMLButtonElement>(".interactSelected").forEach((item) => {
+      item.classList.remove("disabled");
+    });
+
     $("#play").onclick = () => {
-      this.router.navigate("gameRender");
+      if (!this.selectedWorld) return;
+      
+      this.handleRenderWorld(this.selectedWorld);
     };
 
-    $("#cancel").onclick = () => {
-      this.router.navigate("mainScreen");
+    $("#delete").onclick = () => {
+      this.deleteWorld();
     };
+  }
 
-    $("#create").onclick = () => {
-      this.router.navigate("createWorld");
-    };
+  renderWorlds() {
+    this.disableInteractButton();
 
     const worlds: Record<string, WorldsType> = JSON.parse(
       localStorage.getItem("worlds") || "{}"
     );
 
-    const worldsElement = Object.keys(worlds)
+    const worldIds = Object.keys(worlds);
+
+    const worldsElement = worldIds
       .map((key) => {
-        const { blocksMapping, createdDate, name, worldType } =
+        const { createdDate, name, worldType } =
           worlds[key as keyof typeof worlds];
 
         return `
         <div class="world">
-          <h4 class="text-xl leading-[22px]">${name}</h4>
-          <span class="text-textGray text-xl leading-[22px]">${key} (${moment(
-          createdDate
-        ).format("MM/DD/YY HH:mm A")})</span>
+          <h4 class="text-xl leading-[22px] w-full overflow-hidden text-ellipsis">${name}</h4>
+          
+          <span class="text-textGray text-xl leading-[22px] flex items-center">
+            <span class="max-w-[25%] overflow-hidden text-ellipsis inline-block">${key}&nbsp;</span> 
+            (${format(createdDate, "MM/dd/yy HH:mm a")})
+          </span>
+
           <span class="text-textGray text-xl leading-[22px]">${
             WORLD_TYPE_MAPPING[worldType as keyof typeof WORLD_TYPE_MAPPING]
           }</span>
@@ -117,14 +158,30 @@ export default class SelectWorld extends RenderPage {
 
     $("#world_list").innerHTML = worldsElement;
 
-    $$(".world").forEach((item) => {
-      item.addEventListener("click", (e) => {
+    $$(".world").forEach((item, index) => {
+      item.addEventListener("click", () => {
         $$(".world").forEach((item) => {
           item.classList.remove("active");
         });
 
         item.classList.add("active");
+
+        this.selectedWorld = worldIds[index];
+
+        this.initSelectedWorld();
       });
     });
+  }
+
+  afterRender = () => {
+    $("#cancel").onclick = () => {
+      this.router.navigate("mainScreen");
+    };
+
+    $("#create").onclick = () => {
+      this.router.navigate("createWorld");
+    };
+
+    this.renderWorlds();
   };
 }

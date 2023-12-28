@@ -1,6 +1,7 @@
 import { RenderPage } from "@/game/classes/renderPage";
 import Router from "../router";
 import { $ } from "../utils/selector";
+import { WorldsType } from "@/type";
 
 export default class MainScreen extends RenderPage {
   router: Router;
@@ -35,7 +36,7 @@ export default class MainScreen extends RenderPage {
             </button>
 
             <button
-              class="mc-button"
+              class="mc-button disabled"
               id="multiplayer"
             >
               <div class="title">Multiplayer</div>
@@ -44,7 +45,7 @@ export default class MainScreen extends RenderPage {
 
           <div class="w-full flex gap-4 mt-10">
             <button
-              class="mc-button"
+              class="mc-button disabled"
             >
               <div class="title">Options...</div>
             </button>
@@ -71,11 +72,21 @@ export default class MainScreen extends RenderPage {
 
   afterRender = () => {
     $("#singleplayer").onclick = () => {
+      const worlds: Record<string, WorldsType> = JSON.parse(
+        localStorage.getItem("worlds") || "{}"
+      );
+
+      if (!Object.keys(worlds).length) {
+        this.router.navigate("createWorld");
+
+        return;
+      }
+
       this.router.navigate("selectWorld");
     };
 
     $("#github").onclick = () => {
-      window.open('https://github.com/vuongle2609/Minecraft')
+      window.open("https://github.com/vuongle2609/Minecraft");
     };
 
     // https://github.com/vuongle2609/Minecraft

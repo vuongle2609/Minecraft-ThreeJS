@@ -51,6 +51,12 @@ body {
   justify-content: center;
 }
 
+.mc-button.disabled .title {
+  background-color: rgba(0, 0, 0, 0.8);
+  color: gray;
+  box-shadow: inset -2px -4px #0006, inset 2px 2px transparent;
+}
+
 .pixel-corners,
 .pixel-corners--wrapper {
   clip-path: polygon(
@@ -219,7 +225,7 @@ body {
   @apply border-t-[#373737] border-l-[#373737];
 }
 
-.world { 
+.world {
   @apply flex flex-col px-2 border-2 border-transparent;
 }
 

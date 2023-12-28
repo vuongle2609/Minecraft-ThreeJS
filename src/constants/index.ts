@@ -5,3 +5,5 @@ export const WORLD_TYPE_MAPPING = {
   [FLAT_WORLD_TYPE]: "Superflat",
   [NORMAL_WORLD_TYPE]: "Default",
 };
+
+export const DEFAULT_WORLD_NAME = 'New World'
