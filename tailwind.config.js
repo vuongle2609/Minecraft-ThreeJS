@@ -5,6 +5,7 @@ export default {
     extend: {
       colors: {
         gameGray: "#aca9a3",
+        textGray: "#808080",
       },
     },
   },

@@ -56,6 +56,12 @@ export default class BlockManager extends BaseEntity {
       ...this.blocksMapping,
       ...blocksTerrant.get(),
     };
+
+    // window.addEventListener('close', () => {
+    //   this.blocksMapping
+
+    // localStorage.setItem()
+    // })
   }
 
   onMouseDown(e: MouseEvent) {

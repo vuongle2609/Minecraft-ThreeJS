@@ -8,3 +8,10 @@ export interface PlayerInput {
   leftClick: boolean;
   rightClick: boolean;
 }
+
+export interface WorldsType {
+  createdDate: Date;
+  blocksMapping: {};
+  name: string;
+  worldType: number;
+}
