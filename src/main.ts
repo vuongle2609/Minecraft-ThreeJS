@@ -7,7 +7,15 @@ Cache.enabled = true;
 
 class Three {
   gameScene: GameScene;
-  ui = new UI();
+  ui = new UI()
+
+  constructor() {
+    this.initialize();
+  }
+
+  async initialize() {
+    // this.gameScene = new GameScene();
+  }
 }
 
 const app = new Three();
