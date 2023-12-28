@@ -1,18 +1,17 @@
+import { $ } from "@/UI/utils/selector";
 import MouseControl from "@/game/action/mouseControl";
 import Player from "@/game/player/character";
-import { $ } from "@/UI/utils/selector";
-import * as THREE from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import BlockManager from "./blockManager";
 import InventoryManager from "./inventoryManager";
 import Light from "./light";
 import { RenderPage } from "./renderPage";
-// import PhysicsWorker from "../physics/worker?worker";
+import { WebGLRenderer, Scene, PerspectiveCamera, Clock, Color } from "three";
 
 export default class GameScene extends RenderPage {
   removedWindow = false;
 
-  renderer = new THREE.WebGLRenderer({
+  renderer = new WebGLRenderer({
     antialias: true,
     canvas: document.querySelector("#gameScene") as HTMLCanvasElement,
   });
@@ -21,9 +20,9 @@ export default class GameScene extends RenderPage {
     type: "module",
   });
 
-  scene = new THREE.Scene();
+  scene = new Scene();
 
-  camera = new THREE.PerspectiveCamera(
+  camera = new PerspectiveCamera(
     80,
     window.innerWidth / window.innerHeight,
     0.1,
@@ -35,7 +34,7 @@ export default class GameScene extends RenderPage {
   coordinateElement: HTMLElement;
   fpsElement: HTMLElement;
 
-  clock = new THREE.Clock();
+  clock = new Clock();
   frames = 0;
   prevTime = performance.now();
 
@@ -71,7 +70,7 @@ export default class GameScene extends RenderPage {
 
     document.body.appendChild(this.element);
 
-    this.scene.background = new THREE.Color("#87CEEB");
+    this.scene.background = new Color("#87CEEB");
 
     new Light({
       scene: this.scene,
@@ -87,7 +86,7 @@ export default class GameScene extends RenderPage {
 
     this.inventoryManager = new InventoryManager({
       control: this.control,
-      mouseControl: this.mouseControl
+      mouseControl: this.mouseControl,
     });
 
     this.blockManager = new BlockManager({

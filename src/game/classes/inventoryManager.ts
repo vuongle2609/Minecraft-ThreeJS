@@ -176,7 +176,7 @@ export default class InventoryManager extends BaseEntity {
     );
 
     $$<HTMLDivElement>(".hotbarInventory").forEach((item, index) => {
-      item.addEventListener("click", (e) => {
+      item.addEventListener("mousedown", (e) => {
         this.handleMouseDownHotbar(index);
       });
     });
@@ -249,7 +249,7 @@ export default class InventoryManager extends BaseEntity {
     );
 
     $$<HTMLDivElement>(".blockInventory").forEach((item) => {
-      item.addEventListener("click", (e) => {
+      item.addEventListener("mousedown", (e) => {
         this.handleMouseDownInventory(
           item.getAttribute("block_data") as keyof typeof blocks
         );
@@ -257,7 +257,7 @@ export default class InventoryManager extends BaseEntity {
     });
 
     $$<HTMLDivElement>(".emptyInventory").forEach((item) => {
-      item.addEventListener("click", (e) => {
+      item.addEventListener("mousedown", (e) => {
         this.currentDragItem = null;
       });
     });
