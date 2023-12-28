@@ -22,7 +22,7 @@ let originalVy = -25;
 let vy = originalVy;
 let onGround = true;
 
-const physicsTest = new Physics({});
+const physicsTest = new Physics();
 
 const calculateMovement = ({
   directionVectorArr,

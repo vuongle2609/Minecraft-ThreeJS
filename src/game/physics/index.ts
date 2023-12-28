@@ -7,10 +7,8 @@ import {
 import nameFromCoordinate from "../../game/helpers/nameFromCoordinate";
 import { Vector3 } from "three";
 
-export default class Physics extends BaseEntity {
-  constructor(props: BasePropsType) {
-    super(props);
-  }
+export default class Physics {
+  constructor() {}
 
   roundedPosition(position: Vector3) {
     const positionXFloor = 2 * Math.round((position.x + CHARACTER_RADIUS) / 2);
