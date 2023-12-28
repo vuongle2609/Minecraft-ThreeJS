@@ -1,15 +1,25 @@
 import { RenderPage } from "@/game/classes/renderPage";
 import Router from "../router";
 import { $ } from "../utils/selector";
+import {
+  FLAT_WORLD_TYPE,
+  NORMAL_WORLD_TYPE,
+  WORLD_TYPE_MAPPING,
+} from "@/constants";
+import { WorldsType } from "@/type";
 
 export default class CreateWorld extends RenderPage {
   router: Router;
+
+  state = { name: "", worldType: FLAT_WORLD_TYPE };
 
   constructor(router: Router) {
     super();
 
     this.router = router;
   }
+
+  handleAddWorld() {}
 
   element = String.raw`
       <div
@@ -37,9 +47,10 @@ export default class CreateWorld extends RenderPage {
 
             <button
               class="mc-button"
+              id="world_type"
             >
               <div class="title">
-                World Type: Superflat
+                World Type:&nbsp;<span id="world_type_id">Superflat</span>
               </div>
             </button>
           </div>
@@ -47,6 +58,7 @@ export default class CreateWorld extends RenderPage {
           <div class="w-full flex gap-3 mt-auto">
             <button
               class="mc-button"
+              id="create"
             >
               <div class="title">
                 Create New World
@@ -73,6 +85,53 @@ export default class CreateWorld extends RenderPage {
   afterRender = () => {
     $("#cancel").onclick = () => {
       this.router.navigate("selectWorld");
+    };
+
+    $("#create").onclick = () => {
+      const worlds: Record<string, WorldsType> = JSON.parse(
+        localStorage.getItem("worlds") || "{}"
+      );
+
+      const worldState = this.state;
+
+      let worldId = worldState.name;
+
+      while (worlds[worldId]) {
+        worldId += "-";
+      }
+
+      const worldsFormat: WorldsType = {
+        ...worldState,
+        createdDate: new Date(),
+        blocksMapping: {},
+      };
+
+      localStorage.setItem(
+        "worlds",
+        JSON.stringify({ ...worlds, [worldId]: worldsFormat })
+      );
+    };
+
+    $("#world_name").onchange = (e) => {
+      const newName = (e.target as HTMLInputElement)?.value;
+
+      this.setState({
+        name: newName,
+      });
+    };
+
+    $("#world_type").onclick = () => {
+      this.setState({
+        worldType:
+          this.state.worldType === FLAT_WORLD_TYPE
+            ? NORMAL_WORLD_TYPE
+            : FLAT_WORLD_TYPE,
+      });
+
+      $("#world_type_id").innerText =
+        WORLD_TYPE_MAPPING[
+          this.state.worldType as unknown as keyof typeof WORLD_TYPE_MAPPING
+        ];
     };
   };
 }

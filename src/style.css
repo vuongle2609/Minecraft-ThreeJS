@@ -218,3 +218,11 @@ body {
 .box-with-shadow.bold {
   @apply border-t-[#373737] border-l-[#373737];
 }
+
+.world { 
+  @apply flex flex-col px-2 border-2 border-transparent;
+}
+
+.world.active {
+  @apply flex flex-col px-2 bg-black border-2 border-solid border-gameGray;
+}

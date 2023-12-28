@@ -9,7 +9,11 @@ export default class InitScreen extends RenderPage {
     super();
 
     this.router = router;
+
+    if (!localStorage.getItem("worlds"))
+      localStorage.setItem("worlds", JSON.stringify({}));
   }
+
   element = String.raw`
       <div
         class="w-full h-full items-center justify-center bg-cover flex flex-col"
