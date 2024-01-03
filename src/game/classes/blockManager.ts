@@ -1,9 +1,9 @@
+import blocks from "@/constants/blocks";
 import nameFromCoordinate from "@/game/helpers/nameFromCoordinate";
 import {
   BoxGeometry,
-  InstancedMesh,
-  Mesh,
   Material,
+  Mesh,
   Object3DEventMap,
   Vector2,
   Vector3,
@@ -11,8 +11,7 @@ import {
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
-import Terrant from "./terrant";
-import blocks from "@/constants/blocks";
+import detailFromName from "../helpers/detailFromName";
 
 interface PropsType {
   inventoryManager: InventoryManager;
@@ -27,11 +26,12 @@ export default class BlockManager extends BaseEntity {
   geometryBlock = new BoxGeometry(2, 2, 2);
 
   blocksMapping: Record<string, keyof typeof blocks> = {};
-  blocks: Mesh<BoxGeometry, Material[]>[] = [];
 
   currentPlaceSound: HTMLAudioElement;
 
   currentBreakSound: HTMLAudioElement;
+
+  cubeMapping: Record<string, Record<string, Record<string, string>>> = {};
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
@@ -46,22 +46,40 @@ export default class BlockManager extends BaseEntity {
       this.onMouseDown(e);
     });
 
-    const blocksTerrant = new Terrant({
-      scene: this.scene,
-      blocks: this.blocks,
-      worker: this.worker,
-    });
+    const halfWidth = 10 * 2;
 
-    this.blocksMapping = {
-      ...this.blocksMapping,
-      ...blocksTerrant.get(),
+    for (let i = -halfWidth; i < halfWidth; i++) {
+      for (let j = -halfWidth; j < halfWidth; j++) {
+        this.updateBlock(i * 2, 0, j * 2, "grass");
+      }
+    }
+  }
+
+  updateBlock(x: number, y: number, z: number, type: keyof typeof blocks) {
+    const position = new Vector3(x, y, z);
+
+    this.cubeMapping[position.x] = {
+      ...this.cubeMapping[position.x],
+      [position.y]: {
+        ...this.cubeMapping[position.x]?.[position.y],
+        [position.z]: nameFromCoordinate(position.x, position.y, position.z),
+      },
     };
 
-    // window.addEventListener('close', () => {
-    //   this.blocksMapping
+    new Block({
+      position: position,
+      scene: this.scene,
+      type: type,
+      blocksMapping: this.cubeMapping,
+    });
 
-    // localStorage.setItem()
-    // })
+    this.worker?.postMessage({
+      type: "addBlock",
+      data: {
+        position: [position.x, position.y, position.z],
+        type: type,
+      },
+    });
   }
 
   onMouseDown(e: MouseEvent) {
@@ -118,7 +136,9 @@ export default class BlockManager extends BaseEntity {
 
     if (intersects[0]?.distance > 12) return;
 
-    const { x, y, z } = intersects[0].object.position;
+    const clickedDetail = detailFromName(intersects[0].object.name);
+
+    const { x, y, z } = clickedDetail;
 
     const name = nameFromCoordinate(x, y, z);
 
@@ -156,51 +176,42 @@ export default class BlockManager extends BaseEntity {
 
     if (intersects[0]?.distance > 12) return;
 
-    const clickedFace = Math.floor((intersects[0].faceIndex ?? 2) / 2);
+    const clickedDetail = detailFromName(intersects[0].object.name);
 
-    const { x, y, z } = intersects[0].object.position;
+    const clickedFace = clickedDetail.face;
+
+    const { x, y, z } = clickedDetail;
 
     const blockPosition = new Vector3();
 
     switch (clickedFace) {
-      case 0:
+      case "2":
         blockPosition.set(x + 2, y, z);
         break;
-      case 1:
+      case "3":
         blockPosition.set(x - 2, y, z);
         break;
-      case 2:
+      case "4":
         blockPosition.set(x, y + 2, z);
         break;
-      case 3:
+      case "5":
         blockPosition.set(x, y - 2, z);
         break;
-      case 4:
+      case "0":
         blockPosition.set(x, y, z + 2);
         break;
-      case 5:
+      case "1":
         blockPosition.set(x, y, z - 2);
         break;
     }
 
     if (this.inventoryManager.currentFocus) {
-      const block = new Block({
-        position: blockPosition,
-        scene: this.scene,
-        type: this.inventoryManager.currentFocus,
-        blocks: this.blocks,
-      });
-
-      this.blocksMapping = {
-        ...this.blocksMapping,
-        [nameFromCoordinate(blockPosition.x, blockPosition.y, blockPosition.z)]:
-          this.inventoryManager.currentFocus,
-      };
-
-      this.updateBlockWorker({
-        position: [blockPosition.x, blockPosition.y, blockPosition.z],
-        type: this.inventoryManager.currentFocus,
-      });
+      this.updateBlock(
+        blockPosition.x,
+        blockPosition.y,
+        blockPosition.z,
+        this.inventoryManager.currentFocus
+      );
 
       // play sound
 
