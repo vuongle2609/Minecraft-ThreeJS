@@ -20,6 +20,10 @@ export default class GameScene extends RenderPage {
     type: "module",
   });
 
+  // worker = new Worker(new URL("../physics/worker", import.meta.url), {
+  //   type: "module",
+  // });
+
   scene = new Scene();
 
   camera = new PerspectiveCamera(
