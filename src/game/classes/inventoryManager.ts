@@ -30,6 +30,8 @@ export default class InventoryManager extends BaseEntity {
   }
 
   initialize() {
+    this.inventory[0] = 'dirt'
+    
     document.addEventListener(
       "keydown",
       (e) => {
