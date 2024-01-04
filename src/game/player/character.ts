@@ -42,7 +42,7 @@ export default class Player extends BaseEntity {
 
     this.player.receiveShadow = true;
     this.player.castShadow = true;
-    this.player.position.set(0, 20, 0);
+    this.player.position.set(0, 40, 0);
 
     this.scene?.add(this.player);
 

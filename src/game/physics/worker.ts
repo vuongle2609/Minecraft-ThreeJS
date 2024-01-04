@@ -23,6 +23,28 @@ const removeBlock = ({ position }: { position: number[] }) => {
   ];
 };
 
+const fakeGenterrant = () => {
+  const halfWidth = 10 * 2;
+
+  const blocksRender = [];
+
+  for (let i = -halfWidth; i < halfWidth; i++) {
+    for (let j = -halfWidth; j < halfWidth; j++) {
+      const blockAdding = { position: [i * 2, 0, j * 2], type: "grass" };
+      addBlock(blockAdding);
+      blocksRender.push(blockAdding);
+    }
+  }
+
+  self.postMessage({
+    type: "renderBlocks",
+    data: {
+      blocksRender,
+    },
+  });
+};
+fakeGenterrant();
+
 let originalVy = -25;
 let vy = originalVy;
 let onGround = true;

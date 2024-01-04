@@ -1,19 +1,11 @@
+import { BLOCK_WIDTH } from "@/constants";
 import blocks from "@/constants/blocks";
 import nameFromCoordinate from "@/game/helpers/nameFromCoordinate";
-import {
-  BoxGeometry,
-  Material,
-  Mesh,
-  Object3DEventMap,
-  PlaneGeometry,
-  Vector2,
-  Vector3,
-} from "three";
+import { Mesh, PlaneGeometry, Vector2, Vector3 } from "three";
+import { detailFromName } from "../helpers/detailFromName";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
-import { detailFromName } from "../helpers/detailFromName";
-import { BLOCK_WIDTH } from "@/constants";
 
 interface PropsType {
   inventoryManager: InventoryManager;
@@ -21,11 +13,6 @@ interface PropsType {
 
 export default class BlockManager extends BaseEntity {
   inventoryManager: InventoryManager;
-
-  prevHoverBlockHex: number | null = null;
-  prevHoverBlock: Mesh<BoxGeometry, Material[], Object3DEventMap> | null = null;
-
-  geometryBlock = new BoxGeometry(2, 2, 2);
 
   currentPlaceSound: HTMLAudioElement;
 
@@ -46,24 +33,32 @@ export default class BlockManager extends BaseEntity {
       this.onMouseDown(e);
     });
 
-    const halfWidth = 10 * 2;
-
-    for (let i = -halfWidth; i < halfWidth; i++) {
-      for (let j = -halfWidth; j < halfWidth; j++) {
-        this.updateBlock(i * 2, 0, j * 2, "grass");
-      }
-    }
-
     if (this.worker)
       this.worker.addEventListener("message", (e) => {
-        if (e.data.type === "updatePosition") {
-         
+        if (e.data.type === "renderBlocks") {
+          const blocksRender: {
+            position: number[];
+            type: keyof typeof blocks;
+          }[] = e.data.data.blocksRender;
 
+          blocksRender.forEach(({ position, type }) => {
+            this.updateBlock(position[0], position[1], position[2], type, true);
+          });
         }
       });
   }
 
-  updateBlock(x: number, y: number, z: number, type: keyof typeof blocks) {
+  getObject(name: string) {
+    return this.scene?.getObjectByName(name) as THREE.Object3D;
+  }
+
+  updateBlock(
+    x: number,
+    y: number,
+    z: number,
+    type: keyof typeof blocks,
+    disableWorker?: boolean
+  ) {
     const position = new Vector3(x, y, z);
 
     this.blocksMapping[position.x] = {
@@ -81,13 +76,14 @@ export default class BlockManager extends BaseEntity {
       blocksMapping: this.blocksMapping,
     });
 
-    this.worker?.postMessage({
-      type: "addBlock",
-      data: {
-        position: [position.x, position.y, position.z],
-        type: type,
-      },
-    });
+    if (!disableWorker)
+      this.worker?.postMessage({
+        type: "addBlock",
+        data: {
+          position: [position.x, position.y, position.z],
+          type: type,
+        },
+      });
   }
 
   removeBlock(x: number, y: number, z: number, type: string) {
@@ -177,45 +173,40 @@ export default class BlockManager extends BaseEntity {
         // left click
         this.handleBreakBlock();
         break;
+      case 1:
+        // middle click
+        this.handleGetBlock();
+        break;
       case 2:
         // right click
         this.handlePlaceBlock();
     }
   }
 
-  handleHoverBlock() {
-    // using box 3 with outline helper to show focus
-    // const { raycaster } = this.mouseControl! || {};
-    // if (!this.camera || !this.scene) return;
-    // raycaster.setFromCamera(new Vector2(), this.camera);
-    // const intersects = raycaster.intersectObjects(this.scene.children, false);
-    // if (intersects[0]?.distance > 12) return;
-    // const object = intersects[0]?.object as Mesh<
-    //   BoxGeometry,
-    //   Material[],
-    //   Object3DEventMap
-    // >;
-    // if (this.prevHoverBlock?.material?.length) {
-    //   this.prevHoverBlock.material = this.prevHoverBlock.material.map(
-    //     (item) => {
-    //       item.emissive.setHex(this.prevHoverBlockHex as number);
-    //       return item;
-    //     }
-    //   );
-    // }
-    // if (!object) return;
-    // if (object.material?.length)
-    //   object.material = object.material.map((item) => {
-    //     this.prevHoverBlockHex = item.emissive.getHex();
-    //     // random hex for block lighter
-    //     item.emissive.setHex(0x6e6e6e50);
-    //     return item;
-    //   });
-    // this.prevHoverBlock = object;
-  }
+  handleHoverBlock() {}
 
-  getObject(name: string) {
-    return this.scene?.getObjectByName(name) as THREE.Object3D;
+  handleGetBlock() {
+    const { raycaster } = this.mouseControl! || {};
+
+    if (!this.camera || !this.scene || !this.control?.isLocked) return;
+
+    raycaster.setFromCamera(new Vector2(), this.camera);
+
+    const intersects = raycaster.intersectObjects(this.scene.children, false);
+
+    if (intersects[0]?.distance > 12) return;
+
+    const clickedDetail = detailFromName(intersects[0].object.name);
+
+    const { type } = clickedDetail;
+
+    this.inventoryManager.inventory[this.inventoryManager.currentFocusIndex] =
+      type as keyof typeof blocks;
+    this.inventoryManager.renderHotbar();
+    if (this.inventoryManager.currentFocus)
+      this.inventoryManager.renderLabelFocusItem(
+        blocks[this.inventoryManager.currentFocus].name
+      );
   }
 
   handleBreakBlock() {
