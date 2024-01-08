@@ -44,6 +44,7 @@ export default class BlockManager extends BaseEntity {
           blocksRender.forEach(({ position, type }) => {
             this.updateBlock(position[0], position[1], position[2], type, true);
           });
+        } else if (e.data.type === "removeBlocks") {
         }
       });
   }

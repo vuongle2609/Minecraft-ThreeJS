@@ -10,6 +10,7 @@ import BasicCharacterControllerInput from "@/game/action/input";
 import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
 import { CapsuleGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
 import { lerp } from "three/src/math/MathUtils";
+import getChunkCoordinate from "../helpers/getChunkCoordinate";
 
 export default class Player extends BaseEntity {
   input = new BasicCharacterControllerInput();
@@ -58,6 +59,12 @@ export default class Player extends BaseEntity {
 
           this.player.position.add(
             new Vector3(position[0], position[1], position[2])
+          );
+          const roundedPos = this.player.position.clone().round();
+          
+          console.log(
+            "🚀 ~ file: character.ts:67 ~ Player ~ this.worker.addEventListener ~ getChunkCoordinate(roundedPos.x, roundedPos.z);:",
+            getChunkCoordinate(roundedPos.x, roundedPos.z)
           );
         }
       });

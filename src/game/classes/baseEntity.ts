@@ -1,5 +1,5 @@
 import MouseControl from "@/game/action/mouseControl";
-import PhysicsEngine from "@/game/physics";
+import PhysicsEngine from "@/game/physics/physics";
 import { GUI } from "dat.gui";
 import { Camera, Scene } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";

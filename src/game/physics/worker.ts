@@ -6,7 +6,7 @@ import {
   GRAVITY_SCALE,
   JUMP_FORCE,
 } from "../../constants/player";
-import Physics from ".";
+import Physics from "./physics";
 
 let blocksMapping: Record<string, string> = {};
 
@@ -49,7 +49,7 @@ let originalVy = -25;
 let vy = originalVy;
 let onGround = true;
 
-const physicsTest = new Physics();
+const physicsEngine = new Physics();
 
 const calculateMovement = ({
   directionVectorArr,
@@ -96,7 +96,7 @@ const calculateMovement = ({
   }
 
   const { calculatedMoveVector: correctMovement, collideObject } =
-    physicsTest.calculateCorrectMovement(
+    physicsEngine.calculateCorrectMovement(
       new Vector3(moveVector.x, moveVector.y + vy * delta, moveVector.z),
       playerPostion,
       blocksMapping
