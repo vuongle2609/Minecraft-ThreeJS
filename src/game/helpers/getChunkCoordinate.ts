@@ -1,5 +1,5 @@
 const getChunkCoordinate = (x: number, y: number) => {
-  const chunkSize = 10
+  const chunkSize = 16
   const chunkCal = chunkSize * 2;
 
   const chunkX = Math.floor(x / chunkCal);

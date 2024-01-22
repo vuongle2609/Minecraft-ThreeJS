@@ -61,11 +61,6 @@ export default class Player extends BaseEntity {
             new Vector3(position[0], position[1], position[2])
           );
           const roundedPos = this.player.position.clone().round();
-          
-          console.log(
-            "🚀 ~ file: character.ts:67 ~ Player ~ this.worker.addEventListener ~ getChunkCoordinate(roundedPos.x, roundedPos.z);:",
-            getChunkCoordinate(roundedPos.x, roundedPos.z)
-          );
         }
       });
   }
@@ -151,17 +146,17 @@ export default class Player extends BaseEntity {
     // cho duong sin y ngan lai bang cach chia tat ca cho 2.5
     // de cho muot thi noi suy no voi offset truoc
     // 1/2.5 * sin(t * 1/4)
-    if (this.onGround && this.isWalk) {
-      this.cameraOffset =
-        lerp(
-          this.cameraOffset,
-          Math.sin(this.tCounter * SIN_X_MULTIPLY_LENGTH) *
-            SIN_Y_MULTIPLY_LENGTH,
-          LERP_CAMERA_BREATH
-        ) * delta;
-    } else {
-      this.cameraOffset = 0;
-    }
+    // if (this.onGround && this.isWalk) {
+    //   this.cameraOffset =
+    //     lerp(
+    //       this.cameraOffset,
+    //       Math.sin(this.tCounter * SIN_X_MULTIPLY_LENGTH) *
+    //         SIN_Y_MULTIPLY_LENGTH,
+    //       LERP_CAMERA_BREATH
+    //     ) * delta;
+    // } else {
+    //   this.cameraOffset = 0;
+    // }
   }
 
   updateCamera() {

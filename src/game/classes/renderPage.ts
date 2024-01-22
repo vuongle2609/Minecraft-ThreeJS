@@ -8,6 +8,10 @@ export class RenderPage {
   }
 
   render() {
+    (window as any).befforeUnMount?.();
+
+    (window as any).befforeUnMount = undefined;
+
     const app = document.querySelector("#app");
 
     if (app && this.element) {
