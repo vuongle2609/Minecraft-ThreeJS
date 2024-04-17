@@ -2,10 +2,13 @@ import { RenderPage } from "@/game/classes/renderPage";
 import Router from "../router";
 import { $ } from "../utils/selector";
 import GameScene from "@/game/classes/gameScene";
+import { WorldsType } from "@/type";
 
 export default class GameRender extends RenderPage {
   router: Router;
   gameScene: GameScene;
+
+  id: string;
 
   constructor(router: Router) {
     super();
@@ -59,12 +62,26 @@ export default class GameRender extends RenderPage {
     `;
 
   render<T>(state?: T) {
-    console.log("🚀 ~ file: gameRender.ts:62 ~ GameRender ~ state:", state)
+    this.id = state as string;
     super.render();
   }
 
+  saveGame = () => {
+    const worlds = JSON.parse(localStorage.getItem("worlds") || "{}");
+
+    const newWorlds: Record<string, WorldsType> = {
+      ...worlds,
+      [this.id || ""]: {
+        ...worlds[this.id || ""],
+        blocksMapping: this.gameScene.blockManager.blocksWorld,
+      },
+    };
+
+    localStorage.setItem("worlds", JSON.stringify(newWorlds));
+  };
+
   afterRender = () => {
-    this.gameScene = new GameScene();
+    this.gameScene = new GameScene(this.id);
 
     $("#quit").onclick = () => {
       $("#gameScene").remove();
@@ -75,5 +92,11 @@ export default class GameRender extends RenderPage {
     };
 
     this.router.soundManager.changeActiveTheme("mice_on_venus");
+
+    window.onbeforeunload = (e) => {
+      this.saveGame();
+    };
+
+    (window as any).befforeUnMount = () => this.saveGame();
   };
 }

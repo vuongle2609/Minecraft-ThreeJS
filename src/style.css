@@ -30,11 +30,13 @@ body {
   image-rendering: pixelated;
   border: 2px solid #000;
 }
+
 .mc-button:hover .title {
   background-color: rgba(100, 100, 255, 0.45);
   text-shadow: 2px 2px #202013cc;
   color: #ffffa0;
 }
+
 .mc-button:active .title {
   box-shadow: inset -2px -4px #0004, inset 2px 2px #fff5;
 }

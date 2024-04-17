@@ -1,7 +1,12 @@
 import { Vector3 } from "three";
 import nameFromCoordinate from "../helpers/nameFromCoordinate";
-import { SPEED, GRAVITY, GRAVITY_SCALE, JUMP_FORCE } from "../../constants/player";
-import Physics from ".";
+import {
+  SPEED,
+  GRAVITY,
+  GRAVITY_SCALE,
+  JUMP_FORCE,
+} from "../../constants/player";
+import Physics from "./physics";
 
 let blocksMapping: Record<string, string> = {};
 
@@ -18,11 +23,37 @@ const removeBlock = ({ position }: { position: number[] }) => {
   ];
 };
 
+const fakeGenterrant = () => {
+  const width = 14;
+  const height = 2;
+  const halfWidth = width / 2;
+
+  const blocksRender = [];
+
+  // for (let c = 0; c < height; c++) {
+  for (let i = -halfWidth; i < halfWidth; i++) {
+    for (let j = -halfWidth; j < halfWidth; j++) {
+      const blockAdding = { position: [i * 2, 0, j * 2], type: "grass" };
+      addBlock(blockAdding);
+      blocksRender.push(blockAdding);
+    }
+  }
+  // }
+
+  self.postMessage({
+    type: "renderBlocks",
+    data: {
+      blocksRender,
+    },
+  });
+};
+fakeGenterrant();
+
 let originalVy = -25;
 let vy = originalVy;
 let onGround = true;
 
-const physicsTest = new Physics({});
+const physicsEngine = new Physics();
 
 const calculateMovement = ({
   directionVectorArr,
@@ -69,7 +100,7 @@ const calculateMovement = ({
   }
 
   const { calculatedMoveVector: correctMovement, collideObject } =
-    physicsTest.calculateCorrectMovement(
+    physicsEngine.calculateCorrectMovement(
       new Vector3(moveVector.x, moveVector.y + vy * delta, moveVector.z),
       playerPostion,
       blocksMapping

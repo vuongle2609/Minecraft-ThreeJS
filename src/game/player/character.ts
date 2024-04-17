@@ -10,6 +10,7 @@ import BasicCharacterControllerInput from "@/game/action/input";
 import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
 import { CapsuleGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
 import { lerp } from "three/src/math/MathUtils";
+import getChunkCoordinate from "../helpers/getChunkCoordinate";
 
 export default class Player extends BaseEntity {
   input = new BasicCharacterControllerInput();
@@ -42,7 +43,7 @@ export default class Player extends BaseEntity {
 
     this.player.receiveShadow = true;
     this.player.castShadow = true;
-    this.player.position.set(0, 10, 0);
+    this.player.position.set(0, 40, 0);
 
     this.scene?.add(this.player);
 
@@ -59,6 +60,7 @@ export default class Player extends BaseEntity {
           this.player.position.add(
             new Vector3(position[0], position[1], position[2])
           );
+          const roundedPos = this.player.position.clone().round();
         }
       });
   }
@@ -144,17 +146,17 @@ export default class Player extends BaseEntity {
     // cho duong sin y ngan lai bang cach chia tat ca cho 2.5
     // de cho muot thi noi suy no voi offset truoc
     // 1/2.5 * sin(t * 1/4)
-    if (this.onGround && this.isWalk) {
-      this.cameraOffset =
-        lerp(
-          this.cameraOffset,
-          Math.sin(this.tCounter * SIN_X_MULTIPLY_LENGTH) *
-            SIN_Y_MULTIPLY_LENGTH,
-          LERP_CAMERA_BREATH
-        ) * delta;
-    } else {
-      this.cameraOffset = 0;
-    }
+    // if (this.onGround && this.isWalk) {
+    //   this.cameraOffset =
+    //     lerp(
+    //       this.cameraOffset,
+    //       Math.sin(this.tCounter * SIN_X_MULTIPLY_LENGTH) *
+    //         SIN_Y_MULTIPLY_LENGTH,
+    //       LERP_CAMERA_BREATH
+    //     ) * delta;
+    // } else {
+    //   this.cameraOffset = 0;
+    // }
   }
 
   updateCamera() {
