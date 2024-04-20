@@ -63,8 +63,6 @@ export default class Player extends BaseEntity {
           );
           const roundedPos = this.player.position.clone().round();
 
-         
-
           // console.log(
           //   getBlocksInChunk(getChunkCoordinate(roundedPos.x , roundedPos.z))
           // );

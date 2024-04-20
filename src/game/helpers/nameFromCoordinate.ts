@@ -6,7 +6,13 @@ const nameFromCoordinate = (
   face?: number
 ) => {
   return (
-    x + "_" + y + "_" + z + (type ? "_" + type : "") + (face ? "_" + face : "")
+    x +
+    "_" +
+    y +
+    "_" +
+    z +
+    (type ? "_" + type : "") +
+    (face?.toString() ? "_" + face : "")
   );
 };
 

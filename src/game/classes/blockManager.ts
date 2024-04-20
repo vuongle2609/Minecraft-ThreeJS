@@ -21,8 +21,6 @@ export default class BlockManager extends BaseEntity {
   blocksMapping: Record<string, Record<string, Record<string, string>>> = {};
   blocksWorld: Record<string, keyof typeof blocks | 0> = {};
 
-  
-
   constructor(props: BasePropsType & PropsType) {
     super(props);
 
@@ -38,7 +36,7 @@ export default class BlockManager extends BaseEntity {
       this.onMouseDown(e);
     });
 
-    this.renderSavedWorld()
+    this.renderSavedWorld();
 
     if (this.worker)
       this.worker.addEventListener("message", (e) => {
@@ -57,7 +55,10 @@ export default class BlockManager extends BaseEntity {
   }
 
   renderSavedWorld() {
-    console.log("🚀 ~ BlockManager ~ renderSavedWorld ~ this.blocksWorld:", this.blocksWorld)
+    console.log(
+      "🚀 ~ BlockManager ~ renderSavedWorld ~ this.blocksWorld:",
+      this.blocksWorld
+    );
   }
 
   getObject(name: string) {
