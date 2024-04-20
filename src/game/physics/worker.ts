@@ -24,7 +24,8 @@ const removeBlock = ({ position }: { position: number[] }) => {
 };
 
 const fakeGenterrant = () => {
-  const halfWidth = 10 * 2;
+  const width = 16 * 2;
+  const halfWidth = width / 2;
 
   const blocksRender = [];
 

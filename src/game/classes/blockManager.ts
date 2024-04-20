@@ -19,11 +19,16 @@ export default class BlockManager extends BaseEntity {
   currentBreakSound: HTMLAudioElement;
 
   blocksMapping: Record<string, Record<string, Record<string, string>>> = {};
+  blocksWorld: Record<string, keyof typeof blocks | 0> = {};
+
+  
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
 
     this.inventoryManager = props.inventoryManager;
+    this.blocksWorld = props.worldStorage?.blocksMapping || {};
+    // console.log("🚀 ~ BlockManager ~ constructor ~ this.blocksWorld:", this.blocksWorld)
 
     this.initialize();
   }
@@ -32,6 +37,8 @@ export default class BlockManager extends BaseEntity {
     document.addEventListener("mousedown", (e) => {
       this.onMouseDown(e);
     });
+
+    this.renderSavedWorld()
 
     if (this.worker)
       this.worker.addEventListener("message", (e) => {
@@ -49,6 +56,10 @@ export default class BlockManager extends BaseEntity {
       });
   }
 
+  renderSavedWorld() {
+    console.log("🚀 ~ BlockManager ~ renderSavedWorld ~ this.blocksWorld:", this.blocksWorld)
+  }
+
   getObject(name: string) {
     return this.scene?.getObjectByName(name) as THREE.Object3D;
   }
@@ -60,6 +71,12 @@ export default class BlockManager extends BaseEntity {
     type: keyof typeof blocks,
     disableWorker?: boolean
   ) {
+    if (disableWorker && this.blocksWorld[nameFromCoordinate(x, y, z)] == 0) {
+      return;
+    }
+
+    if (!disableWorker) this.blocksWorld[nameFromCoordinate(x, y, z)] = type;
+
     const position = new Vector3(x, y, z);
 
     this.blocksMapping[position.x] = {
@@ -166,6 +183,8 @@ export default class BlockManager extends BaseEntity {
       plane.name = nameFromCoordinate(x, y - BLOCK_WIDTH, z, bottomBlock, 4);
       this.scene?.add(plane);
     }
+
+    this.blocksWorld[nameFromCoordinate(x, y, z)] = 0;
   }
 
   onMouseDown(e: MouseEvent) {

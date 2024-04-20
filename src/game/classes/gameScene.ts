@@ -7,8 +7,12 @@ import InventoryManager from "./inventoryManager";
 import Light from "./light";
 import { RenderPage } from "./renderPage";
 import { WebGLRenderer, Scene, PerspectiveCamera, Clock, Color } from "three";
+import { WorldsType } from "@/type";
 
 export default class GameScene extends RenderPage {
+  id: string;
+  worldStorage: WorldsType;
+
   removedWindow = false;
 
   renderer = new WebGLRenderer({
@@ -19,10 +23,6 @@ export default class GameScene extends RenderPage {
   worker = new Worker(new URL("../physics/worker", import.meta.url), {
     type: "module",
   });
-
-  // worker = new Worker(new URL("../physics/worker", import.meta.url), {
-  //   type: "module",
-  // });
 
   scene = new Scene();
 
@@ -52,8 +52,11 @@ export default class GameScene extends RenderPage {
 
   lastCallTime = 0;
 
-  constructor() {
+  constructor(id: string) {
     super();
+
+    this.id = id;
+    this.worldStorage = JSON.parse(localStorage.getItem("worlds") || "{}")[id];
 
     this.initialize();
   }
@@ -100,6 +103,8 @@ export default class GameScene extends RenderPage {
       inventoryManager: this.inventoryManager,
       control: this.control,
       worker: this.worker,
+      id: this.id,
+      worldStorage: this.worldStorage,
     });
 
     this.player = new Player({
@@ -149,6 +154,8 @@ export default class GameScene extends RenderPage {
   disposeRender() {
     this.renderer.dispose();
     this.removedWindow = true;
+    this.worker.terminate();
+    this.blockManager.terrantWorker.terminate();
   }
 
   RAF(t: number) {
