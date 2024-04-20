@@ -24,11 +24,13 @@ const removeBlock = ({ position }: { position: number[] }) => {
 };
 
 const fakeGenterrant = () => {
-  const width = 16 * 2;
+  const width = 14;
+  const height = 2;
   const halfWidth = width / 2;
 
   const blocksRender = [];
 
+  // for (let c = 0; c < height; c++) {
   for (let i = -halfWidth; i < halfWidth; i++) {
     for (let j = -halfWidth; j < halfWidth; j++) {
       const blockAdding = { position: [i * 2, 0, j * 2], type: "grass" };
@@ -36,6 +38,7 @@ const fakeGenterrant = () => {
       blocksRender.push(blockAdding);
     }
   }
+  // }
 
   self.postMessage({
     type: "renderBlocks",
