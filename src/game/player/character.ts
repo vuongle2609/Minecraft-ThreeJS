@@ -8,6 +8,7 @@ import BasicCharacterControllerInput from "@/game/action/input";
 import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
 import { CapsuleGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
 import { getChunkCoordinate } from "../helpers/chunkHelpers";
+import { CHUNK_SIZE } from "@/constants";
 
 export default class Player extends BaseEntity {
   input = new BasicCharacterControllerInput();
@@ -47,7 +48,12 @@ export default class Player extends BaseEntity {
     this.player.castShadow = true;
 
     if (initPos) this.player.position.set(initPos[0], initPos[1], initPos[2]);
-    else this.player.position.set(0, CHARACTER_LENGTH + 10, 0);
+    else
+      this.player.position.set(
+        CHUNK_SIZE / 2,
+        CHARACTER_LENGTH + 0.2,
+        CHUNK_SIZE / 2
+      );
 
     const roundedPos = this.player.position.clone().round();
 
