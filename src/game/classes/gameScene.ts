@@ -79,6 +79,9 @@ export default class GameScene extends RenderPage {
 
     this.scene.background = new Color("#87CEEB");
 
+    if (this.worldStorage.rotation)
+      this.camera.rotation.fromArray(this.worldStorage.rotation as any);
+
     new Light({
       scene: this.scene,
     });
@@ -112,6 +115,7 @@ export default class GameScene extends RenderPage {
       camera: this.camera,
       blockManager: this.blockManager,
       worker: this.worker,
+      initPos: this.worldStorage.initPos,
     });
 
     this.inventoryManager.renderHotbar();
@@ -155,7 +159,7 @@ export default class GameScene extends RenderPage {
     this.renderer.dispose();
     this.removedWindow = true;
     this.worker.terminate();
-    this.blockManager.terrantWorker.terminate();
+    // this.blockManager.terrantWorker.terminate();
   }
 
   RAF(t: number) {

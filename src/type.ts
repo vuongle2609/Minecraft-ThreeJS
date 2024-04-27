@@ -18,4 +18,6 @@ export interface WorldsType {
   blocksMapping: BlocksMappingType;
   name: string;
   worldType: number;
+  initPos?: number[];
+  rotation?: number[];
 }

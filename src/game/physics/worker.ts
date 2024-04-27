@@ -1,14 +1,11 @@
 import { Vector3 } from "three";
 import nameFromCoordinate from "../helpers/nameFromCoordinate";
-import {
-  SPEED,
-  GRAVITY,
-  GRAVITY_SCALE,
-  JUMP_FORCE,
-} from "../../constants/player";
+import { SPEED, GRAVITY, GRAVITY_SCALE, JUMP_FORCE } from "@/constants/player";
 import Physics from "./physics";
+import blocks from "@/constants/blocks";
+import { CHUNK_SIZE } from "@/constants";
 
-let blocksMapping: Record<string, string> = {};
+let blocksMapping: Record<string, string | 0> = {};
 
 const addBlock = ({ position, type }: { position: number[]; type: string }) => {
   blocksMapping = {
@@ -22,32 +19,6 @@ const removeBlock = ({ position }: { position: number[] }) => {
     nameFromCoordinate(position[0], position[1], position[2])
   ];
 };
-
-const fakeGenterrant = () => {
-  const width = 14;
-  const height = 2;
-  const halfWidth = width / 2;
-
-  const blocksRender = [];
-
-  // for (let c = 0; c < height; c++) {
-  for (let i = -halfWidth; i < halfWidth; i++) {
-    for (let j = -halfWidth; j < halfWidth; j++) {
-      const blockAdding = { position: [i * 2, 0, j * 2], type: "grass" };
-      addBlock(blockAdding);
-      blocksRender.push(blockAdding);
-    }
-  }
-  // }
-
-  self.postMessage({
-    type: "renderBlocks",
-    data: {
-      blocksRender,
-    },
-  });
-};
-fakeGenterrant();
 
 let originalVy = -25;
 let vy = originalVy;
@@ -120,6 +91,55 @@ const calculateMovement = ({
   });
 };
 
+const fakeGenterrant = () => {
+  const width = CHUNK_SIZE;
+  const height = 2;
+  const halfWidth = width / 2;
+
+  const blocksRender = [];
+
+  // maybe remove
+  Object.keys(blocksMapping).forEach((key) => {
+    const position = key.split("_").map(Number);
+    const blockAdding = { position, type: blocksMapping[key] };
+
+    blocksRender.push(blockAdding);
+  });
+
+  for (let c = 0; c < height; c++) {
+    for (let i = -halfWidth; i < halfWidth; i++) {
+      for (let j = -halfWidth; j < halfWidth; j++) {
+        const position = [i * 2, c * -2, j * 2];
+        const blockAdding = { position, type: "grass" };
+
+        if (
+          blocksMapping[
+            nameFromCoordinate(position[0], position[1], position[2])
+          ] !== 0 ||
+          blocksMapping[
+            nameFromCoordinate(position[0], position[1], position[2])
+          ]
+        ) {
+          addBlock(blockAdding);
+          blocksRender.push(blockAdding);
+        }
+      }
+    }
+  }
+
+  self.postMessage({
+    type: "renderBlocks",
+    data: {
+      blocksRender,
+    },
+  });
+
+  // start allow calculate physics
+  setTimeout(() => {
+    eventMapping = { ...eventMapping, calculateMovement };
+  }, 500);
+};
+
 const jumpCharacter = () => {
   if (onGround) {
     vy = JUMP_FORCE;
@@ -127,11 +147,21 @@ const jumpCharacter = () => {
   }
 };
 
-const eventMapping = {
+const initBlocks = ({
+  blocksInit,
+}: {
+  blocksInit: Record<string, keyof typeof blocks | 0>;
+}) => {
+  blocksMapping = { ...blocksMapping, ...blocksInit };
+
+  fakeGenterrant();
+};
+
+let eventMapping: Record<string, Function> = {
   addBlock,
   removeBlock,
-  calculateMovement,
   jumpCharacter,
+  initBlocks,
 };
 
 self.onmessage = (
@@ -140,5 +170,5 @@ self.onmessage = (
     data: any;
   }>
 ) => {
-  eventMapping[e.data.type](e.data.data);
+  eventMapping[e.data.type]?.(e.data.data);
 };

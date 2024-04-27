@@ -1,5 +1,6 @@
 import blocks from "@/constants/blocks";
 import {
+  CHARACTER_LENGTH,
   CHARACTER_MIDDLE_LENGTH,
   CHARACTER_RADIUS,
   LERP_CAMERA_BREATH,
@@ -30,12 +31,12 @@ export default class Player extends BaseEntity {
   prevStepKey: keyof typeof blocks | undefined = undefined;
   currentStepSound: HTMLAudioElement;
 
-  constructor(props: BasePropsType) {
+  constructor(props: BasePropsType & { initPos?: number[] }) {
     super(props);
-    this.initialize();
+    this.initialize(props.initPos);
   }
 
-  initialize() {
+  initialize(initPos?: number[]) {
     // init player render
     this.player = new Mesh(
       new CapsuleGeometry(CHARACTER_RADIUS, CHARACTER_MIDDLE_LENGTH),
@@ -44,7 +45,9 @@ export default class Player extends BaseEntity {
 
     this.player.receiveShadow = true;
     this.player.castShadow = true;
-    this.player.position.set(0, 40, 0);
+
+    if (initPos) this.player.position.set(initPos[0], initPos[1], initPos[2]);
+    else this.player.position.set(0, CHARACTER_LENGTH + 0.1, 0);
 
     this.scene?.add(this.player);
 
@@ -63,9 +66,7 @@ export default class Player extends BaseEntity {
           );
           const roundedPos = this.player.position.clone().round();
 
-          // console.log(
-          //   getBlocksInChunk(getChunkCoordinate(roundedPos.x , roundedPos.z))
-          // );
+          // console.log(getChunkCoordinate(roundedPos.x, roundedPos.z));
         }
       });
   }

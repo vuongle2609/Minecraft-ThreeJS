@@ -68,7 +68,7 @@ export default class Physics {
   calculateCorrectMovement(
     vectorMove: Vector3,
     playerPosition: Vector3,
-    blocksMapping: Record<string, string>
+    blocksMapping: Record<string, string | 0>
   ) {
     playerPosition.y -= 2;
 

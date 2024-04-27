@@ -26,7 +26,6 @@ export default class BlockManager extends BaseEntity {
 
     this.inventoryManager = props.inventoryManager;
     this.blocksWorld = props.worldStorage?.blocksMapping || {};
-    // console.log("🚀 ~ BlockManager ~ constructor ~ this.blocksWorld:", this.blocksWorld)
 
     this.initialize();
   }
@@ -55,10 +54,12 @@ export default class BlockManager extends BaseEntity {
   }
 
   renderSavedWorld() {
-    console.log(
-      "🚀 ~ BlockManager ~ renderSavedWorld ~ this.blocksWorld:",
-      this.blocksWorld
-    );
+    this.worker?.postMessage({
+      type: "initBlocks",
+      data: {
+        blocksInit: this.blocksWorld,
+      },
+    });
   }
 
   getObject(name: string) {
