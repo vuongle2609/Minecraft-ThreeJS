@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import nameFromCoordinate from "../helpers/nameFromCoordinate";
+import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
 import { SPEED, GRAVITY, GRAVITY_SCALE, JUMP_FORCE } from "@/constants/player";
 import Physics from "./physics";
 import blocks from "@/constants/blocks";
@@ -135,11 +135,10 @@ const fakeGenterrant = () => {
   });
 
   // start allow calculate physics
-  setTimeout(() => {
-    eventMapping = { ...eventMapping, calculateMovement };
-  }, 500);
 };
-
+setTimeout(() => {
+  eventMapping = { ...eventMapping, calculateMovement };
+}, 300);
 const jumpCharacter = () => {
   if (onGround) {
     vy = JUMP_FORCE;
@@ -154,7 +153,7 @@ const initBlocks = ({
 }) => {
   blocksMapping = { ...blocksMapping, ...blocksInit };
 
-  fakeGenterrant();
+  // fakeGenterrant();
 };
 
 let eventMapping: Record<string, Function> = {

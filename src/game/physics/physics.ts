@@ -4,7 +4,7 @@ import {
   CHARACTER_MIDDLE_LENGTH,
   CHARACTER_RADIUS,
 } from "../../constants/player";
-import nameFromCoordinate from "../helpers/nameFromCoordinate";
+import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
 
 export default class Physics {
   constructor() {}

@@ -3,16 +3,11 @@ import {
   CHARACTER_LENGTH,
   CHARACTER_MIDDLE_LENGTH,
   CHARACTER_RADIUS,
-  LERP_CAMERA_BREATH,
-  SIN_X_MULTIPLY_LENGTH,
-  SIN_Y_MULTIPLY_LENGTH,
 } from "@/constants/player";
 import BasicCharacterControllerInput from "@/game/action/input";
 import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
 import { CapsuleGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
-import { lerp } from "three/src/math/MathUtils";
-import getChunkCoordinate from "../helpers/chunkHelpers";
-import nameFromCoordinate from "../helpers/nameFromCoordinate";
+import { getChunkCoordinate } from "../helpers/chunkHelpers";
 
 export default class Player extends BaseEntity {
   input = new BasicCharacterControllerInput();
@@ -31,6 +26,11 @@ export default class Player extends BaseEntity {
   prevStepKey: keyof typeof blocks | undefined = undefined;
   currentStepSound: HTMLAudioElement;
 
+  currentChunk: {
+    x: number;
+    z: number;
+  };
+
   constructor(props: BasePropsType & { initPos?: number[] }) {
     super(props);
     this.initialize(props.initPos);
@@ -47,7 +47,13 @@ export default class Player extends BaseEntity {
     this.player.castShadow = true;
 
     if (initPos) this.player.position.set(initPos[0], initPos[1], initPos[2]);
-    else this.player.position.set(0, CHARACTER_LENGTH + 0.1, 0);
+    else this.player.position.set(0, CHARACTER_LENGTH + 10, 0);
+
+    const roundedPos = this.player.position.clone().round();
+
+    this.currentChunk = getChunkCoordinate(roundedPos.x, roundedPos.z);
+
+    this.handleChangeChunk();
 
     this.scene?.add(this.player);
 
@@ -64,12 +70,30 @@ export default class Player extends BaseEntity {
           this.player.position.add(
             new Vector3(position[0], position[1], position[2])
           );
-          const roundedPos = this.player.position.clone().round();
 
-          // console.log(getChunkCoordinate(roundedPos.x, roundedPos.z));
+          this.handleDetectChunkChange();
         }
       });
   }
+
+  handleDetectChunkChange = () => {
+    const roundedPos = this.player.position.clone().round();
+
+    const newCalChunk = getChunkCoordinate(roundedPos.x, roundedPos.z);
+
+    if (
+      newCalChunk.x != this.currentChunk.x ||
+      newCalChunk.z != this.currentChunk.z
+    ) {
+      this.currentChunk = newCalChunk;
+
+      this.handleChangeChunk();
+    }
+  };
+
+  handleChangeChunk = () => {
+    this.blockManager?.handleRequestChunks(this.currentChunk);
+  };
 
   handleMovement(delta: number) {
     this.isWalk = false;

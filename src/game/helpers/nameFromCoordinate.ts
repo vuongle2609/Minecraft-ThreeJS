@@ -1,4 +1,4 @@
-const nameFromCoordinate = (
+export const nameFromCoordinate = (
   x: number,
   y: number,
   z: number,
@@ -16,4 +16,6 @@ const nameFromCoordinate = (
   );
 };
 
-export default nameFromCoordinate;
+export const nameChunkFromCoordinate = (x: number, z: number) => {
+  return x + "_" + z;
+};

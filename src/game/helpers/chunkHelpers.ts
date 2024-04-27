@@ -1,30 +1,33 @@
 import { CHUNK_SIZE } from "@/constants/index";
-import nameFromCoordinate from "./nameFromCoordinate";
+import { nameFromCoordinate } from "./nameFromCoordinate";
+import blocks from "@/constants/blocks";
 
-const getChunkCoordinate = (x: number, y: number) => {
-  const CHUNK_SIZE = 16;
+export const getChunkCoordinate = (x: number, z: number) => {
   const chunkCal = CHUNK_SIZE * 2;
 
-  const chunkX = Math.floor(x / chunkCal);
-  const chunkY = Math.floor(y / chunkCal);
+  const chunkX = Math.floor(x / chunkCal) || 0;
+  const chunkZ = Math.floor(z / chunkCal) || 0;
 
   return {
     x: chunkX,
-    y: chunkY,
+    z: chunkZ,
   };
 };
 
-const getBlocksInChunk = (x: number, y: number) => {
-  const CHUNK_SIZE = 16;
-  const blocksInChunk: Record<string, null> = {};
+export const getBlocksInChunk = (x: number, z: number) => {
+  const blocksInChunk: {
+    position: number[];
+    type: keyof typeof blocks;
+  }[] = [];
 
   for (let xA = x * CHUNK_SIZE; xA < (x + 1) * CHUNK_SIZE; xA++) {
-    for (let yA = y * CHUNK_SIZE; yA < (y + 1) * CHUNK_SIZE; yA++) {
-      blocksInChunk[nameFromCoordinate(xA * 2, 0, yA * 2)] = null;
+    for (let zA = z * CHUNK_SIZE; zA < (z + 1) * CHUNK_SIZE; zA++) {
+      blocksInChunk.push({
+        position: [xA * 2, 0, zA * 2],
+        type: "grass",
+      });
     }
   }
 
   return blocksInChunk;
 };
-
-export default getChunkCoordinate;

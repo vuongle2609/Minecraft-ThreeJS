@@ -1,11 +1,15 @@
 import { BLOCK_WIDTH } from "@/constants";
 import blocks from "@/constants/blocks";
-import nameFromCoordinate from "@/game/helpers/nameFromCoordinate";
+import {
+  nameChunkFromCoordinate,
+  nameFromCoordinate,
+} from "@/game/helpers/nameFromCoordinate";
 import { Mesh, PlaneGeometry, Vector2, Vector3 } from "three";
 import { detailFromName } from "../helpers/detailFromName";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
+import { getBlocksInChunk, getChunkCoordinate } from "../helpers/chunkHelpers";
 
 interface PropsType {
   inventoryManager: InventoryManager;
@@ -20,12 +24,19 @@ export default class BlockManager extends BaseEntity {
 
   blocksMapping: Record<string, Record<string, Record<string, string>>> = {};
   blocksWorld: Record<string, keyof typeof blocks | 0> = {};
+  blocksWorldChunk: Record<string, Record<string, keyof typeof blocks | 0>> =
+    {};
+
+  chunksWorkers: Record<string, Worker> = {};
+  chunksActive: string[] = [];
+  chunksBlocks: Record<string, string[]> = {};
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
 
     this.inventoryManager = props.inventoryManager;
     this.blocksWorld = props.worldStorage?.blocksMapping || {};
+    console.log(props.worldStorage?.blocksWorldChunk);
 
     this.initialize();
   }
@@ -48,9 +59,86 @@ export default class BlockManager extends BaseEntity {
           blocksRender.forEach(({ position, type }) => {
             this.updateBlock(position[0], position[1], position[2], type, true);
           });
-        } else if (e.data.type === "removeBlocks") {
         }
       });
+  }
+
+  handleRequestChunks(currentChunk: { x: number; z: number }) {
+    // get neighbors
+    const neighborOffset = [
+      { x: -1, z: -1 },
+      { x: -1, z: 0 },
+      { x: -1, z: 1 },
+      { x: 0, z: -1 },
+      { x: 0, z: 1 },
+      { x: 0, z: 0 },
+      { x: 1, z: -1 },
+      { x: 1, z: 0 },
+      { x: 1, z: 1 },
+    ];
+
+    const neighborChunksKeys = neighborOffset.map((offset) => {
+      const chunk = {
+        x: currentChunk.x + offset.x,
+        z: currentChunk.z + offset.z,
+      };
+
+      const chunkName = nameChunkFromCoordinate(chunk.x, chunk.z);
+
+      if (!this.chunksBlocks[chunkName]) {
+        this.chunksWorkers[chunkName] = new Worker(
+          new URL("../terrant/worker", import.meta.url),
+          {
+            type: "module",
+          }
+        );
+
+        this.chunksWorkers[chunkName].postMessage(chunk);
+
+        this.chunksWorkers[chunkName].onmessage = (e) => {
+          const blocksRender: {
+            position: number[];
+            type: keyof typeof blocks;
+          }[] = e.data.blocks;
+
+          const blocksInChunk: string[] = [];
+
+          blocksRender.forEach(({ position, type }) => {
+            this.updateBlock(position[0], position[1], position[2], type);
+            blocksInChunk.push(
+              nameFromCoordinate(position[0], position[1], position[2], type)
+            );
+          });
+
+          this.chunksBlocks[chunkName] = blocksInChunk;
+
+          this.chunksWorkers[chunkName].terminate();
+
+          delete this.chunksWorkers[chunkName];
+        };
+      }
+
+      return chunkName;
+    });
+
+    const inactiveChunk = this.chunksActive.filter(
+      (item) => !neighborChunksKeys.includes(item)
+    );
+
+    let blocksDelete: string[] = [];
+
+    inactiveChunk.forEach((item) => {
+      blocksDelete = [...blocksDelete, ...this.chunksBlocks[item]];
+
+      delete this.chunksBlocks[item];
+    });
+
+    blocksDelete.forEach((blockKey) => {
+      const { type, y, x, z } = detailFromName(blockKey);
+      this.removeBlock(x, y, z, type);
+    });
+
+    this.chunksActive = neighborChunksKeys;
   }
 
   renderSavedWorld() {
@@ -73,8 +161,26 @@ export default class BlockManager extends BaseEntity {
     type: keyof typeof blocks,
     disableWorker?: boolean
   ) {
+    const newUpdateBlockChunk = getChunkCoordinate(x, z);
+    const chunkName = nameChunkFromCoordinate(
+      newUpdateBlockChunk.x,
+      newUpdateBlockChunk.z
+    );
+
+    // if (
+    //   disableWorker &&
+    //   this.blocksWorldChunk[chunkName][nameFromCoordinate(x, y, z)] == 0
+    // ) {
+    //   return;
+    // }
+
     if (disableWorker && this.blocksWorld[nameFromCoordinate(x, y, z)] == 0) {
       return;
+    }
+
+    if (!disableWorker) {
+      this.blocksWorldChunk[chunkName] = this.blocksWorldChunk[chunkName] || {};
+      this.blocksWorldChunk[chunkName][nameFromCoordinate(x, y, z)] = type;
     }
 
     if (!disableWorker) this.blocksWorld[nameFromCoordinate(x, y, z)] = type;
@@ -186,7 +292,23 @@ export default class BlockManager extends BaseEntity {
       this.scene?.add(plane);
     }
 
+    delete this.blocksMapping[x][y][z];
+
+    this.removeBlockWorker({
+      position: [x, y, z],
+    });
+
     this.blocksWorld[nameFromCoordinate(x, y, z)] = 0;
+    {
+      const newUpdateBlockChunk = getChunkCoordinate(x, z);
+      const chunkName = nameChunkFromCoordinate(
+        newUpdateBlockChunk.x,
+        newUpdateBlockChunk.z
+      );
+
+      this.blocksWorldChunk[chunkName] = this.blocksWorldChunk[chunkName] || {};
+      this.blocksWorldChunk[chunkName][nameFromCoordinate(x, y, z)] = 0;
+    }
   }
 
   onMouseDown(e: MouseEvent) {
@@ -245,7 +367,6 @@ export default class BlockManager extends BaseEntity {
     const clickedDetail = detailFromName(intersects[0].object.name);
 
     const { x, y, z, type } = clickedDetail;
-
     this.removeBlock(x, y, z, type);
 
     // play sound
@@ -257,12 +378,6 @@ export default class BlockManager extends BaseEntity {
     this.currentBreakSound = blocks[type as keyof typeof blocks].break;
 
     this.currentBreakSound.play();
-
-    delete this.blocksMapping[x][y][z];
-
-    this.removeBlockWorker({
-      position: [x, y, z],
-    });
   }
 
   handlePlaceBlock() {

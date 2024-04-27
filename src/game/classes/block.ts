@@ -1,5 +1,5 @@
 import blocks from "@/constants/blocks";
-import nameFromCoordinate from "@/game/helpers/nameFromCoordinate";
+import {nameFromCoordinate} from "@/game/helpers/nameFromCoordinate";
 import { BoxGeometry, Material, Mesh, PlaneGeometry, Vector3 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import { BLOCK_WIDTH } from "@/constants";

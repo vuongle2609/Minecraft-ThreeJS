@@ -16,6 +16,7 @@ export type BlocksMappingType = Record<string, keyof typeof blocks | 0>;
 export interface WorldsType {
   createdDate: Date;
   blocksMapping: BlocksMappingType;
+  blocksWorldChunk: Record<string, BlocksMappingType>;
   name: string;
   worldType: number;
   initPos?: number[];
