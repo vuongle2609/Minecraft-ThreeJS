@@ -157,6 +157,8 @@ export default class GameScene extends RenderPage {
 
   disposeRender() {
     this.renderer.dispose();
+    this.chunkManager.dispose();
+    this.player.input.dispose();
     this.removedWindow = true;
     this.worker.terminate();
   }

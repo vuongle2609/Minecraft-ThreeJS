@@ -18,14 +18,14 @@ export default class BasicCharacterControllerInput {
       rightClick: false,
     };
 
-    document.addEventListener("keydown", (e) => this.onKeydown(e), false);
-    document.addEventListener("keyup", (e) => this.onKeyup(e), false);
-    document.addEventListener("mousedown", (e) => this.onMouseDown(e), false);
-    document.addEventListener("mouseup", (e) => this.onMouseUp(e), false);
+    document.addEventListener("keydown", this.onKeydown.bind(this), false);
+    document.addEventListener("keyup", this.onKeyup.bind(this), false);
+    document.addEventListener("mousedown", this.onMouseDown.bind(this), false);
+    document.addEventListener("mouseup", this.onMouseUp.bind(this), false);
 
     document.addEventListener(
       "pointerlockchange",
-      () => this.handleLockChange(),
+      this.handleLockChange.bind(this),
       false
     );
   }
@@ -108,5 +108,22 @@ export default class BasicCharacterControllerInput {
         this.keys.shift = false;
         break;
     }
+  }
+
+  dispose() {
+    document.removeEventListener("keydown", this.onKeydown.bind(this), false);
+    document.removeEventListener("keyup", this.onKeyup.bind(this), false);
+    document.removeEventListener(
+      "mousedown",
+      this.onMouseDown.bind(this),
+      false
+    );
+    document.removeEventListener("mouseup", this.onMouseUp.bind(this), false);
+
+    document.removeEventListener(
+      "pointerlockchange",
+      this.handleLockChange.bind(this),
+      false
+    );
   }
 }

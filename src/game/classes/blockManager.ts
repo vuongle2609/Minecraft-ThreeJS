@@ -1,12 +1,12 @@
 import { BLOCK_WIDTH } from "@/constants";
 import blocks from "@/constants/blocks";
+import { getChunkCoordinate } from "@/game/helpers/chunkHelpers";
+import { detailFromName } from "@/game/helpers/detailFromName";
 import {
   nameChunkFromCoordinate,
   nameFromCoordinate,
 } from "@/game/helpers/nameFromCoordinate";
 import { Mesh, PlaneGeometry, Vector2, Vector3 } from "three";
-import { getChunkCoordinate } from "@/game/helpers/chunkHelpers";
-import { detailFromName } from "@/game/helpers/detailFromName";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
@@ -35,14 +35,10 @@ export default class BlockManager extends BaseEntity {
 
     this.inventoryManager = props.inventoryManager;
     this.blocksWorldChunk = props.worldStorage?.blocksWorldChunk || {};
-
-    this.initialize();
   }
 
   async initialize() {
-    document.addEventListener("mousedown", (e) => {
-      this.onMouseDown(e);
-    });
+    document.addEventListener("mousedown", this.onMouseDown.bind(this));
   }
 
   getObject(name: string) {
@@ -54,8 +50,7 @@ export default class BlockManager extends BaseEntity {
     y: number,
     z: number,
     type: keyof typeof blocks,
-    isRenderChunk?: boolean,
-    shouldUpdateBlocks?: boolean
+    isRenderChunk?: boolean
   ) {
     const newUpdateBlockChunk = getChunkCoordinate(x, z);
     const chunkName = nameChunkFromCoordinate(
@@ -92,12 +87,6 @@ export default class BlockManager extends BaseEntity {
       type: type,
       blocksMapping: this.blocksMapping,
     });
-
-    if (shouldUpdateBlocks) {
-      this.chunksBlocks[chunkName].push(
-        nameFromCoordinate(position.x, position.y, position.z, type)
-      );
-    }
 
     // add newFunction to bulk render on worker
     // if (!isRenderChunk)
@@ -214,22 +203,6 @@ export default class BlockManager extends BaseEntity {
     }
   }
 
-  onMouseDown(e: MouseEvent) {
-    switch (e.button) {
-      case 0:
-        // left click
-        this.handleBreakBlock();
-        break;
-      case 1:
-        // middle click
-        this.handleGetBlock();
-        break;
-      case 2:
-        // right click
-        this.handlePlaceBlock();
-    }
-  }
-
   handleHoverBlock() {}
 
   handleGetBlock() {
@@ -329,9 +302,22 @@ export default class BlockManager extends BaseEntity {
         blockPosition.y,
         blockPosition.z,
         this.inventoryManager.currentFocus,
-        false,
-        true
+        false
       );
+
+      const chunk = getChunkCoordinate(blockPosition.x, blockPosition.z);
+      const chunkName = nameChunkFromCoordinate(chunk.x, chunk.z);
+
+      if (this.chunksBlocks[chunkName]) {
+        this.chunksBlocks[chunkName].push(
+          nameFromCoordinate(
+            blockPosition.x,
+            blockPosition.y,
+            blockPosition.z,
+            this.inventoryManager.currentFocus
+          )
+        );
+      }
 
       // play sound
 
@@ -365,8 +351,28 @@ export default class BlockManager extends BaseEntity {
     });
   }
 
+  onMouseDown(e: MouseEvent) {
+    switch (e.button) {
+      case 0:
+        // left click
+        this.handleBreakBlock();
+        break;
+      case 1:
+        // middle click
+        this.handleGetBlock();
+        break;
+      case 2:
+        // right click
+        this.handlePlaceBlock();
+    }
+  }
+
   update() {
     // :( donno
     this.handleHoverBlock();
+  }
+
+  dispose() {
+    document.removeEventListener("mousedown", this.onMouseDown.bind(this));
   }
 }
