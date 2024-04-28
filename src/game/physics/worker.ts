@@ -7,6 +7,7 @@ import {
 } from "../../constants/player";
 import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
 import Physics from "./physics";
+import { TIME_TO_INTERACT } from "../../constants";
 
 let blocksMapping: Record<string, string | 0> = {};
 
@@ -96,7 +97,7 @@ const calculateMovement = ({
 
 setTimeout(() => {
   eventMapping = { ...eventMapping, calculateMovement };
-}, 300);
+}, TIME_TO_INTERACT);
 
 const jumpCharacter = () => {
   if (onGround) {
