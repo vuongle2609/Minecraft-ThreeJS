@@ -3,7 +3,7 @@ import PhysicsEngine from "@/game/physics/physics";
 import { GUI } from "dat.gui";
 import { Camera, Scene } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
-import BlockManager from "./blockManager";
+import ChunkManager from "./chunkManager";
 import { WorldsType } from "@/type";
 
 export interface BasePropsType {
@@ -13,7 +13,7 @@ export interface BasePropsType {
   gui?: GUI;
   camera?: Camera;
   physicsEngine?: PhysicsEngine;
-  blockManager?: BlockManager;
+  chunkManager?: ChunkManager;
   worker?: Worker;
   id?: string;
   worldStorage?: WorldsType;
@@ -25,7 +25,7 @@ export default class BaseEntity {
   gui?: GUI;
   camera?: Camera;
   mouseControl?: MouseControl;
-  blockManager?: BlockManager;
+  chunkManager?: ChunkManager;
   worker?: Worker;
   id?: string;
   worldStorage?: WorldsType;
@@ -37,7 +37,7 @@ export default class BaseEntity {
       scene,
       camera,
       mouseControl,
-      blockManager,
+      chunkManager,
       worker,
       id,
       worldStorage,
@@ -48,7 +48,7 @@ export default class BaseEntity {
     this.scene = scene;
     this.camera = camera;
     this.mouseControl = mouseControl;
-    this.blockManager = blockManager;
+    this.chunkManager = chunkManager;
     this.worker = worker;
     this.id = id;
     this.worldStorage = worldStorage;

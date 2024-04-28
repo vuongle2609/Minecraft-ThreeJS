@@ -2,7 +2,7 @@ import { $ } from "@/UI/utils/selector";
 import MouseControl from "@/game/action/mouseControl";
 import Player from "@/game/player/character";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
-import BlockManager from "./blockManager";
+import ChunkManager from "./chunkManager";
 import InventoryManager from "./inventoryManager";
 import Light from "./light";
 import { RenderPage } from "./renderPage";
@@ -23,10 +23,6 @@ export default class GameScene extends RenderPage {
   worker = new Worker(new URL("../physics/worker", import.meta.url), {
     type: "module",
   });
-
-  // worker = new Worker(new URL("../physics/worker", import.meta.url), {
-  //   type: "module",
-  // });
 
   scene = new Scene();
 
@@ -50,7 +46,7 @@ export default class GameScene extends RenderPage {
 
   mouseControl: MouseControl;
 
-  blockManager: BlockManager;
+  chunkManager: ChunkManager;
 
   inventoryManager: InventoryManager;
 
@@ -60,8 +56,6 @@ export default class GameScene extends RenderPage {
     super();
 
     this.id = id;
-    console.log("🚀 ~ GameScene ~ constructor ~ id:", id)
-    console.log("🚀 ~ GameScene ~ constructor ~ localStorage.get@", localStorage.getItem("worlds"))
     this.worldStorage = JSON.parse(localStorage.getItem("worlds") || "{}")[id];
 
     this.initialize();
@@ -85,6 +79,9 @@ export default class GameScene extends RenderPage {
 
     this.scene.background = new Color("#87CEEB");
 
+    if (this.worldStorage.rotation)
+      this.camera.rotation.fromArray(this.worldStorage.rotation as any);
+
     new Light({
       scene: this.scene,
     });
@@ -102,7 +99,7 @@ export default class GameScene extends RenderPage {
       mouseControl: this.mouseControl,
     });
 
-    this.blockManager = new BlockManager({
+    this.chunkManager = new ChunkManager({
       mouseControl: this.mouseControl,
       scene: this.scene,
       camera: this.camera,
@@ -110,14 +107,15 @@ export default class GameScene extends RenderPage {
       control: this.control,
       worker: this.worker,
       id: this.id,
-      worldStorage: this.worldStorage
+      worldStorage: this.worldStorage,
     });
 
     this.player = new Player({
       scene: this.scene,
       camera: this.camera,
-      blockManager: this.blockManager,
+      chunkManager: this.chunkManager,
       worker: this.worker,
+      initPos: this.worldStorage.initPos,
     });
 
     this.inventoryManager.renderHotbar();
@@ -159,7 +157,10 @@ export default class GameScene extends RenderPage {
 
   disposeRender() {
     this.renderer.dispose();
+    this.chunkManager.dispose();
+    this.player.input.dispose();
     this.removedWindow = true;
+    this.worker.terminate();
   }
 
   RAF(t: number) {
@@ -182,7 +183,7 @@ export default class GameScene extends RenderPage {
 
       this.player?.update(delta, t);
 
-      this.blockManager?.update();
+      this.chunkManager?.update();
 
       this.renderer.render(this.scene, this.camera);
     }

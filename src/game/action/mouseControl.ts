@@ -43,17 +43,15 @@ export default class MouseControl extends BaseEntity {
       this.mousePercentScreenY = this.y / canvasHeight;
     };
 
-    window.addEventListener("pointermove", (e) => {
-      this.onPointerMove(e);
-    });
+    window.addEventListener("pointermove", this.onPointerMove.bind(this));
 
     btnFocus?.addEventListener("click", () => {
       this.control?.lock();
     });
 
     this.control?.addEventListener("lock", () => {
-      if ($('#modal-inventory')) return
-      
+      if ($("#modal-inventory")) return;
+
       const modalFocus = $("#modal_focus");
       const modalGame = $("#modal_game");
 
@@ -66,7 +64,7 @@ export default class MouseControl extends BaseEntity {
     });
 
     this.control?.addEventListener("unlock", () => {
-      if ($('#modal-inventory')) return
+      if ($("#modal-inventory")) return;
 
       const modalFocus = $("#modal_focus");
       // const modalGame = $("#modal_game");

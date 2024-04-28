@@ -1,11 +1,10 @@
-import BaseEntity, { BasePropsType } from "../classes/baseEntity";
+import { Vector3 } from "three";
 import {
   CHARACTER_LENGTH_CEIL,
   CHARACTER_MIDDLE_LENGTH,
   CHARACTER_RADIUS,
 } from "../../constants/player";
-import nameFromCoordinate from "../helpers/nameFromCoordinate";
-import { Vector3 } from "three";
+import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
 
 export default class Physics {
   constructor() {}
@@ -69,7 +68,7 @@ export default class Physics {
   calculateCorrectMovement(
     vectorMove: Vector3,
     playerPosition: Vector3,
-    blocksMapping: Record<string, string>
+    blocksMapping: Record<string, string | 0>
   ) {
     playerPosition.y -= 2;
 
@@ -95,22 +94,8 @@ export default class Physics {
       ] ||
       blocksMapping[
         nameFromCoordinate(
-          roundedNextPosition.x,
-          roundedCurrentPosition.y + CHARACTER_MIDDLE_LENGTH,
-          roundedCurrentPosition.z
-        )
-      ] ||
-      blocksMapping[
-        nameFromCoordinate(
           roundedNextPosition1.x,
           roundedCurrentPosition1.y,
-          roundedCurrentPosition1.z
-        )
-      ] ||
-      blocksMapping[
-        nameFromCoordinate(
-          roundedNextPosition1.x,
-          roundedCurrentPosition1.y + CHARACTER_MIDDLE_LENGTH,
           roundedCurrentPosition1.z
         )
       ] ||
@@ -123,16 +108,32 @@ export default class Physics {
       ] ||
       blocksMapping[
         nameFromCoordinate(
-          roundedNextPosition2.x,
-          roundedCurrentPosition2.y + CHARACTER_MIDDLE_LENGTH,
-          roundedCurrentPosition2.z
+          roundedNextPosition3.x,
+          roundedCurrentPosition3.y,
+          roundedCurrentPosition3.z
+        )
+      ];
+
+    const nextObjectXTop =
+      blocksMapping[
+        nameFromCoordinate(
+          roundedNextPosition.x,
+          roundedCurrentPosition.y + CHARACTER_MIDDLE_LENGTH,
+          roundedCurrentPosition.z
         )
       ] ||
       blocksMapping[
         nameFromCoordinate(
-          roundedNextPosition3.x,
-          roundedCurrentPosition3.y,
-          roundedCurrentPosition3.z
+          roundedNextPosition1.x,
+          roundedCurrentPosition1.y + CHARACTER_MIDDLE_LENGTH,
+          roundedCurrentPosition1.z
+        )
+      ] ||
+      blocksMapping[
+        nameFromCoordinate(
+          roundedNextPosition2.x,
+          roundedCurrentPosition2.y + CHARACTER_MIDDLE_LENGTH,
+          roundedCurrentPosition2.z
         )
       ] ||
       blocksMapping[
@@ -213,22 +214,8 @@ export default class Physics {
       ] ||
       blocksMapping[
         nameFromCoordinate(
-          roundedCurrentPosition.x,
-          roundedCurrentPosition.y + CHARACTER_MIDDLE_LENGTH,
-          roundedNextPosition.z
-        )
-      ] ||
-      blocksMapping[
-        nameFromCoordinate(
           roundedCurrentPosition1.x,
           roundedCurrentPosition1.y,
-          roundedNextPosition1.z
-        )
-      ] ||
-      blocksMapping[
-        nameFromCoordinate(
-          roundedCurrentPosition1.x,
-          roundedCurrentPosition1.y + CHARACTER_MIDDLE_LENGTH,
           roundedNextPosition1.z
         )
       ] ||
@@ -241,16 +228,32 @@ export default class Physics {
       ] ||
       blocksMapping[
         nameFromCoordinate(
-          roundedCurrentPosition2.x,
-          roundedCurrentPosition2.y + CHARACTER_MIDDLE_LENGTH,
-          roundedNextPosition2.z
+          roundedCurrentPosition3.x,
+          roundedCurrentPosition3.y,
+          roundedNextPosition3.z
+        )
+      ];
+
+    const nextObjectZTop =
+      blocksMapping[
+        nameFromCoordinate(
+          roundedCurrentPosition.x,
+          roundedCurrentPosition.y + CHARACTER_MIDDLE_LENGTH,
+          roundedNextPosition.z
         )
       ] ||
       blocksMapping[
         nameFromCoordinate(
-          roundedCurrentPosition3.x,
-          roundedCurrentPosition3.y,
-          roundedNextPosition3.z
+          roundedCurrentPosition1.x,
+          roundedCurrentPosition1.y + CHARACTER_MIDDLE_LENGTH,
+          roundedNextPosition1.z
+        )
+      ] ||
+      blocksMapping[
+        nameFromCoordinate(
+          roundedCurrentPosition2.x,
+          roundedCurrentPosition2.y + CHARACTER_MIDDLE_LENGTH,
+          roundedNextPosition2.z
         )
       ] ||
       blocksMapping[
@@ -263,9 +266,9 @@ export default class Physics {
 
     const calculatedMoveVector = new Vector3();
 
-    calculatedMoveVector.x = nextObjectX ? 0 : vectorMove.x;
-    calculatedMoveVector.y = nextObjectYTop || nextObjectY ? 0 : vectorMove.y;
-    calculatedMoveVector.z = nextObjectZ ? 0 : vectorMove.z;
+    calculatedMoveVector.x = nextObjectX || nextObjectXTop ? 0 : vectorMove.x;
+    calculatedMoveVector.y = nextObjectY || nextObjectYTop ? 0 : vectorMove.y;
+    calculatedMoveVector.z = nextObjectZ || nextObjectZTop ? 0 : vectorMove.z;
 
     return { calculatedMoveVector, collideObject: nextObjectY };
   }

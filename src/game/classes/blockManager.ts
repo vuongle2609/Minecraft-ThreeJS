@@ -1,8 +1,12 @@
 import { BLOCK_WIDTH } from "@/constants";
 import blocks from "@/constants/blocks";
-import nameFromCoordinate from "@/game/helpers/nameFromCoordinate";
+import { getChunkCoordinate } from "@/game/helpers/chunkHelpers";
+import { detailFromName } from "@/game/helpers/detailFromName";
+import {
+  nameChunkFromCoordinate,
+  nameFromCoordinate,
+} from "@/game/helpers/nameFromCoordinate";
 import { Mesh, PlaneGeometry, Vector2, Vector3 } from "three";
-import { detailFromName } from "../helpers/detailFromName";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
@@ -19,37 +23,22 @@ export default class BlockManager extends BaseEntity {
   currentBreakSound: HTMLAudioElement;
 
   blocksMapping: Record<string, Record<string, Record<string, string>>> = {};
-  blocksWorld: Record<string, keyof typeof blocks | 0> = {};
+  blocksWorldChunk: Record<string, Record<string, keyof typeof blocks | 0>> =
+    {};
+
+  chunksWorkers: Record<string, Worker> = {};
+  chunksActive: string[] = [];
+  chunksBlocks: Record<string, string[]> = {};
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
 
     this.inventoryManager = props.inventoryManager;
-    this.blocksWorld = props.worldStorage?.blocksMapping || {};
-    // console.log("🚀 ~ BlockManager ~ constructor ~ this.blocksWorld:", this.blocksWorld)
-
-    this.initialize();
+    this.blocksWorldChunk = props.worldStorage?.blocksWorldChunk || {};
   }
 
   async initialize() {
-    document.addEventListener("mousedown", (e) => {
-      this.onMouseDown(e);
-    });
-
-    if (this.worker)
-      this.worker.addEventListener("message", (e) => {
-        if (e.data.type === "renderBlocks") {
-          const blocksRender: {
-            position: number[];
-            type: keyof typeof blocks;
-          }[] = e.data.data.blocksRender;
-
-          blocksRender.forEach(({ position, type }) => {
-            this.updateBlock(position[0], position[1], position[2], type, true);
-          });
-        } else if (e.data.type === "removeBlocks") {
-        }
-      });
+    document.addEventListener("mousedown", this.onMouseDown.bind(this));
   }
 
   getObject(name: string) {
@@ -61,13 +50,26 @@ export default class BlockManager extends BaseEntity {
     y: number,
     z: number,
     type: keyof typeof blocks,
-    disableWorker?: boolean
+    isRenderChunk?: boolean
   ) {
-    if (disableWorker && this.blocksWorld[nameFromCoordinate(x, y, z)] == 0) {
+    const newUpdateBlockChunk = getChunkCoordinate(x, z);
+    const chunkName = nameChunkFromCoordinate(
+      newUpdateBlockChunk.x,
+      newUpdateBlockChunk.z
+    );
+
+    // if render chunk and block marked as destroyed then return
+    if (
+      isRenderChunk &&
+      this.blocksWorldChunk[chunkName]?.[nameFromCoordinate(x, y, z)] == 0
+    ) {
       return;
     }
 
-    if (!disableWorker) this.blocksWorld[nameFromCoordinate(x, y, z)] = type;
+    if (!isRenderChunk) {
+      this.blocksWorldChunk[chunkName] = this.blocksWorldChunk[chunkName] || {};
+      this.blocksWorldChunk[chunkName][nameFromCoordinate(x, y, z)] = type;
+    }
 
     const position = new Vector3(x, y, z);
 
@@ -86,17 +88,24 @@ export default class BlockManager extends BaseEntity {
       blocksMapping: this.blocksMapping,
     });
 
-    if (!disableWorker)
-      this.worker?.postMessage({
-        type: "addBlock",
-        data: {
-          position: [position.x, position.y, position.z],
-          type: type,
-        },
-      });
+    // add newFunction to bulk render on worker
+    // if (!isRenderChunk)
+    this.worker?.postMessage({
+      type: "addBlock",
+      data: {
+        position: [position.x, position.y, position.z],
+        type: type,
+      },
+    });
   }
 
-  removeBlock(x: number, y: number, z: number, type: string) {
+  removeBlock(
+    x: number,
+    y: number,
+    z: number,
+    type: string,
+    temporary?: boolean
+  ) {
     const halfWidth = BLOCK_WIDTH / 2;
 
     const geometry = new PlaneGeometry(BLOCK_WIDTH, BLOCK_WIDTH);
@@ -176,22 +185,21 @@ export default class BlockManager extends BaseEntity {
       this.scene?.add(plane);
     }
 
-    this.blocksWorld[nameFromCoordinate(x, y, z)] = 0;
-  }
+    delete this.blocksMapping[x][y][z];
 
-  onMouseDown(e: MouseEvent) {
-    switch (e.button) {
-      case 0:
-        // left click
-        this.handleBreakBlock();
-        break;
-      case 1:
-        // middle click
-        this.handleGetBlock();
-        break;
-      case 2:
-        // right click
-        this.handlePlaceBlock();
+    this.removeBlockWorker({
+      position: [x, y, z],
+    });
+
+    if (!temporary) {
+      const newUpdateBlockChunk = getChunkCoordinate(x, z);
+      const chunkName = nameChunkFromCoordinate(
+        newUpdateBlockChunk.x,
+        newUpdateBlockChunk.z
+      );
+
+      this.blocksWorldChunk[chunkName] = this.blocksWorldChunk[chunkName] || {};
+      this.blocksWorldChunk[chunkName][nameFromCoordinate(x, y, z)] = 0;
     }
   }
 
@@ -230,12 +238,11 @@ export default class BlockManager extends BaseEntity {
 
     const intersects = raycaster.intersectObjects(this.scene.children, false);
 
-    if (intersects[0]?.distance > 12) return;
+    if (intersects[0]?.distance > 12 || !intersects[0]) return;
 
     const clickedDetail = detailFromName(intersects[0].object.name);
 
     const { x, y, z, type } = clickedDetail;
-
     this.removeBlock(x, y, z, type);
 
     // play sound
@@ -247,12 +254,6 @@ export default class BlockManager extends BaseEntity {
     this.currentBreakSound = blocks[type as keyof typeof blocks].break;
 
     this.currentBreakSound.play();
-
-    delete this.blocksMapping[x][y][z];
-
-    this.removeBlockWorker({
-      position: [x, y, z],
-    });
   }
 
   handlePlaceBlock() {
@@ -264,7 +265,7 @@ export default class BlockManager extends BaseEntity {
 
     const intersects = raycaster.intersectObjects(this.scene.children, false);
 
-    if (intersects[0]?.distance > 12) return;
+    if (intersects[0]?.distance > 12 || !intersects[0]) return;
 
     const clickedDetail = detailFromName(intersects[0].object.name);
 
@@ -300,8 +301,23 @@ export default class BlockManager extends BaseEntity {
         blockPosition.x,
         blockPosition.y,
         blockPosition.z,
-        this.inventoryManager.currentFocus
+        this.inventoryManager.currentFocus,
+        false
       );
+
+      const chunk = getChunkCoordinate(blockPosition.x, blockPosition.z);
+      const chunkName = nameChunkFromCoordinate(chunk.x, chunk.z);
+
+      if (this.chunksBlocks[chunkName]) {
+        this.chunksBlocks[chunkName].push(
+          nameFromCoordinate(
+            blockPosition.x,
+            blockPosition.y,
+            blockPosition.z,
+            this.inventoryManager.currentFocus
+          )
+        );
+      }
 
       // play sound
 
@@ -335,7 +351,28 @@ export default class BlockManager extends BaseEntity {
     });
   }
 
+  onMouseDown(e: MouseEvent) {
+    switch (e.button) {
+      case 0:
+        // left click
+        this.handleBreakBlock();
+        break;
+      case 1:
+        // middle click
+        this.handleGetBlock();
+        break;
+      case 2:
+        // right click
+        this.handlePlaceBlock();
+    }
+  }
+
   update() {
+    // :( donno
     this.handleHoverBlock();
+  }
+
+  dispose() {
+    document.removeEventListener("mousedown", this.onMouseDown.bind(this));
   }
 }

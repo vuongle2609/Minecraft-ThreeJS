@@ -1,9 +1,9 @@
-import MainScreen from "../pages/mainScreen";
-import CreateWorld from "../pages/createWorld";
-import SelectWorld from "../pages/selectWorld";
-import GameRender from "../pages/gameRender";
+import CreateWorld from "@/UI/pages/createWorld";
+import GameRender from "@/UI/pages/gameRender";
+import InitScreen from "@/UI/pages/initScreen";
+import MainScreen from "@/UI/pages/mainScreen";
+import SelectWorld from "@/UI/pages/selectWorld";
 import SoundManager from "@/game/classes/soundManager";
-import InitScreen from "../pages/initScreen";
 
 export default class Router {
   soundManager: SoundManager;

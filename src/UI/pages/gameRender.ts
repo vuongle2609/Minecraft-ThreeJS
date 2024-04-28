@@ -69,11 +69,15 @@ export default class GameRender extends RenderPage {
   saveGame = () => {
     const worlds = JSON.parse(localStorage.getItem("worlds") || "{}");
 
+    const rotation: number[] = [];
+    this.gameScene.camera.rotation.toArray(rotation);
     const newWorlds: Record<string, WorldsType> = {
       ...worlds,
       [this.id || ""]: {
         ...worlds[this.id || ""],
-        blocksMapping: this.gameScene.blockManager.blocksWorld,
+        blocksWorldChunk: this.gameScene.chunkManager.blocksWorldChunk,
+        initPos: this.gameScene.player.player.position.toArray(),
+        rotation,
       },
     };
 

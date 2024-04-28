@@ -2,7 +2,7 @@ import SoundManager from "@/game/classes/soundManager";
 import Router from "./router";
 
 export default class UI {
-  soundManager = new SoundManager()
+  soundManager = new SoundManager();
   router = new Router(this.soundManager);
 
   constructor() {

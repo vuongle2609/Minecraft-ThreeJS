@@ -6,6 +6,8 @@ export const WORLD_TYPE_MAPPING = {
   [NORMAL_WORLD_TYPE]: "Default",
 };
 
-export const DEFAULT_WORLD_NAME = 'New World'
+export const DEFAULT_WORLD_NAME = "New World";
 
-export const BLOCK_WIDTH = 2
+export const BLOCK_WIDTH = 2;
+
+export const CHUNK_SIZE = 6;

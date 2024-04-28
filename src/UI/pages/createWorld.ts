@@ -118,7 +118,7 @@ export default class CreateWorld extends RenderPage {
       const worldsFormat: WorldsType = {
         ...worldState,
         createdDate: new Date(),
-        blocksMapping: {},
+        blocksWorldChunk: {},
       };
 
       localStorage.setItem(

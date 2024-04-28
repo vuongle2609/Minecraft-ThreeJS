@@ -1,14 +1,14 @@
 import { Vector3 } from "three";
-import nameFromCoordinate from "../helpers/nameFromCoordinate";
 import {
-  SPEED,
   GRAVITY,
   GRAVITY_SCALE,
   JUMP_FORCE,
+  SPEED,
 } from "../../constants/player";
+import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
 import Physics from "./physics";
 
-let blocksMapping: Record<string, string> = {};
+let blocksMapping: Record<string, string | 0> = {};
 
 const addBlock = ({ position, type }: { position: number[]; type: string }) => {
   blocksMapping = {
@@ -22,32 +22,6 @@ const removeBlock = ({ position }: { position: number[] }) => {
     nameFromCoordinate(position[0], position[1], position[2])
   ];
 };
-
-const fakeGenterrant = () => {
-  const width = 14;
-  const height = 2;
-  const halfWidth = width / 2;
-
-  const blocksRender = [];
-
-  // for (let c = 0; c < height; c++) {
-  for (let i = -halfWidth; i < halfWidth; i++) {
-    for (let j = -halfWidth; j < halfWidth; j++) {
-      const blockAdding = { position: [i * 2, 0, j * 2], type: "grass" };
-      addBlock(blockAdding);
-      blocksRender.push(blockAdding);
-    }
-  }
-  // }
-
-  self.postMessage({
-    type: "renderBlocks",
-    data: {
-      blocksRender,
-    },
-  });
-};
-fakeGenterrant();
 
 let originalVy = -25;
 let vy = originalVy;
@@ -120,6 +94,10 @@ const calculateMovement = ({
   });
 };
 
+setTimeout(() => {
+  eventMapping = { ...eventMapping, calculateMovement };
+}, 300);
+
 const jumpCharacter = () => {
   if (onGround) {
     vy = JUMP_FORCE;
@@ -127,10 +105,9 @@ const jumpCharacter = () => {
   }
 };
 
-const eventMapping = {
+let eventMapping: Record<string, Function> = {
   addBlock,
   removeBlock,
-  calculateMovement,
   jumpCharacter,
 };
 
@@ -140,5 +117,5 @@ self.onmessage = (
     data: any;
   }>
 ) => {
-  eventMapping[e.data.type](e.data.data);
+  eventMapping[e.data.type]?.(e.data.data);
 };
