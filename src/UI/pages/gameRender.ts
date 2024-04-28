@@ -75,8 +75,7 @@ export default class GameRender extends RenderPage {
       ...worlds,
       [this.id || ""]: {
         ...worlds[this.id || ""],
-        blocksMapping: this.gameScene.blockManager.blocksWorld,
-        blocksWorldChunk: this.gameScene.blockManager.blocksWorldChunk,
+        blocksWorldChunk: this.gameScene.chunkManager.blocksWorldChunk,
         initPos: this.gameScene.player.player.position.toArray(),
         rotation,
       },

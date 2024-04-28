@@ -98,7 +98,7 @@ export default class Player extends BaseEntity {
   };
 
   handleChangeChunk = () => {
-    this.blockManager?.handleRequestChunks(this.currentChunk);
+    this.chunkManager?.handleRequestChunks(this.currentChunk);
   };
 
   handleMovement(delta: number) {

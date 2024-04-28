@@ -1,9 +1,8 @@
+import { CHUNK_SIZE } from "@/constants";
+import { GRAVITY, GRAVITY_SCALE, JUMP_FORCE, SPEED } from "@/constants/player";
 import { Vector3 } from "three";
 import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
-import { SPEED, GRAVITY, GRAVITY_SCALE, JUMP_FORCE } from "@/constants/player";
 import Physics from "./physics";
-import blocks from "@/constants/blocks";
-import { CHUNK_SIZE } from "@/constants";
 
 let blocksMapping: Record<string, string | 0> = {};
 
@@ -136,9 +135,11 @@ const fakeGenterrant = () => {
 
   // start allow calculate physics
 };
+
 setTimeout(() => {
   eventMapping = { ...eventMapping, calculateMovement };
 }, 300);
+
 const jumpCharacter = () => {
   if (onGround) {
     vy = JUMP_FORCE;
@@ -146,21 +147,21 @@ const jumpCharacter = () => {
   }
 };
 
-const initBlocks = ({
-  blocksInit,
-}: {
-  blocksInit: Record<string, keyof typeof blocks | 0>;
-}) => {
-  blocksMapping = { ...blocksMapping, ...blocksInit };
+// const initBlocks = ({
+//   blocksInit,
+// }: {
+//   blocksInit: Record<string, keyof typeof blocks | 0>;
+// }) => {
+//   blocksMapping = { ...blocksMapping, ...blocksInit };
 
-  // fakeGenterrant();
-};
+//   // fakeGenterrant();
+// };
 
 let eventMapping: Record<string, Function> = {
   addBlock,
   removeBlock,
   jumpCharacter,
-  initBlocks,
+  // initBlocks,
 };
 
 self.onmessage = (

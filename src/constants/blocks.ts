@@ -186,7 +186,7 @@ const blocks = {
       }),
     ],
   },
-  oak_planks: {
+  oakPlanks: {
     name: "Oak Wood Planks",
     icon: oakPlanksIcon,
     step: new Audio(stepStone),
@@ -214,7 +214,7 @@ const blocks = {
       }),
     ],
   },
-  block_of_diamond: {
+  blockOfDiamond: {
     name: "Block of Diamond",
     icon: blockOfDiamondIcon,
     step: new Audio(stepStone),
@@ -242,7 +242,7 @@ const blocks = {
       }),
     ],
   },
-  block_of_iron: {
+  blockOfIron: {
     name: "Block of Iron",
     icon: blockOfIronIcon,
     step: new Audio(stepStone),
@@ -270,7 +270,7 @@ const blocks = {
       }),
     ],
   },
-  block_of_gold: {
+  blockOfGold: {
     name: "Block of Gold",
     icon: blockOfGoldIcon,
     step: new Audio(stepStone),
@@ -298,7 +298,7 @@ const blocks = {
       }),
     ],
   },
-  block_of_lapis: {
+  blockOfLapis: {
     name: "Block of Lapis",
     icon: blockOfLapisIcon,
     step: new Audio(stepStone),
@@ -326,7 +326,7 @@ const blocks = {
       }),
     ],
   },
-  block_of_emerald: {
+  blockOfEmerald: {
     name: "Block of Emerald",
     icon: blockOfEmeraldIcon,
     step: new Audio(stepStone),

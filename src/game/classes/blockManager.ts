@@ -5,11 +5,11 @@ import {
   nameFromCoordinate,
 } from "@/game/helpers/nameFromCoordinate";
 import { Mesh, PlaneGeometry, Vector2, Vector3 } from "three";
-import { detailFromName } from "../helpers/detailFromName";
+import { getChunkCoordinate } from "@/game/helpers/chunkHelpers";
+import { detailFromName } from "@/game/helpers/detailFromName";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
-import { getBlocksInChunk, getChunkCoordinate } from "../helpers/chunkHelpers";
 
 interface PropsType {
   inventoryManager: InventoryManager;
@@ -23,7 +23,6 @@ export default class BlockManager extends BaseEntity {
   currentBreakSound: HTMLAudioElement;
 
   blocksMapping: Record<string, Record<string, Record<string, string>>> = {};
-  blocksWorld: Record<string, keyof typeof blocks | 0> = {};
   blocksWorldChunk: Record<string, Record<string, keyof typeof blocks | 0>> =
     {};
 
@@ -35,8 +34,7 @@ export default class BlockManager extends BaseEntity {
     super(props);
 
     this.inventoryManager = props.inventoryManager;
-    this.blocksWorld = props.worldStorage?.blocksMapping || {};
-    console.log(props.worldStorage?.blocksWorldChunk);
+    this.blocksWorldChunk = props.worldStorage?.blocksWorldChunk || {};
 
     this.initialize();
   }
@@ -44,109 +42,6 @@ export default class BlockManager extends BaseEntity {
   async initialize() {
     document.addEventListener("mousedown", (e) => {
       this.onMouseDown(e);
-    });
-
-    this.renderSavedWorld();
-
-    if (this.worker)
-      this.worker.addEventListener("message", (e) => {
-        if (e.data.type === "renderBlocks") {
-          const blocksRender: {
-            position: number[];
-            type: keyof typeof blocks;
-          }[] = e.data.data.blocksRender;
-
-          blocksRender.forEach(({ position, type }) => {
-            this.updateBlock(position[0], position[1], position[2], type, true);
-          });
-        }
-      });
-  }
-
-  handleRequestChunks(currentChunk: { x: number; z: number }) {
-    // get neighbors
-    const neighborOffset = [
-      { x: -1, z: -1 },
-      { x: -1, z: 0 },
-      { x: -1, z: 1 },
-      { x: 0, z: -1 },
-      { x: 0, z: 1 },
-      { x: 0, z: 0 },
-      { x: 1, z: -1 },
-      { x: 1, z: 0 },
-      { x: 1, z: 1 },
-    ];
-
-    const neighborChunksKeys = neighborOffset.map((offset) => {
-      const chunk = {
-        x: currentChunk.x + offset.x,
-        z: currentChunk.z + offset.z,
-      };
-
-      const chunkName = nameChunkFromCoordinate(chunk.x, chunk.z);
-
-      if (!this.chunksBlocks[chunkName]) {
-        this.chunksWorkers[chunkName] = new Worker(
-          new URL("../terrant/worker", import.meta.url),
-          {
-            type: "module",
-          }
-        );
-
-        this.chunksWorkers[chunkName].postMessage(chunk);
-
-        this.chunksWorkers[chunkName].onmessage = (e) => {
-          const blocksRender: {
-            position: number[];
-            type: keyof typeof blocks;
-          }[] = e.data.blocks;
-
-          const blocksInChunk: string[] = [];
-
-          blocksRender.forEach(({ position, type }) => {
-            this.updateBlock(position[0], position[1], position[2], type);
-            blocksInChunk.push(
-              nameFromCoordinate(position[0], position[1], position[2], type)
-            );
-          });
-
-          this.chunksBlocks[chunkName] = blocksInChunk;
-
-          this.chunksWorkers[chunkName].terminate();
-
-          delete this.chunksWorkers[chunkName];
-        };
-      }
-
-      return chunkName;
-    });
-
-    const inactiveChunk = this.chunksActive.filter(
-      (item) => !neighborChunksKeys.includes(item)
-    );
-
-    let blocksDelete: string[] = [];
-
-    inactiveChunk.forEach((item) => {
-      blocksDelete = [...blocksDelete, ...this.chunksBlocks[item]];
-
-      delete this.chunksBlocks[item];
-    });
-
-    blocksDelete.forEach((blockKey) => {
-      const { type, y, x, z } = detailFromName(blockKey);
-      this.removeBlock(x, y, z, type);
-    });
-
-    this.chunksActive = neighborChunksKeys;
-  }
-
-  renderSavedWorld() {
-    this.worker?.postMessage({
-      type: "initBlocks",
-      data: {
-        blocksInit: this.blocksWorld,
-      },
     });
   }
 
@@ -159,7 +54,8 @@ export default class BlockManager extends BaseEntity {
     y: number,
     z: number,
     type: keyof typeof blocks,
-    disableWorker?: boolean
+    isRenderChunk?: boolean,
+    shouldUpdateBlocks?: boolean
   ) {
     const newUpdateBlockChunk = getChunkCoordinate(x, z);
     const chunkName = nameChunkFromCoordinate(
@@ -167,23 +63,18 @@ export default class BlockManager extends BaseEntity {
       newUpdateBlockChunk.z
     );
 
-    // if (
-    //   disableWorker &&
-    //   this.blocksWorldChunk[chunkName][nameFromCoordinate(x, y, z)] == 0
-    // ) {
-    //   return;
-    // }
-
-    if (disableWorker && this.blocksWorld[nameFromCoordinate(x, y, z)] == 0) {
+    // if render chunk and block marked as destroyed then return
+    if (
+      isRenderChunk &&
+      this.blocksWorldChunk[chunkName]?.[nameFromCoordinate(x, y, z)] == 0
+    ) {
       return;
     }
 
-    if (!disableWorker) {
+    if (!isRenderChunk) {
       this.blocksWorldChunk[chunkName] = this.blocksWorldChunk[chunkName] || {};
       this.blocksWorldChunk[chunkName][nameFromCoordinate(x, y, z)] = type;
     }
-
-    if (!disableWorker) this.blocksWorld[nameFromCoordinate(x, y, z)] = type;
 
     const position = new Vector3(x, y, z);
 
@@ -202,17 +93,30 @@ export default class BlockManager extends BaseEntity {
       blocksMapping: this.blocksMapping,
     });
 
-    if (!disableWorker)
-      this.worker?.postMessage({
-        type: "addBlock",
-        data: {
-          position: [position.x, position.y, position.z],
-          type: type,
-        },
-      });
+    if (shouldUpdateBlocks) {
+      this.chunksBlocks[chunkName].push(
+        nameFromCoordinate(position.x, position.y, position.z, type)
+      );
+    }
+
+    // add newFunction to bulk render on worker
+    // if (!isRenderChunk)
+    this.worker?.postMessage({
+      type: "addBlock",
+      data: {
+        position: [position.x, position.y, position.z],
+        type: type,
+      },
+    });
   }
 
-  removeBlock(x: number, y: number, z: number, type: string) {
+  removeBlock(
+    x: number,
+    y: number,
+    z: number,
+    type: string,
+    temporary?: boolean
+  ) {
     const halfWidth = BLOCK_WIDTH / 2;
 
     const geometry = new PlaneGeometry(BLOCK_WIDTH, BLOCK_WIDTH);
@@ -298,8 +202,7 @@ export default class BlockManager extends BaseEntity {
       position: [x, y, z],
     });
 
-    this.blocksWorld[nameFromCoordinate(x, y, z)] = 0;
-    {
+    if (!temporary) {
       const newUpdateBlockChunk = getChunkCoordinate(x, z);
       const chunkName = nameChunkFromCoordinate(
         newUpdateBlockChunk.x,
@@ -362,7 +265,7 @@ export default class BlockManager extends BaseEntity {
 
     const intersects = raycaster.intersectObjects(this.scene.children, false);
 
-    if (intersects[0]?.distance > 12) return;
+    if (intersects[0]?.distance > 12 || !intersects[0]) return;
 
     const clickedDetail = detailFromName(intersects[0].object.name);
 
@@ -389,7 +292,7 @@ export default class BlockManager extends BaseEntity {
 
     const intersects = raycaster.intersectObjects(this.scene.children, false);
 
-    if (intersects[0]?.distance > 12) return;
+    if (intersects[0]?.distance > 12 || !intersects[0]) return;
 
     const clickedDetail = detailFromName(intersects[0].object.name);
 
@@ -425,7 +328,9 @@ export default class BlockManager extends BaseEntity {
         blockPosition.x,
         blockPosition.y,
         blockPosition.z,
-        this.inventoryManager.currentFocus
+        this.inventoryManager.currentFocus,
+        false,
+        true
       );
 
       // play sound
@@ -461,6 +366,7 @@ export default class BlockManager extends BaseEntity {
   }
 
   update() {
+    // :( donno
     this.handleHoverBlock();
   }
 }

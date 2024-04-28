@@ -2,7 +2,7 @@ import { $ } from "@/UI/utils/selector";
 import MouseControl from "@/game/action/mouseControl";
 import Player from "@/game/player/character";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
-import BlockManager from "./blockManager";
+import ChunkManager from "./chunkManager";
 import InventoryManager from "./inventoryManager";
 import Light from "./light";
 import { RenderPage } from "./renderPage";
@@ -46,7 +46,7 @@ export default class GameScene extends RenderPage {
 
   mouseControl: MouseControl;
 
-  blockManager: BlockManager;
+  chunkManager: ChunkManager;
 
   inventoryManager: InventoryManager;
 
@@ -99,7 +99,7 @@ export default class GameScene extends RenderPage {
       mouseControl: this.mouseControl,
     });
 
-    this.blockManager = new BlockManager({
+    this.chunkManager = new ChunkManager({
       mouseControl: this.mouseControl,
       scene: this.scene,
       camera: this.camera,
@@ -113,7 +113,7 @@ export default class GameScene extends RenderPage {
     this.player = new Player({
       scene: this.scene,
       camera: this.camera,
-      blockManager: this.blockManager,
+      chunkManager: this.chunkManager,
       worker: this.worker,
       initPos: this.worldStorage.initPos,
     });
@@ -159,7 +159,6 @@ export default class GameScene extends RenderPage {
     this.renderer.dispose();
     this.removedWindow = true;
     this.worker.terminate();
-    // this.blockManager.terrantWorker.terminate();
   }
 
   RAF(t: number) {
@@ -182,7 +181,7 @@ export default class GameScene extends RenderPage {
 
       this.player?.update(delta, t);
 
-      this.blockManager?.update();
+      this.chunkManager?.update();
 
       this.renderer.render(this.scene, this.camera);
     }
