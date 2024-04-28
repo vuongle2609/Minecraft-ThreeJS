@@ -1,6 +1,10 @@
-import { CHUNK_SIZE } from "@/constants";
-import { GRAVITY, GRAVITY_SCALE, JUMP_FORCE, SPEED } from "@/constants/player";
 import { Vector3 } from "three";
+import {
+  GRAVITY,
+  GRAVITY_SCALE,
+  JUMP_FORCE,
+  SPEED,
+} from "../../constants/player";
 import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
 import Physics from "./physics";
 
@@ -90,52 +94,6 @@ const calculateMovement = ({
   });
 };
 
-const fakeGenterrant = () => {
-  const width = CHUNK_SIZE;
-  const height = 2;
-  const halfWidth = width / 2;
-
-  const blocksRender = [];
-
-  // maybe remove
-  Object.keys(blocksMapping).forEach((key) => {
-    const position = key.split("_").map(Number);
-    const blockAdding = { position, type: blocksMapping[key] };
-
-    blocksRender.push(blockAdding);
-  });
-
-  for (let c = 0; c < height; c++) {
-    for (let i = -halfWidth; i < halfWidth; i++) {
-      for (let j = -halfWidth; j < halfWidth; j++) {
-        const position = [i * 2, c * -2, j * 2];
-        const blockAdding = { position, type: "grass" };
-
-        if (
-          blocksMapping[
-            nameFromCoordinate(position[0], position[1], position[2])
-          ] !== 0 ||
-          blocksMapping[
-            nameFromCoordinate(position[0], position[1], position[2])
-          ]
-        ) {
-          addBlock(blockAdding);
-          blocksRender.push(blockAdding);
-        }
-      }
-    }
-  }
-
-  self.postMessage({
-    type: "renderBlocks",
-    data: {
-      blocksRender,
-    },
-  });
-
-  // start allow calculate physics
-};
-
 setTimeout(() => {
   eventMapping = { ...eventMapping, calculateMovement };
 }, 300);
@@ -147,21 +105,10 @@ const jumpCharacter = () => {
   }
 };
 
-// const initBlocks = ({
-//   blocksInit,
-// }: {
-//   blocksInit: Record<string, keyof typeof blocks | 0>;
-// }) => {
-//   blocksMapping = { ...blocksMapping, ...blocksInit };
-
-//   // fakeGenterrant();
-// };
-
 let eventMapping: Record<string, Function> = {
   addBlock,
   removeBlock,
   jumpCharacter,
-  // initBlocks,
 };
 
 self.onmessage = (

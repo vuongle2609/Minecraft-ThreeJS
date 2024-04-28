@@ -10,4 +10,4 @@ export const DEFAULT_WORLD_NAME = "New World";
 
 export const BLOCK_WIDTH = 2;
 
-export const CHUNK_SIZE = 4;
+export const CHUNK_SIZE = 6;

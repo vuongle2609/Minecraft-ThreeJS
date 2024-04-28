@@ -1,9 +1,6 @@
-import { CHUNK_SIZE } from "@/constants/index";
-import {
-  nameChunkFromCoordinate,
-  nameFromCoordinate,
-} from "./nameFromCoordinate";
-import blocks from "@/constants/blocks";
+import blocks from "../../constants/blocks";
+import { CHUNK_SIZE } from "../../constants/index";
+import { nameFromCoordinate } from "./nameFromCoordinate";
 
 export const getChunkCoordinate = (x: number, z: number) => {
   const chunkCal = CHUNK_SIZE * 2;
