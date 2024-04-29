@@ -1,4 +1,6 @@
 import {
+  BufferAttribute,
+  BufferGeometry,
   MeshToonMaterial,
   NearestFilter,
   PlaneGeometry,
@@ -373,6 +375,29 @@ Object.values(blocks).forEach((block) => {
   block.break.volume = 0.6;
 });
 
-export const renderGeometry = new PlaneGeometry(BLOCK_WIDTH, BLOCK_WIDTH);
+// export const renderGeometry = new PlaneGeometry(BLOCK_WIDTH, BLOCK_WIDTH);
+
+export const renderGeometry = (() => {
+  const geometry = new BufferGeometry();
+  const vertices = new Float32Array([
+    -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0,
+
+    1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0,
+  ]);
+
+  const uvs = new Float32Array([
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0,
+
+    1.0, 1.0, 0.0, 1.0, 0.0, 0.0,
+  ]);
+
+  geometry.setAttribute("position", new BufferAttribute(vertices, 3));
+  geometry.setAttribute("uv", new BufferAttribute(uvs, 2));
+
+  // Normals (Important for lighting)
+  geometry.computeVertexNormals();
+
+  return geometry;
+})();
 
 export default blocks;

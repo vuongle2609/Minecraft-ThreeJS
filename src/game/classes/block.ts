@@ -8,7 +8,6 @@ interface PropsType {
   position: Vector3;
   type: keyof typeof blocks;
   blocksMapping: Record<string, Record<string, Record<string, BlockA>>>;
-  intancedFaces: Record<string, number>;
 }
 
 enum Face {
@@ -31,8 +30,6 @@ type BlockFaces = {
   [bottom]: null | Mesh;
 };
 
-const halfWidth = BLOCK_WIDTH / 2;
-
 export default class BlockA extends BaseEntity {
   blockFaces: BlockFaces = {
     [leftZ]: null,
@@ -46,7 +43,6 @@ export default class BlockA extends BaseEntity {
   position: Vector3;
   atttribute: BlockAttributeType;
   blocksMapping: Record<string, Record<string, Record<string, BlockA>>>;
-  intancedFaces: Record<string, number>;
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
@@ -55,7 +51,6 @@ export default class BlockA extends BaseEntity {
     this.position = props.position;
     this.atttribute = blocks[props.type];
     this.blocksMapping = props.blocksMapping;
-    this.intancedFaces= props.intancedFaces
 
     this.initialize();
   }
@@ -122,9 +117,9 @@ export default class BlockA extends BaseEntity {
 
     const { x, y, z } = this.position;
 
-    const { position, rotation } = this.calFaceAttr(face);
+    const { rotation } = this.calFaceAttr(face);
 
-    plane.position.set(position[0], position[1], position[2]);
+    plane.position.copy(this.position);
     plane.rotation.set(rotation[0], rotation[1], rotation[2]);
     plane.name = nameFromCoordinate(x, y, z, this.type, face);
 
@@ -133,31 +128,25 @@ export default class BlockA extends BaseEntity {
   }
 
   calFaceAttr(face: keyof BlockFaces) {
-    const { x, y, z } = this.position;
-
     switch (face) {
       case leftZ:
-        return { position: [x, y, z + halfWidth], rotation: [0, 0, 0] };
+        return { rotation: [0, 0, 0] };
       case rightZ:
-        return { position: [x, y, z - halfWidth], rotation: [0, Math.PI, 0] };
+        return { rotation: [0, Math.PI, 0] };
       case leftX:
         return {
-          position: [x + halfWidth, y, z],
           rotation: [0, Math.PI / 2, 0],
         };
       case rightX:
         return {
-          position: [x - halfWidth, y, z],
           rotation: [0, -Math.PI / 2, 0],
         };
       case top:
         return {
-          position: [x, y + halfWidth, z],
           rotation: [-Math.PI / 2, 0, 0],
         };
       case bottom:
         return {
-          position: [x, y - halfWidth, z],
           rotation: [Math.PI / 2, 0, 0],
         };
     }
