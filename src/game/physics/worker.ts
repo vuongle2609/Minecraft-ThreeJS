@@ -18,6 +18,13 @@ const addBlock = ({ position, type }: { position: number[]; type: string }) => {
   };
 };
 
+const bulkAddBlock = ({ blocks }: { blocks: Record<string, string | 0> }) => {
+  blocksMapping = {
+    ...blocksMapping,
+    ...blocks,
+  };
+};
+
 const removeBlock = ({ position }: { position: number[] }) => {
   delete blocksMapping[
     nameFromCoordinate(position[0], position[1], position[2])
@@ -110,6 +117,7 @@ let eventMapping: Record<string, Function> = {
   addBlock,
   removeBlock,
   jumpCharacter,
+  bulkAddBlock,
 };
 
 self.onmessage = (

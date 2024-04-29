@@ -1,11 +1,11 @@
-import blocks, { renderGeometry } from "@/constants/blocks";
+import blocks from "@/constants/blocks";
 import { getChunkCoordinate } from "@/game/helpers/chunkHelpers";
 import { detailFromName } from "@/game/helpers/detailFromName";
 import {
   nameChunkFromCoordinate,
   nameFromCoordinate,
 } from "@/game/helpers/nameFromCoordinate";
-import { InstancedMesh, PlaneGeometry, Vector2, Vector3 } from "three";
+import { Vector2, Vector3 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 
 import Block from "./block";
@@ -46,13 +46,21 @@ export default class BlockManager extends BaseEntity {
     return this.scene?.getObjectByName(name) as THREE.Object3D;
   }
 
-  updateBlock(
-    x: number,
-    y: number,
-    z: number,
-    type: keyof typeof blocks,
-    isRenderChunk?: boolean
-  ) {
+  updateBlock({
+    x,
+    y,
+    z,
+    type,
+    isRenderChunk,
+    shouldNotRenderIntoScene,
+  }: {
+    x: number;
+    y: number;
+    z: number;
+    type: keyof typeof blocks;
+    isRenderChunk?: boolean;
+    shouldNotRenderIntoScene?: boolean;
+  }) {
     const newUpdateBlockChunk = getChunkCoordinate(x, z);
     const chunkName = nameChunkFromCoordinate(
       newUpdateBlockChunk.x,
@@ -77,6 +85,7 @@ export default class BlockManager extends BaseEntity {
       scene: this.scene,
       type: type,
       blocksMapping: this.blocksMapping,
+      shouldNotRender: shouldNotRenderIntoScene,
     });
 
     this.blocksMapping[x] = {
@@ -86,16 +95,6 @@ export default class BlockManager extends BaseEntity {
         [z]: block,
       },
     };
-
-    // add newFunction to bulk render on worker
-    // if (!isRenderChunk)
-    this.worker?.postMessage({
-      type: "addBlock",
-      data: {
-        position: [position.x, position.y, position.z],
-        type: type,
-      },
-    });
   }
 
   removeBlock(x: number, y: number, z: number, temporary?: boolean) {
@@ -213,13 +212,21 @@ export default class BlockManager extends BaseEntity {
     }
 
     if (this.inventoryManager.currentFocus) {
-      this.updateBlock(
-        blockPosition.x,
-        blockPosition.y,
-        blockPosition.z,
-        this.inventoryManager.currentFocus,
-        false
-      );
+      this.updateBlock({
+        x: blockPosition.x,
+        y: blockPosition.y,
+        z: blockPosition.z,
+        type: this.inventoryManager.currentFocus,
+        isRenderChunk: false,
+      });
+
+      this.worker?.postMessage({
+        type: "addBlock",
+        data: {
+          position: [blockPosition.x, blockPosition.y, blockPosition.z],
+          type: this.inventoryManager.currentFocus,
+        },
+      });
 
       const chunk = getChunkCoordinate(blockPosition.x, blockPosition.z);
       const chunkName = nameChunkFromCoordinate(chunk.x, chunk.z);

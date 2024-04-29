@@ -1,2 +1,23 @@
-- add check is on ground with sound foot managerment
-- add object blocks mapping
+- add check is on ground with sound foot managerment (done)
+- add object blocks mapping (done)
+
+
+ (cal optimize render block)  
+
+how?
+in worker cal y object ?
+
+then in main thread cal the rest
+
+before optimize 2700
+
+
+> rrender
+
+
+
+//////
+
+convert to instanced mesh
+detect face using rotation
+each face only hold type using name

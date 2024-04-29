@@ -7,12 +7,17 @@ import { detailFromName } from "../helpers/detailFromName";
 import { BasePropsType } from "./baseEntity";
 import BlockManager from "./blockManager";
 import InventoryManager from "./inventoryManager";
+import { Face } from "@/constants/block";
+
+const { leftZ, rightZ, leftX, rightX } = Face;
 
 interface PropsType {
   inventoryManager: InventoryManager;
 }
 
 export default class ChunkManager extends BlockManager {
+  chunkRenderQueue: Function[] = [];
+
   constructor(props: BasePropsType & PropsType) {
     super(props);
 
@@ -27,21 +32,22 @@ export default class ChunkManager extends BlockManager {
   handleRequestChunks(currentChunk: { x: number; z: number }) {
     // get neighbors
     const neighborOffset = [
-      { x: -1, z: -1 },
-      { x: -1, z: 0 },
-      { x: -1, z: 1 },
-      { x: 0, z: -1 },
-      { x: 0, z: 1 },
-      { x: 0, z: 0 },
-      { x: 1, z: -1 },
-      { x: 1, z: 0 },
-      { x: 1, z: 1 },
+      { x: 0, z: 0, sides: [] },
+      { x: -1, z: 0, sides: [leftX] },
+      { x: 1, z: 0, sides: [rightX] },
+      { x: 0, z: -1, sides: [leftZ] },
+      { x: 0, z: 1, sides: [rightZ] },
+      { x: -1, z: -1, sides: [leftX, leftZ] },
+      { x: -1, z: 1, sides: [leftX, rightZ] },
+      { x: 1, z: -1, sides: [leftZ, rightX] },
+      { x: 1, z: 1, sides: [rightX, rightZ] },
     ];
 
     const neighborChunksKeys = neighborOffset.map((offset) => {
       const chunk = {
         x: currentChunk.x + offset.x,
         z: currentChunk.z + offset.z,
+        sides: offset.sides,
       };
 
       const chunkName = nameChunkFromCoordinate(chunk.x, chunk.z);
@@ -65,36 +71,23 @@ export default class ChunkManager extends BlockManager {
         position: number[];
         type: keyof typeof blocks;
       }
-    > = {}
+    > = {},
+    blocksToRender: Record<string, 1>
   ) => {
-    // if after process blocks in chunk and return data but chunk no
-    // longer active then abort
-    if (!this.chunksActive.includes(chunkName)) return;
-
-    if (this.blocksWorldChunk[chunkName] && blocksRenderWorker) {
-      blocksRenderWorker = {
-        ...blocksRenderWorker,
-        ...Object.keys(this.blocksWorldChunk[chunkName]).reduce(
-          (prev, currKey) => {
-            const { x, y, z } = detailFromName(currKey);
-            return {
-              ...prev,
-              [currKey]: {
-                position: [x, y, z],
-                type: this.blocksWorldChunk[chunkName][currKey],
-              },
-            };
-          },
-          {}
-        ),
-      };
-    }
-
-    const blocksRender = Object.values(blocksRenderWorker);
+    const blocksRender = Object.keys(blocksRenderWorker);
     const blocksInChunk: string[] = [];
 
-    blocksRender.forEach(({ position, type }) => {
-      this.updateBlock(position[0], position[1], position[2], type, true);
+    blocksRender.forEach((key) => {
+      const { position, type } = blocksRenderWorker[key];
+
+      this.updateBlock({
+        x: position[0],
+        y: position[1],
+        z: position[2],
+        type,
+        isRenderChunk: true,
+        shouldNotRenderIntoScene: !blocksToRender[key],
+      });
 
       blocksInChunk.push(
         nameFromCoordinate(position[0], position[1], position[2])
@@ -107,6 +100,53 @@ export default class ChunkManager extends BlockManager {
     this.chunksWorkers[chunkName]?.terminate();
     delete this.chunksWorkers[chunkName];
   };
+
+  handleRenderChunkQueue(
+    chunkName: string,
+    blocksRenderWorker: Record<
+      string,
+      {
+        position: number[];
+        type: keyof typeof blocks;
+      }
+    > = {},
+    blocksToRender: Record<string, 1>
+  ) {
+    // if after process blocks in chunk and return data but chunk no
+    // longer active then abort
+    if (!this.chunksActive.includes(chunkName)) return;
+
+    // priority add to physics cal first
+    this.worker?.postMessage({
+      type: "bulkAddBlock",
+      data: {
+        blocks: Object.keys(blocksRenderWorker).reduce((prev, key) => {
+          return { ...prev, [key]: blocksRenderWorker[key].type };
+        }, {}),
+      },
+    });
+
+    // maybe the queue things is not working :(
+    let shouldStart = false;
+    if (this.chunkRenderQueue.length === 0) {
+      shouldStart = true;
+    }
+
+    this.chunkRenderQueue.unshift(() => {
+      this.handleRenderChunkBlocks(
+        chunkName,
+        blocksRenderWorker,
+        blocksToRender
+      );
+      this.chunkRenderQueue.pop();
+
+      this.chunkRenderQueue.at(-1)?.();
+    });
+
+    if (shouldStart) {
+      this.chunkRenderQueue.at(-1)?.();
+    }
+  }
 
   handleClearChunks = (neighborChunksKeys: string[]) => {
     const inactiveChunk = this.chunksActive.filter(
@@ -146,10 +186,15 @@ export default class ChunkManager extends BlockManager {
       this.chunksWorkers[chunkName].postMessage({
         ...chunk,
         type: this.worldStorage?.worldType,
+        chunkBlocksCustom: this.blocksWorldChunk[chunkName],
       });
 
       this.chunksWorkers[chunkName].onmessage = (e) => {
-        this.handleRenderChunkBlocks(chunkName, e.data.blocks);
+        this.handleRenderChunkQueue(
+          chunkName,
+          e.data.blocks,
+          e.data.blocksToRender
+        );
       };
     }
   };

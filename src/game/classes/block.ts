@@ -1,34 +1,18 @@
 import { BLOCK_WIDTH } from "@/constants";
 import blocks, { BlockAttributeType, renderGeometry } from "@/constants/blocks";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
-import { InstancedMesh, Mesh, Object3D, PlaneGeometry, Vector3 } from "three";
+import { Mesh, Object3D, Vector3 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
+import { BlockFaces, Face } from "@/constants/block";
 
 interface PropsType {
   position: Vector3;
   type: keyof typeof blocks;
   blocksMapping: Record<string, Record<string, Record<string, BlockA>>>;
-}
-
-enum Face {
-  leftZ,
-  rightZ,
-  leftX,
-  rightX,
-  top,
-  bottom,
+  shouldNotRender?: boolean;
 }
 
 const { leftZ, rightZ, leftX, rightX, top, bottom } = Face;
-
-type BlockFaces = {
-  [leftZ]: null | Mesh;
-  [rightZ]: null | Mesh;
-  [leftX]: null | Mesh;
-  [rightX]: null | Mesh;
-  [top]: null | Mesh;
-  [bottom]: null | Mesh;
-};
 
 export default class BlockA extends BaseEntity {
   blockFaces: BlockFaces = {
@@ -52,15 +36,15 @@ export default class BlockA extends BaseEntity {
     this.atttribute = blocks[props.type];
     this.blocksMapping = props.blocksMapping;
 
-    this.initialize();
+    if (!props.shouldNotRender) this.render();
   }
 
   getObject(name: string) {
     return this.scene?.getObjectByName(name) as THREE.Object3D;
   }
 
-  async initialize() {
-    // should handle at top level
+  async render() {
+    // should handle at top level, maybe dont need?
     // if (position.x % 2 || position.y % 2 || position.z % 2) return;
 
     const { x, y, z } = this.position;
