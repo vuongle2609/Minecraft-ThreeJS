@@ -8,7 +8,7 @@ interface PropsType {
   position: Vector3;
   type: keyof typeof blocks;
   blocksMapping: Record<string, Record<string, Record<string, BlockA>>>;
-  intancedFaces: Record<string, number>;
+  blocksIntanced: Record<string, InstancedMesh[]>;
 }
 
 enum Face {
@@ -46,7 +46,8 @@ export default class BlockA extends BaseEntity {
   position: Vector3;
   atttribute: BlockAttributeType;
   blocksMapping: Record<string, Record<string, Record<string, BlockA>>>;
-  intancedFaces: Record<string, number>;
+  blocksIntanced: Record<string, InstancedMesh[]>;
+  dummyMesh = new Mesh()
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
@@ -55,7 +56,7 @@ export default class BlockA extends BaseEntity {
     this.position = props.position;
     this.atttribute = blocks[props.type];
     this.blocksMapping = props.blocksMapping;
-    this.intancedFaces= props.intancedFaces
+    this.blocksIntanced = props.blocksIntanced;
 
     this.initialize();
   }
@@ -124,9 +125,9 @@ export default class BlockA extends BaseEntity {
 
     const { position, rotation } = this.calFaceAttr(face);
 
-    plane.position.set(position[0], position[1], position[2]);
-    plane.rotation.set(rotation[0], rotation[1], rotation[2]);
-    plane.name = nameFromCoordinate(x, y, z, this.type, face);
+    this.dummyMesh.position.set(position[0], position[1], position[2]);
+    this.dummyMesh.rotation.set(rotation[0], rotation[1], rotation[2]);
+    renderGeometry.name = nameFromCoordinate(x, y, z, this.type, face);
 
     this.blockFaces[face] = plane;
     this.scene?.add(plane);

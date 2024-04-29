@@ -10,7 +10,9 @@ export const DEFAULT_WORLD_NAME = "New World";
 
 export const BLOCK_WIDTH = 2;
 
-export const CHUNK_SIZE = 26;
+// 4x 5x fps
+// export const CHUNK_SIZE = 26;
+export const CHUNK_SIZE = 2;
 
 export const TIME_TO_INTERACT = 3000;
 

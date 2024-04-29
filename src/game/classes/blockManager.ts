@@ -31,19 +31,19 @@ export default class BlockManager extends BaseEntity {
   chunksWorkers: Record<string, Worker> = {};
   chunksActive: string[] = [];
 
-  // intancedFaces: Record<string, number> = Object.keys(blocks).reduce(
-  //   (prev, key) => {
-  //     return {
-  //       ...prev,
-  //       [key]: new InstancedMesh(
-  //         renderGeometry,
-  //         blocks[key as keyof typeof blocks].texture,
-  //         1002
-  //       ),
-  //     };
-  //   },
-  //   {}
-  // );
+  blocksIntanced: Record<string, InstancedMesh[]> = Object.keys(blocks).reduce(
+    (prev, key) => {
+      const currBlock = blocks[key as keyof typeof blocks];
+
+      return {
+        ...prev,
+        [key]: currBlock.texture.map(
+          (texture) => new InstancedMesh(renderGeometry, texture, 1002)
+        ),
+      };
+    },
+    {}
+  );
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
@@ -91,7 +91,7 @@ export default class BlockManager extends BaseEntity {
       scene: this.scene,
       type: type,
       blocksMapping: this.blocksMapping,
-      // intancedFaces: this.intancedFaces,
+      blocksIntanced: this.blocksIntanced,
     });
 
     this.blocksMapping[x] = {
