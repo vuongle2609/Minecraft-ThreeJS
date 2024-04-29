@@ -77,6 +77,16 @@ export default class Player extends BaseEntity {
             new Vector3(position[0], position[1], position[2])
           );
 
+          if (this.player.position.y < -61) {
+            this.player.position.copy(
+              new Vector3(
+                CHUNK_SIZE / 2,
+                CHARACTER_LENGTH + 0.5,
+                CHUNK_SIZE / 2
+              )
+            );
+          }
+
           this.handleDetectChunkChange();
         }
       });

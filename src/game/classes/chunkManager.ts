@@ -56,6 +56,7 @@ export default class ChunkManager extends BlockManager {
     this.chunksActive = neighborChunksKeys;
   }
 
+  // can optimize worker speed
   handleRenderChunkBlocks = (
     chunkName: string,
     blocksRenderWorker: Record<
@@ -68,7 +69,6 @@ export default class ChunkManager extends BlockManager {
   ) => {
     // if after process blocks in chunk and return data but chunk no
     // longer active then abort
-
     if (!this.chunksActive.includes(chunkName)) return;
 
     if (this.blocksWorldChunk[chunkName] && blocksRenderWorker) {
@@ -97,7 +97,7 @@ export default class ChunkManager extends BlockManager {
       this.updateBlock(position[0], position[1], position[2], type, true);
 
       blocksInChunk.push(
-        nameFromCoordinate(position[0], position[1], position[2], type)
+        nameFromCoordinate(position[0], position[1], position[2])
       );
     });
 
@@ -125,9 +125,9 @@ export default class ChunkManager extends BlockManager {
     });
 
     blocksDelete.forEach((blockKey) => {
-      const { type, y, x, z } = detailFromName(blockKey);
-      if (type === "blockOfDiamon") console.log("xoa kim xu");
-      this.removeBlock(x, y, z, type, true);
+      const { y, x, z } = detailFromName(blockKey);
+
+      this.removeBlock(x, y, z, true);
     });
   };
 
@@ -143,7 +143,10 @@ export default class ChunkManager extends BlockManager {
         }
       );
 
-      this.chunksWorkers[chunkName].postMessage(chunk);
+      this.chunksWorkers[chunkName].postMessage({
+        ...chunk,
+        type: this.worldStorage?.worldType,
+      });
 
       this.chunksWorkers[chunkName].onmessage = (e) => {
         this.handleRenderChunkBlocks(chunkName, e.data.blocks);

@@ -6,7 +6,14 @@ import ChunkManager from "./chunkManager";
 import InventoryManager from "./inventoryManager";
 import Light from "./light";
 import { RenderPage } from "./renderPage";
-import { WebGLRenderer, Scene, PerspectiveCamera, Clock, Color } from "three";
+import {
+  WebGLRenderer,
+  Scene,
+  PerspectiveCamera,
+  Clock,
+  Color,
+  Fog,
+} from "three";
 import { WorldsType } from "@/type";
 
 export default class GameScene extends RenderPage {
@@ -78,6 +85,7 @@ export default class GameScene extends RenderPage {
     document.body.appendChild(this.element);
 
     this.scene.background = new Color("#87CEEB");
+    // this.scene.fog = new Fog(0xcccccc, 3, 40);
 
     if (this.worldStorage.rotation)
       this.camera.rotation.fromArray(this.worldStorage.rotation as any);

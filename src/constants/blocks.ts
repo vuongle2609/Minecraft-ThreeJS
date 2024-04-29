@@ -1,4 +1,9 @@
-import { MeshToonMaterial, NearestFilter, TextureLoader } from "three";
+import {
+  MeshToonMaterial,
+  NearestFilter,
+  PlaneGeometry,
+  TextureLoader,
+} from "three";
 
 // textures image
 import grassTopGreen from "@/assets/block/grassBlockTop.png";
@@ -40,6 +45,7 @@ import placeBlock from "@/assets/sound/place/block.mp3";
 import breakGrass from "@/assets/sound/break/grass.mp3";
 import breakWood from "@/assets/sound/break/wood.mp3";
 import breakBlock from "@/assets/sound/break/block.mp3";
+import { BLOCK_WIDTH } from ".";
 
 // texture load
 const textureLoader = new TextureLoader();
@@ -89,16 +95,16 @@ const blocks = {
         map: textures.grassSideTexture,
       }),
       new worldMaterial({
+        map: textures.grassSideTexture,
+      }),
+      new worldMaterial({
+        map: textures.grassSideTexture,
+      }),
+      new worldMaterial({
         map: textures.grassTopGreenTexture,
       }),
       new worldMaterial({
         map: textures.dirtTexture,
-      }),
-      new worldMaterial({
-        map: textures.grassSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.grassSideTexture,
       }),
     ],
   },
@@ -172,17 +178,18 @@ const blocks = {
       new worldMaterial({
         map: textures.furnaceFrontTexture,
       }),
-      new worldMaterial({
-        map: textures.furnaceTopTexture,
-      }),
-      new worldMaterial({
-        map: textures.furnaceTopTexture,
-      }),
+
       new worldMaterial({
         map: textures.furnaceSideTexture,
       }),
       new worldMaterial({
         map: textures.furnaceSideTexture,
+      }),
+      new worldMaterial({
+        map: textures.furnaceTopTexture,
+      }),
+      new worldMaterial({
+        map: textures.furnaceTopTexture,
       }),
     ],
   },
@@ -355,6 +362,7 @@ const blocks = {
     ],
   },
 };
+export type BlockAttributeType = (typeof blocks)[keyof typeof blocks];
 
 Object.values(blocks).forEach((block) => {
   block.step.loop = true;
@@ -364,5 +372,7 @@ Object.values(blocks).forEach((block) => {
   block.place.volume = 0.6;
   block.break.volume = 0.6;
 });
+
+export const renderGeometry = new PlaneGeometry(BLOCK_WIDTH, BLOCK_WIDTH);
 
 export default blocks;

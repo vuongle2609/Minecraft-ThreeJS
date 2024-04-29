@@ -1,13 +1,13 @@
-import { BLOCK_WIDTH } from "@/constants";
-import blocks from "@/constants/blocks";
+import blocks, { renderGeometry } from "@/constants/blocks";
 import { getChunkCoordinate } from "@/game/helpers/chunkHelpers";
 import { detailFromName } from "@/game/helpers/detailFromName";
 import {
   nameChunkFromCoordinate,
   nameFromCoordinate,
 } from "@/game/helpers/nameFromCoordinate";
-import { Mesh, PlaneGeometry, Vector2, Vector3 } from "three";
+import { InstancedMesh, PlaneGeometry, Vector2, Vector3 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
+
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
 
@@ -22,13 +22,28 @@ export default class BlockManager extends BaseEntity {
 
   currentBreakSound: HTMLAudioElement;
 
-  blocksMapping: Record<string, Record<string, Record<string, string>>> = {};
+  blocksMapping: Record<string, Record<string, Record<string, Block>>> = {};
+
   blocksWorldChunk: Record<string, Record<string, keyof typeof blocks | 0>> =
     {};
+  chunksBlocks: Record<string, string[]> = {};
 
   chunksWorkers: Record<string, Worker> = {};
   chunksActive: string[] = [];
-  chunksBlocks: Record<string, string[]> = {};
+
+  // intancedFaces: Record<string, number> = Object.keys(blocks).reduce(
+  //   (prev, key) => {
+  //     return {
+  //       ...prev,
+  //       [key]: new InstancedMesh(
+  //         renderGeometry,
+  //         blocks[key as keyof typeof blocks].texture,
+  //         1002
+  //       ),
+  //     };
+  //   },
+  //   {}
+  // );
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
@@ -38,7 +53,7 @@ export default class BlockManager extends BaseEntity {
   }
 
   async initialize() {
-    document.addEventListener("mousedown", this.onMouseDown.bind(this));
+    document.addEventListener("mousedown", this.onMouseDown.bind(this), false);
   }
 
   getObject(name: string) {
@@ -57,36 +72,35 @@ export default class BlockManager extends BaseEntity {
       newUpdateBlockChunk.x,
       newUpdateBlockChunk.z
     );
+    const coorName = nameFromCoordinate(x, y, z);
 
     // if render chunk and block marked as destroyed then return
-    if (
-      isRenderChunk &&
-      this.blocksWorldChunk[chunkName]?.[nameFromCoordinate(x, y, z)] == 0
-    ) {
+    if (isRenderChunk && this.blocksWorldChunk[chunkName]?.[coorName] == 0) {
       return;
     }
 
     if (!isRenderChunk) {
       this.blocksWorldChunk[chunkName] = this.blocksWorldChunk[chunkName] || {};
-      this.blocksWorldChunk[chunkName][nameFromCoordinate(x, y, z)] = type;
+      this.blocksWorldChunk[chunkName][coorName] = type;
     }
 
     const position = new Vector3(x, y, z);
 
-    this.blocksMapping[position.x] = {
-      ...this.blocksMapping[position.x],
-      [position.y]: {
-        ...this.blocksMapping[position.x]?.[position.y],
-        [position.z]: type,
-      },
-    };
-
-    new Block({
+    const block = new Block({
       position: position,
       scene: this.scene,
       type: type,
       blocksMapping: this.blocksMapping,
+      // intancedFaces: this.intancedFaces,
     });
+
+    this.blocksMapping[x] = {
+      ...this.blocksMapping[x],
+      [y]: {
+        ...this.blocksMapping[x]?.[y],
+        [z]: block,
+      },
+    };
 
     // add newFunction to bulk render on worker
     // if (!isRenderChunk)
@@ -99,99 +113,16 @@ export default class BlockManager extends BaseEntity {
     });
   }
 
-  removeBlock(
-    x: number,
-    y: number,
-    z: number,
-    type: string,
-    temporary?: boolean
-  ) {
-    const halfWidth = BLOCK_WIDTH / 2;
+  removeBlock(x: number, y: number, z: number, temporary?: boolean) {
+    const blockToRemove = this.blocksMapping[x][y][z];
 
-    const geometry = new PlaneGeometry(BLOCK_WIDTH, BLOCK_WIDTH);
-
-    for (let i = 0; i < 6; i++) {
-      this.scene?.remove(this.getObject(nameFromCoordinate(x, y, z, type, i)));
-    }
-
-    const leftZBlock = this.blocksMapping[x]?.[y]?.[z + BLOCK_WIDTH];
-    if (leftZBlock) {
-      const plane = new Mesh(
-        geometry,
-        blocks[leftZBlock as keyof typeof blocks].texture[1]
-      );
-      plane.position.set(x, y, z + BLOCK_WIDTH - halfWidth);
-      plane.rotation.set(0, Math.PI, 0);
-      plane.name = nameFromCoordinate(x, y, z + BLOCK_WIDTH, leftZBlock, 1);
-      this.scene?.add(plane);
-    }
-
-    const rightZBlock = this.blocksMapping[x]?.[y]?.[z - BLOCK_WIDTH];
-    if (rightZBlock) {
-      const plane = new Mesh(
-        geometry,
-        blocks[rightZBlock as keyof typeof blocks].texture[0]
-      );
-      plane.position.set(x, y, z - BLOCK_WIDTH + halfWidth);
-      plane.name = nameFromCoordinate(x, y, z - BLOCK_WIDTH, rightZBlock, 0);
-      this.scene?.add(plane);
-    }
-
-    const leftXBlock = this.blocksMapping[x + BLOCK_WIDTH]?.[y]?.[z];
-    if (leftXBlock) {
-      const plane = new Mesh(
-        geometry,
-        blocks[leftXBlock as keyof typeof blocks].texture[5]
-      );
-      plane.position.set(x + BLOCK_WIDTH - halfWidth, y, z);
-      plane.rotation.set(0, -Math.PI / 2, 0);
-      plane.name = nameFromCoordinate(x + BLOCK_WIDTH, y, z, leftXBlock, 3);
-      this.scene?.add(plane);
-    }
-
-    const rightXBlock = this.blocksMapping[x - BLOCK_WIDTH]?.[y]?.[z];
-    if (rightXBlock) {
-      const plane = new Mesh(
-        geometry,
-        blocks[rightXBlock as keyof typeof blocks].texture[4]
-      );
-      plane.position.set(x - BLOCK_WIDTH + halfWidth, y, z);
-      plane.rotation.set(0, Math.PI / 2, 0);
-      plane.name = nameFromCoordinate(x - BLOCK_WIDTH, y, z, rightXBlock, 2);
-      this.scene?.add(plane);
-    }
-
-    const topBlock = this.blocksMapping[x]?.[y + BLOCK_WIDTH]?.[z];
-    if (topBlock) {
-      const plane = new Mesh(
-        geometry,
-        blocks[topBlock as keyof typeof blocks].texture[3]
-      );
-      plane.position.set(x, y + BLOCK_WIDTH - halfWidth, z);
-      plane.rotation.set(Math.PI / 2, 0, 0);
-      plane.name = nameFromCoordinate(x, y + BLOCK_WIDTH, z, topBlock, 5);
-      this.scene?.add(plane);
-    }
-
-    const bottomBlock = this.blocksMapping[x]?.[y - BLOCK_WIDTH]?.[z];
-    if (bottomBlock) {
-      const plane = new Mesh(
-        geometry,
-        blocks[bottomBlock as keyof typeof blocks].texture[2]
-      );
-      plane.position.set(x, y - BLOCK_WIDTH + halfWidth, z);
-      plane.rotation.set(-Math.PI / 2, 0, 0);
-      plane.name = nameFromCoordinate(x, y - BLOCK_WIDTH, z, bottomBlock, 4);
-      this.scene?.add(plane);
-    }
-
-    delete this.blocksMapping[x][y][z];
-
-    this.removeBlockWorker({
-      position: [x, y, z],
-    });
+    blockToRemove?.destroy();
 
     if (!temporary) {
+      this.removeBlockWorker({
+        position: [x, y, z],
+      });
+
       const newUpdateBlockChunk = getChunkCoordinate(x, z);
       const chunkName = nameChunkFromCoordinate(
         newUpdateBlockChunk.x,
@@ -243,7 +174,7 @@ export default class BlockManager extends BaseEntity {
     const clickedDetail = detailFromName(intersects[0].object.name);
 
     const { x, y, z, type } = clickedDetail;
-    this.removeBlock(x, y, z, type);
+    this.removeBlock(x, y, z);
 
     // play sound
     if (this.currentBreakSound) {
@@ -310,12 +241,7 @@ export default class BlockManager extends BaseEntity {
 
       if (this.chunksBlocks[chunkName]) {
         this.chunksBlocks[chunkName].push(
-          nameFromCoordinate(
-            blockPosition.x,
-            blockPosition.y,
-            blockPosition.z,
-            this.inventoryManager.currentFocus
-          )
+          nameFromCoordinate(blockPosition.x, blockPosition.y, blockPosition.z)
         );
       }
 

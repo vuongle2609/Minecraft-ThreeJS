@@ -1,160 +1,196 @@
 import { BLOCK_WIDTH } from "@/constants";
-import blocks from "@/constants/blocks";
+import blocks, { BlockAttributeType, renderGeometry } from "@/constants/blocks";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
-import { Mesh, PlaneGeometry, Vector3 } from "three";
+import { InstancedMesh, Mesh, Object3D, PlaneGeometry, Vector3 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 
 interface PropsType {
   position: Vector3;
   type: keyof typeof blocks;
-  blocksMapping: Record<string, Record<string, Record<string, string>>>;
+  blocksMapping: Record<string, Record<string, Record<string, BlockA>>>;
+  intancedFaces: Record<string, number>;
 }
 
-export default class Block extends BaseEntity {
+enum Face {
+  leftZ,
+  rightZ,
+  leftX,
+  rightX,
+  top,
+  bottom,
+}
+
+const { leftZ, rightZ, leftX, rightX, top, bottom } = Face;
+
+type BlockFaces = {
+  [leftZ]: null | Mesh;
+  [rightZ]: null | Mesh;
+  [leftX]: null | Mesh;
+  [rightX]: null | Mesh;
+  [top]: null | Mesh;
+  [bottom]: null | Mesh;
+};
+
+const halfWidth = BLOCK_WIDTH / 2;
+
+export default class BlockA extends BaseEntity {
+  blockFaces: BlockFaces = {
+    [leftZ]: null,
+    [rightZ]: null,
+    [leftX]: null,
+    [rightX]: null,
+    [top]: null,
+    [bottom]: null,
+  };
+  type: keyof typeof blocks;
+  position: Vector3;
+  atttribute: BlockAttributeType;
+  blocksMapping: Record<string, Record<string, Record<string, BlockA>>>;
+  intancedFaces: Record<string, number>;
+
   constructor(props: BasePropsType & PropsType) {
     super(props);
 
-    this.initialize({
-      position: props.position,
-      type: props.type,
-      blocksMapping: props.blocksMapping,
-    });
+    this.type = props.type;
+    this.position = props.position;
+    this.atttribute = blocks[props.type];
+    this.blocksMapping = props.blocksMapping;
+    this.intancedFaces= props.intancedFaces
+
+    this.initialize();
   }
 
   getObject(name: string) {
     return this.scene?.getObjectByName(name) as THREE.Object3D;
   }
 
-  async initialize({ position, type, blocksMapping }: PropsType) {
-    if (position.x % 2 || position.y % 2 || position.z % 2) return;
+  async initialize() {
+    // should handle at top level
+    // if (position.x % 2 || position.y % 2 || position.z % 2) return;
 
-    const halfWidth = BLOCK_WIDTH / 2;
+    const { x, y, z } = this.position;
 
-    const geometry = new PlaneGeometry(BLOCK_WIDTH, BLOCK_WIDTH);
-
-    const placeBlock = blocks[type];
-
-    const textures = placeBlock.texture;
-
-    const { x, y, z } = position;
-
-    const leftZBlock = blocksMapping[x]?.[y]?.[z + BLOCK_WIDTH];
+    const leftZBlock = this.blocksMapping[x]?.[y]?.[z + BLOCK_WIDTH];
     if (leftZBlock) {
-      this.scene?.remove(
-        this.getObject(nameFromCoordinate(x, y, z + BLOCK_WIDTH, leftZBlock, 1))
-      );
+      leftZBlock.removeFace(rightZ);
     } else {
-      const plane = new Mesh(geometry, textures[0]);
-      plane.position.set(x, y, z + halfWidth);
-      plane.name = nameFromCoordinate(
-        position.x,
-        position.y,
-        position.z,
-        type,
-        0
-      );
-      this.scene?.add(plane);
+      this.addFace(leftZ);
     }
 
-    const rightZBlock = blocksMapping[x]?.[y]?.[z - BLOCK_WIDTH];
+    const rightZBlock = this.blocksMapping[x]?.[y]?.[z - BLOCK_WIDTH];
     if (rightZBlock) {
-      this.scene?.remove(
-        this.getObject(
-          nameFromCoordinate(x, y, z - BLOCK_WIDTH, rightZBlock, 0)
-        )
-      );
+      rightZBlock.removeFace(leftZ);
     } else {
-      const plane = new Mesh(geometry, textures[1]);
-      plane.position.set(x, y, z - halfWidth);
-      plane.rotation.set(0, Math.PI, 0);
-      plane.name = nameFromCoordinate(
-        position.x,
-        position.y,
-        position.z,
-        type,
-        1
-      );
-      this.scene?.add(plane);
+      this.addFace(rightZ);
     }
 
-    const leftXBlock = blocksMapping[x + BLOCK_WIDTH]?.[y]?.[z];
+    const leftXBlock = this.blocksMapping[x + BLOCK_WIDTH]?.[y]?.[z];
     if (leftXBlock) {
-      this.scene?.remove(
-        this.getObject(nameFromCoordinate(x + BLOCK_WIDTH, y, z, leftXBlock, 3))
-      );
+      leftXBlock.removeFace(rightX);
     } else {
-      const plane = new Mesh(geometry, textures[4]);
-      plane.position.set(x + halfWidth, y, z);
-      plane.rotation.set(0, Math.PI / 2, 0);
-      plane.name = nameFromCoordinate(
-        position.x,
-        position.y,
-        position.z,
-        type,
-        2
-      );
-      this.scene?.add(plane);
+      this.addFace(leftX);
     }
 
-    const rightXBlock = blocksMapping[x - BLOCK_WIDTH]?.[y]?.[z];
+    const rightXBlock = this.blocksMapping[x - BLOCK_WIDTH]?.[y]?.[z];
     if (rightXBlock) {
-      this.scene?.remove(
-        this.getObject(
-          nameFromCoordinate(x - BLOCK_WIDTH, y, z, rightXBlock, 2)
-        )
-      );
+      rightXBlock.removeFace(leftX);
     } else {
-      const plane = new Mesh(geometry, textures[5]);
-      plane.position.set(x - halfWidth, y, z);
-      plane.rotation.set(0, -Math.PI / 2, 0);
-      plane.name = nameFromCoordinate(
-        position.x,
-        position.y,
-        position.z,
-        type,
-        3
-      );
-      this.scene?.add(plane);
+      this.addFace(rightX);
     }
 
-    const topBlock = blocksMapping[x]?.[y + BLOCK_WIDTH]?.[z];
+    const topBlock = this.blocksMapping[x]?.[y + BLOCK_WIDTH]?.[z];
     if (topBlock) {
-      this.scene?.remove(
-        this.getObject(nameFromCoordinate(x, y + BLOCK_WIDTH, z, topBlock, 5))
-      );
+      topBlock.removeFace(bottom);
     } else {
-      const plane = new Mesh(geometry, textures[2]);
-      plane.position.set(x, y + halfWidth, z);
-      plane.rotation.set(-Math.PI / 2, 0, 0);
-      plane.name = nameFromCoordinate(
-        position.x,
-        position.y,
-        position.z,
-        type,
-        4
-      );
-      this.scene?.add(plane);
+      this.addFace(top);
     }
 
-    const bottomBlock = blocksMapping[x]?.[y - BLOCK_WIDTH]?.[z];
+    const bottomBlock = this.blocksMapping[x]?.[y - BLOCK_WIDTH]?.[z];
     if (bottomBlock) {
-      this.scene?.remove(
-        this.getObject(
-          nameFromCoordinate(x, y - BLOCK_WIDTH, z, bottomBlock, 4)
-        )
-      );
+      bottomBlock.removeFace(top);
     } else {
-      const plane = new Mesh(geometry, textures[3]);
-      plane.position.set(x, y - halfWidth, z);
-      plane.rotation.set(Math.PI / 2, 0, 0);
-      plane.name = nameFromCoordinate(
-        position.x,
-        position.y,
-        position.z,
-        type,
-        5
-      );
-      this.scene?.add(plane);
+      this.addFace(bottom);
     }
+  }
+
+  removeFace(face: keyof BlockFaces) {
+    this.scene?.remove(this.blockFaces[face] as Object3D);
+  }
+
+  addFace(face: keyof BlockFaces) {
+    const plane = new Mesh(renderGeometry, this.atttribute.texture[face]);
+
+    const { x, y, z } = this.position;
+
+    const { position, rotation } = this.calFaceAttr(face);
+
+    plane.position.set(position[0], position[1], position[2]);
+    plane.rotation.set(rotation[0], rotation[1], rotation[2]);
+    plane.name = nameFromCoordinate(x, y, z, this.type, face);
+
+    this.blockFaces[face] = plane;
+    this.scene?.add(plane);
+  }
+
+  calFaceAttr(face: keyof BlockFaces) {
+    const { x, y, z } = this.position;
+
+    switch (face) {
+      case leftZ:
+        return { position: [x, y, z + halfWidth], rotation: [0, 0, 0] };
+      case rightZ:
+        return { position: [x, y, z - halfWidth], rotation: [0, Math.PI, 0] };
+      case leftX:
+        return {
+          position: [x + halfWidth, y, z],
+          rotation: [0, Math.PI / 2, 0],
+        };
+      case rightX:
+        return {
+          position: [x - halfWidth, y, z],
+          rotation: [0, -Math.PI / 2, 0],
+        };
+      case top:
+        return {
+          position: [x, y + halfWidth, z],
+          rotation: [-Math.PI / 2, 0, 0],
+        };
+      case bottom:
+        return {
+          position: [x, y - halfWidth, z],
+          rotation: [Math.PI / 2, 0, 0],
+        };
+    }
+  }
+
+  destroy() {
+    const { x, y, z } = this.position;
+
+    Object.values(this.blockFaces).forEach((item) => {
+      if (item) {
+        item.geometry.dispose();
+        this.scene?.remove(item);
+      }
+    });
+
+    const leftZBlock = this.blocksMapping[x]?.[y]?.[z + BLOCK_WIDTH];
+    leftZBlock?.addFace(rightZ);
+
+    const rightZBlock = this.blocksMapping[x]?.[y]?.[z - BLOCK_WIDTH];
+    rightZBlock?.addFace(leftZ);
+
+    const leftXBlock = this.blocksMapping[x + BLOCK_WIDTH]?.[y]?.[z];
+    leftXBlock?.addFace(rightX);
+
+    const rightXBlock = this.blocksMapping[x - BLOCK_WIDTH]?.[y]?.[z];
+    rightXBlock?.addFace(leftX);
+
+    const topBlock = this.blocksMapping[x]?.[y + BLOCK_WIDTH]?.[z];
+    topBlock?.addFace(bottom);
+
+    const bottomBlock = this.blocksMapping[x]?.[y - BLOCK_WIDTH]?.[z];
+    bottomBlock?.addFace(top);
+
+    delete this.blocksMapping[x][y][z];
   }
 }
