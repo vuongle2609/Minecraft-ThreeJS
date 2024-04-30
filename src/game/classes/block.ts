@@ -108,6 +108,8 @@ export default class BlockA extends BaseEntity {
 
     const { rotation } = this.calFaceAttr(face);
 
+    // plane.castShadow = true;
+    // plane.receiveShadow = true;
     plane.position.copy(this.position);
     plane.rotation.set(rotation[0], rotation[1], rotation[2]);
     plane.name = nameFromCoordinate(x, y, z, this.type, face);

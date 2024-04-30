@@ -1,6 +1,7 @@
 import {
   BufferAttribute,
   BufferGeometry,
+  MeshStandardMaterial,
   MeshToonMaterial,
   NearestFilter,
   TextureLoader,

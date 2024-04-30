@@ -2,6 +2,7 @@ import { BLOCK_WIDTH } from "../../constants";
 import { Face } from "../../constants/block";
 import { getNeighbors } from "../helpers/blocksHelpers";
 import { getBlocksInChunkFlat } from "./flatWorldGeneration";
+import { getBlocksInChunk } from "./worldGeneration";
 
 const { leftZ, rightZ, leftX, rightX, bottom, top } = Face;
 
@@ -10,17 +11,10 @@ type FaceCustom = typeof leftZ | typeof rightZ | typeof leftX | typeof rightX;
 self.onmessage = (e) => {
   const { x, z, chunkBlocksCustom, sides } = e.data;
 
-  // const blocks =
-  //   e.data.type === 1
-  //     ? getBlocksInChunkFlat(e.data.x, e.data.z, e.data.chunkBlocksCustom)
-  //     : getBlocksInChunk(e.data.x, e.data.z);
-
-  const { blocksInChunk, boundaries } = getBlocksInChunkFlat(
-    x,
-    z,
-    chunkBlocksCustom,
-    sides
-  );
+  const { blocksInChunk, boundaries } =
+    e.data.type === 1
+      ? getBlocksInChunkFlat(x, z, chunkBlocksCustom, sides)
+      : getBlocksInChunk(x, z, chunkBlocksCustom, sides);
 
   const blocksRender: Record<string, 1> = {};
 

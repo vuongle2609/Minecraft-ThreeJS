@@ -1,4 +1,5 @@
 import { Vector3 } from "three";
+import { TIME_TO_INTERACT } from "../../constants";
 import {
   GRAVITY,
   GRAVITY_SCALE,
@@ -7,29 +8,8 @@ import {
 } from "../../constants/player";
 import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
 import Physics from "./physics";
-import { TIME_TO_INTERACT } from "../../constants";
 
 let blocksMapping: Record<string, string | 0> = {};
-
-const addBlock = ({ position, type }: { position: number[]; type: string }) => {
-  blocksMapping = {
-    ...blocksMapping,
-    [nameFromCoordinate(position[0], position[1], position[2])]: type,
-  };
-};
-
-const bulkAddBlock = ({ blocks }: { blocks: Record<string, string | 0> }) => {
-  blocksMapping = {
-    ...blocksMapping,
-    ...blocks,
-  };
-};
-
-const removeBlock = ({ position }: { position: number[] }) => {
-  delete blocksMapping[
-    nameFromCoordinate(position[0], position[1], position[2])
-  ];
-};
 
 let originalVy = -25;
 let vy = originalVy;
@@ -102,15 +82,42 @@ const calculateMovement = ({
   });
 };
 
-setTimeout(() => {
-  eventMapping = { ...eventMapping, calculateMovement };
-}, TIME_TO_INTERACT);
-
 const jumpCharacter = () => {
   if (onGround) {
     vy = JUMP_FORCE;
     onGround = false;
   }
+};
+
+let initFunc: undefined | Function = () =>
+  setTimeout(() => {
+    eventMapping = { ...eventMapping, calculateMovement };
+  }, TIME_TO_INTERACT);
+
+const initPhysics = () => {
+  initFunc?.();
+  initFunc = undefined;
+};
+
+const addBlock = ({ position, type }: { position: number[]; type: string }) => {
+  blocksMapping = {
+    ...blocksMapping,
+    [nameFromCoordinate(position[0], position[1], position[2])]: type,
+  };
+};
+
+const bulkAddBlock = ({ blocks }: { blocks: Record<string, string | 0> }) => {
+  initPhysics();
+  blocksMapping = {
+    ...blocksMapping,
+    ...blocks,
+  };
+};
+
+const removeBlock = ({ position }: { position: number[] }) => {
+  delete blocksMapping[
+    nameFromCoordinate(position[0], position[1], position[2])
+  ];
 };
 
 let eventMapping: Record<string, Function> = {
