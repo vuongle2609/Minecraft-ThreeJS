@@ -86,7 +86,7 @@ export default class ChunkManager extends BlockManager {
         z: position[2],
         type,
         isRenderChunk: true,
-        shouldNotRenderIntoScene: !blocksToRender[key],
+        shouldNotRenderIntoScene: !(key in blocksToRender),
       });
 
       blocksInChunk.push(
@@ -193,7 +193,7 @@ export default class ChunkManager extends BlockManager {
         this.handleRenderChunkQueue(
           chunkName,
           e.data.blocks,
-          e.data.blocksToRender
+          e.data.blocksRender
         );
       };
     }

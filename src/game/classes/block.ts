@@ -1,9 +1,9 @@
 import { BLOCK_WIDTH } from "@/constants";
+import { BlockFaces, Face } from "@/constants/block";
 import blocks, { BlockAttributeType, renderGeometry } from "@/constants/blocks";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
 import { Mesh, Object3D, Vector3 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
-import { BlockFaces, Face } from "@/constants/block";
 
 interface PropsType {
   position: Vector3;
@@ -31,19 +31,23 @@ export default class BlockA extends BaseEntity {
   constructor(props: BasePropsType & PropsType) {
     super(props);
 
-    this.type = props.type;
-    this.position = props.position;
-    this.atttribute = blocks[props.type];
-    this.blocksMapping = props.blocksMapping;
+    const { type, position, blocksMapping, shouldNotRender } = props!;
 
-    if (!props.shouldNotRender) this.render();
+    this.type = type;
+    this.position = position;
+    this.atttribute = blocks[type];
+    this.blocksMapping = blocksMapping;
+
+    if (!shouldNotRender) {
+      this.render();
+    }
   }
 
   getObject(name: string) {
     return this.scene?.getObjectByName(name) as THREE.Object3D;
   }
 
-  async render() {
+  render() {
     // should handle at top level, maybe dont need?
     // if (position.x % 2 || position.y % 2 || position.z % 2) return;
 
@@ -97,6 +101,7 @@ export default class BlockA extends BaseEntity {
   }
 
   addFace(face: keyof BlockFaces) {
+    // console.count('add')
     const plane = new Mesh(renderGeometry, this.atttribute.texture[face]);
 
     const { x, y, z } = this.position;

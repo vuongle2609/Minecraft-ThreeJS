@@ -10,6 +10,7 @@ import BaseEntity, { BasePropsType } from "./baseEntity";
 
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
+import { Face } from "@/constants/block";
 
 interface PropsType {
   inventoryManager: InventoryManager;
@@ -183,6 +184,7 @@ export default class BlockManager extends BaseEntity {
     if (intersects[0]?.distance > 12 || !intersects[0]) return;
 
     const clickedDetail = detailFromName(intersects[0].object.name);
+    // console.log(intersects[0].object.rotation);
 
     const clickedFace = clickedDetail.face;
 

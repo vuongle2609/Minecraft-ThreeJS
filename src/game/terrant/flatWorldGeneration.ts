@@ -34,11 +34,31 @@ export const getBlocksInChunkFlat = (
 
   const sideFunc = (side: FaceCustom, pos: number[]) => {
     const calFuncMap: Record<FaceCustom, Function> = {
-      [leftZ]: () => (pos[2] < boundaries[side] ? pos[2] : boundaries[side]),
-      [rightZ]: () => (pos[2] > boundaries[side] ? pos[2] : boundaries[side]),
+      [leftZ]: () =>
+        boundaries[side]
+          ? pos[2] < boundaries[side]
+            ? pos[2]
+            : boundaries[side]
+          : pos[2],
+      [rightZ]: () =>
+        boundaries[side]
+          ? pos[2] > boundaries[side]
+            ? pos[2]
+            : boundaries[side]
+          : pos[2],
 
-      [leftX]: () => (pos[0] < boundaries[side] ? pos[0] : boundaries[side]),
-      [rightX]: () => (pos[0] > boundaries[side] ? pos[0] : boundaries[side]),
+      [leftX]: () =>
+        boundaries[side]
+          ? pos[0] < boundaries[side]
+            ? pos[0]
+            : boundaries[side]
+          : pos[0],
+      [rightX]: () =>
+        boundaries[side]
+          ? pos[0] > boundaries[side]
+            ? pos[0]
+            : boundaries[side]
+          : pos[0],
     };
 
     boundaries[side] = calFuncMap[side]();
