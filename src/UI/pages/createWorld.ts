@@ -6,13 +6,14 @@ import {
   FLAT_WORLD_TYPE,
   NORMAL_WORLD_TYPE,
   WORLD_TYPE_MAPPING,
+  DEFAULT_WORLD_TYPE,
 } from "@/constants";
 import { WorldsType } from "@/type";
 
 export default class CreateWorld extends RenderPage {
   router: Router;
 
-  state = { name: DEFAULT_WORLD_NAME, worldType: FLAT_WORLD_TYPE };
+  state = { name: DEFAULT_WORLD_NAME, worldType: DEFAULT_WORLD_TYPE };
 
   constructor(router: Router) {
     super();
@@ -53,7 +54,11 @@ export default class CreateWorld extends RenderPage {
               id="world_type"
             >
               <div class="title">
-                World Type:&nbsp;<span id="world_type_id">Superflat</span>
+                World Type:&nbsp;<span id="world_type_id">${
+                  WORLD_TYPE_MAPPING[
+                    this.state.worldType as keyof typeof WORLD_TYPE_MAPPING
+                  ]
+                }</span>
               </div>
             </button>
           </div>

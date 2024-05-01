@@ -1,26 +1,20 @@
-import { BLOCK_WIDTH } from "../../constants";
+import { BLOCK_WIDTH, FLAT_WORLD_TYPE } from "../../constants";
 import { Face } from "../../constants/block";
 import { getNeighbors } from "../helpers/blocksHelpers";
 import { getBlocksInChunkFlat } from "./flatWorldGeneration";
+import { getBlocksInChunk } from "./worldGeneration";
 
 const { leftZ, rightZ, leftX, rightX, bottom, top } = Face;
 
 type FaceCustom = typeof leftZ | typeof rightZ | typeof leftX | typeof rightX;
 
 self.onmessage = (e) => {
-  const { x, z, chunkBlocksCustom, sides } = e.data;
+  const { x, z, chunkBlocksCustom, sides, type } = e.data;
 
-  // const blocks =
-  //   e.data.type === 1
-  //     ? getBlocksInChunkFlat(e.data.x, e.data.z, e.data.chunkBlocksCustom)
-  //     : getBlocksInChunk(e.data.x, e.data.z);
-
-  const { blocksInChunk, boundaries } = getBlocksInChunkFlat(
-    x,
-    z,
-    chunkBlocksCustom,
-    sides
-  );
+  const { blocksInChunk, boundaries } =
+    type === FLAT_WORLD_TYPE
+      ? getBlocksInChunkFlat(x, z, chunkBlocksCustom, sides)
+      : getBlocksInChunk(x, z, chunkBlocksCustom, sides);
 
   const blocksRender: Record<string, 1> = {};
 
@@ -105,11 +99,11 @@ self.onmessage = (e) => {
       return isBoundaryCal && neighborCondition;
     };
 
-    sides.forEach((side: FaceCustom) => {
-      if (sideFunc(side)) {
-        shouldRender = false;
-      }
-    });
+    // sides.forEach((side: FaceCustom) => {
+    //   if (sideFunc(side)) {
+    //     shouldRender = false;
+    //   }
+    // });
 
     if (
       y == boundaries.lowestY &&
@@ -153,5 +147,8 @@ self.onmessage = (e) => {
     }
   });
 
-  self.postMessage({ blocks: blocksInChunk, blocksRender });
+  self.postMessage({
+    blocks: blocksInChunk,
+    blocksRender,
+  });
 };

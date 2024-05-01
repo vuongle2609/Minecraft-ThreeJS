@@ -1,20 +1,21 @@
 import { $ } from "@/UI/utils/selector";
 import MouseControl from "@/game/action/mouseControl";
 import Player from "@/game/player/character";
+import { WorldsType } from "@/type";
+import {
+  Clock,
+  Color,
+  Fog,
+  PerspectiveCamera,
+  SRGBTransfer,
+  Scene,
+  WebGLRenderer,
+} from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import ChunkManager from "./chunkManager";
 import InventoryManager from "./inventoryManager";
 import Light from "./light";
 import { RenderPage } from "./renderPage";
-import {
-  WebGLRenderer,
-  Scene,
-  PerspectiveCamera,
-  Clock,
-  Color,
-  Fog,
-} from "three";
-import { WorldsType } from "@/type";
 
 export default class GameScene extends RenderPage {
   id: string;
@@ -24,6 +25,7 @@ export default class GameScene extends RenderPage {
 
   renderer = new WebGLRenderer({
     antialias: true,
+    alpha: true,
     canvas: document.querySelector("#gameScene") as HTMLCanvasElement,
   });
 
@@ -70,7 +72,7 @@ export default class GameScene extends RenderPage {
 
   initialize() {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.enabled = false;
 
     window.addEventListener(
       "resize",
@@ -84,8 +86,8 @@ export default class GameScene extends RenderPage {
 
     document.body.appendChild(this.element);
 
-    this.scene.background = new Color("#87CEEB");
-    // this.scene.fog = new Fog(0xcccccc, 3, 40);
+    this.scene.background = new Color("#6EB1FF");
+    this.scene.fog = new Fog(0xcccccc, 3, 40);
 
     if (this.worldStorage.rotation)
       this.camera.rotation.fromArray(this.worldStorage.rotation as any);

@@ -48,48 +48,44 @@ export default class Player extends BaseEntity {
     this.player.castShadow = true;
 
     if (initPos) this.player.position.set(initPos[0], initPos[1], initPos[2]);
-    else
+    else {
       this.player.position.set(
         CHUNK_SIZE / 2,
-        CHARACTER_LENGTH + 0.5,
+        CHARACTER_LENGTH + 60,
         CHUNK_SIZE / 2
       );
+    }
 
     const roundedPos = this.player.position.clone().round();
 
     this.currentChunk = getChunkCoordinate(roundedPos.x, roundedPos.z);
 
-    this.handleChangeChunk();
-
     this.scene?.add(this.player);
 
-    if (this.worker)
-      this.worker.addEventListener("message", (e) => {
-        if (e.data.type === "updatePosition") {
-          const { position, onGround, collideObject } = e.data.data;
+    this.handleChangeChunk();
 
-          this.prevStepKey = this.currentStepKey;
-          this.currentStepKey = collideObject;
+    this.worker?.addEventListener("message", (e) => {
+      if (e.data.type === "updatePosition") {
+        const { position, onGround, collideObject } = e.data.data;
 
-          this.onGround = onGround;
+        this.prevStepKey = this.currentStepKey;
+        this.currentStepKey = collideObject;
 
-          this.player.position.add(
-            new Vector3(position[0], position[1], position[2])
+        this.onGround = onGround;
+
+        this.player.position.add(
+          new Vector3(position[0], position[1], position[2])
+        );
+
+        if (this.player.position.y < -61) {
+          this.player.position.copy(
+            new Vector3(CHUNK_SIZE / 2, CHARACTER_LENGTH + 0.5, CHUNK_SIZE / 2)
           );
-
-          if (this.player.position.y < -61) {
-            this.player.position.copy(
-              new Vector3(
-                CHUNK_SIZE / 2,
-                CHARACTER_LENGTH + 0.5,
-                CHUNK_SIZE / 2
-              )
-            );
-          }
-
-          this.handleDetectChunkChange();
         }
-      });
+
+        this.handleDetectChunkChange();
+      }
+    });
   }
 
   handleDetectChunkChange = () => {

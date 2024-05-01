@@ -159,6 +159,9 @@ export default class BlockManager extends BaseEntity {
     const clickedDetail = detailFromName(intersects[0].object.name);
 
     const { x, y, z, type } = clickedDetail;
+
+    if (type === "bedrock") return;
+
     this.removeBlock(x, y, z);
 
     // play sound

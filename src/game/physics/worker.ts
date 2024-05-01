@@ -1,5 +1,7 @@
 import { Vector3 } from "three";
+import { BLOCK_WIDTH, CHUNK_SIZE, TIME_TO_INTERACT } from "../../constants";
 import {
+  CHARACTER_LENGTH,
   GRAVITY,
   GRAVITY_SCALE,
   JUMP_FORCE,
@@ -7,29 +9,9 @@ import {
 } from "../../constants/player";
 import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
 import Physics from "./physics";
-import { TIME_TO_INTERACT } from "../../constants";
+import { BlockKeys } from "../../constants/blocks";
 
 let blocksMapping: Record<string, string | 0> = {};
-
-const addBlock = ({ position, type }: { position: number[]; type: string }) => {
-  blocksMapping = {
-    ...blocksMapping,
-    [nameFromCoordinate(position[0], position[1], position[2])]: type,
-  };
-};
-
-const bulkAddBlock = ({ blocks }: { blocks: Record<string, string | 0> }) => {
-  blocksMapping = {
-    ...blocksMapping,
-    ...blocks,
-  };
-};
-
-const removeBlock = ({ position }: { position: number[] }) => {
-  delete blocksMapping[
-    nameFromCoordinate(position[0], position[1], position[2])
-  ];
-};
 
 let originalVy = -25;
 let vy = originalVy;
@@ -102,10 +84,6 @@ const calculateMovement = ({
   });
 };
 
-setTimeout(() => {
-  eventMapping = { ...eventMapping, calculateMovement };
-}, TIME_TO_INTERACT);
-
 const jumpCharacter = () => {
   if (onGround) {
     vy = JUMP_FORCE;
@@ -113,11 +91,78 @@ const jumpCharacter = () => {
   }
 };
 
+let initFunc: undefined | Function = () =>
+  setTimeout(() => {
+    eventMapping = { ...eventMapping, calculateMovement };
+  }, TIME_TO_INTERACT);
+
+const initPhysics = () => {
+  initFunc?.();
+  initFunc = undefined;
+};
+
+const addBlock = ({ position, type }: { position: number[]; type: string }) => {
+  blocksMapping = {
+    ...blocksMapping,
+    [nameFromCoordinate(position[0], position[1], position[2])]: type,
+  };
+};
+
+let playerInitPos = [CHUNK_SIZE / 2, CHARACTER_LENGTH + 0.5, CHUNK_SIZE / 2];
+let shouldReturnPosY = false;
+
+const getPlayerShouldSpawn = (blocks: Record<string, any>) => {
+  const pos = [...playerInitPos];
+
+  let shouldStop = false;
+  let countY = 0;
+
+  while (!shouldStop) {
+    if (blocks[nameFromCoordinate(pos[0], countY, pos[2])]) {
+      countY += BLOCK_WIDTH;
+    } else {
+      shouldStop = true;
+    }
+  }
+  shouldReturnPosY = false;
+  return [pos[0], countY + 1, pos[2]];
+};
+
+const requestPosY = () => {
+  console.log("123");
+  shouldReturnPosY = true;
+};
+
+const bulkAddBlock = ({ blocks }: { blocks: Record<string, string | 0> }) => {
+  initPhysics();
+  blocksMapping = {
+    ...blocksMapping,
+    ...blocks,
+  };
+
+  if (shouldReturnPosY) {
+    console.log("🚀 ~ shouldInitPos:", shouldReturnPosY);
+    self.postMessage({
+      type: "changePosition",
+      data: {
+        position: getPlayerShouldSpawn(blocksMapping),
+      },
+    });
+  }
+};
+
+const removeBlock = ({ position }: { position: number[] }) => {
+  delete blocksMapping[
+    nameFromCoordinate(position[0], position[1], position[2])
+  ];
+};
+
 let eventMapping: Record<string, Function> = {
   addBlock,
   removeBlock,
   jumpCharacter,
   bulkAddBlock,
+  requestPosY,
 };
 
 self.onmessage = (
