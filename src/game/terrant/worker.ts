@@ -6,15 +6,13 @@ import { getBlocksInChunk } from "./worldGeneration";
 
 const { leftZ, rightZ, leftX, rightX, bottom, top } = Face;
 
-type FaceCustom = typeof leftZ | typeof rightZ | typeof leftX | typeof rightX;
-
 self.onmessage = (e) => {
-  const { x, z, chunkBlocksCustom, type } = e.data;
+  const { x, z, chunkBlocksCustom, type, seed } = e.data;
 
   const { blocksInChunk, boundaries } =
     type === FLAT_WORLD_TYPE
-      ? getBlocksInChunkFlat(x, z, chunkBlocksCustom)
-      : getBlocksInChunk(x, z, chunkBlocksCustom);
+      ? getBlocksInChunkFlat(x, z, chunkBlocksCustom, seed)
+      : getBlocksInChunk(x, z, chunkBlocksCustom, seed);
 
   const blocksRender: Record<string, 1> = {};
 

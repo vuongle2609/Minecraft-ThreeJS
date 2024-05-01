@@ -9,7 +9,8 @@ import {
   DEFAULT_WORLD_TYPE,
 } from "@/constants";
 import { WorldsType } from "@/type";
-
+import { v4 } from "uuid";
+import MersenneTwister from "../utils/random";
 export default class CreateWorld extends RenderPage {
   router: Router;
 
@@ -108,22 +109,23 @@ export default class CreateWorld extends RenderPage {
     $("#create").onclick = () => {
       if (this.state.name === "") return;
 
+      //@ts-ignore
+      var m = new MersenneTwister();
+      var randomNumber = m.random();
+
       const worlds: Record<string, WorldsType> = JSON.parse(
         localStorage.getItem("worlds") || "{}"
       );
 
       const worldState = this.state;
 
-      let worldId = worldState.name;
-
-      while (worlds[worldId]) {
-        worldId += "-";
-      }
+      let worldId = v4();
 
       const worldsFormat: WorldsType = {
         ...worldState,
         createdDate: new Date(),
         blocksWorldChunk: {},
+        seed: Math.round(randomNumber * 1000000),
       };
 
       localStorage.setItem(

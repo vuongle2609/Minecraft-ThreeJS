@@ -11,7 +11,8 @@ type FaceCustom = typeof leftZ | typeof rightZ | typeof leftX | typeof rightX;
 export const getBlocksInChunkFlat = (
   x: number,
   z: number,
-  chunkBlocksCustom: Record<string, 0 | keyof typeof blocks>
+  chunkBlocksCustom: Record<string, 0 | keyof typeof blocks>,
+  seed: number
 ) => {
   let blocksInChunk: Record<
     string,

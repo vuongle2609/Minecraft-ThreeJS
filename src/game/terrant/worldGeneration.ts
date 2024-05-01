@@ -5,26 +5,6 @@ import blocks from "../../constants/blocks";
 import { detailFromName } from "../helpers/detailFromName";
 import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
 
-const noise = new FastNoiseLite();
-noise.SetFrequency(0.026);
-noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
-noise.SetFractalType(FastNoiseLite.FractalType.FBm);
-noise.SetFractalOctaves(1.7);
-noise.SetFractalLacunarity(0.3);
-noise.SetFractalGain(4);
-noise.SetFractalWeightedStrength(3.4);
-noise.SetSeed(2131232);
-
-const noiseTree = new FastNoiseLite();
-noiseTree.SetFrequency(0.007);
-noiseTree.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
-noiseTree.SetFractalType(FastNoiseLite.FractalType.FBm);
-noiseTree.SetFractalOctaves(6);
-noiseTree.SetFractalLacunarity(4.98);
-noiseTree.SetFractalGain(5.63);
-noiseTree.SetFractalWeightedStrength(5);
-noiseTree.SetSeed(2131232);
-
 const { leftZ, rightZ, leftX, rightX } = Face;
 
 type FaceCustom = typeof leftZ | typeof rightZ | typeof leftX | typeof rightX;
@@ -32,8 +12,29 @@ type FaceCustom = typeof leftZ | typeof rightZ | typeof leftX | typeof rightX;
 export const getBlocksInChunk = (
   x: number,
   z: number,
-  chunkBlocksCustom: Record<string, 0 | keyof typeof blocks>
+  chunkBlocksCustom: Record<string, 0 | keyof typeof blocks>,
+  seed: number
 ) => {
+  const noise = new FastNoiseLite();
+  noise.SetFrequency(0.026);
+  noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
+  noise.SetFractalType(FastNoiseLite.FractalType.FBm);
+  noise.SetFractalOctaves(1.7);
+  noise.SetFractalLacunarity(0.3);
+  noise.SetFractalGain(4);
+  noise.SetFractalWeightedStrength(3.4);
+  noise.SetSeed(seed);
+
+  const noiseTree = new FastNoiseLite();
+  noiseTree.SetFrequency(0.007);
+  noiseTree.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
+  noiseTree.SetFractalType(FastNoiseLite.FractalType.FBm);
+  noiseTree.SetFractalOctaves(6);
+  noiseTree.SetFractalLacunarity(4.98);
+  noiseTree.SetFractalGain(5.63);
+  noiseTree.SetFractalWeightedStrength(5);
+  noiseTree.SetSeed(seed);
+
   let blocksInChunk: Record<
     string,
     {

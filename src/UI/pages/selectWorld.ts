@@ -1,10 +1,10 @@
+import { WORLD_TYPE_MAPPING } from "@/constants";
 import { RenderPage } from "@/game/classes/renderPage";
+import { WorldsType } from "@/type";
+import { format } from "date-fns";
+import { v4 } from "uuid";
 import Router from "../router";
 import { $, $$ } from "../utils/selector";
-import { WorldsType } from "@/type";
-import { WORLD_TYPE_MAPPING } from "@/constants";
-import { format } from "date-fns";
-
 export default class SelectWorld extends RenderPage {
   router: Router;
   selectedWorld: string | null = null;
@@ -101,6 +101,35 @@ export default class SelectWorld extends RenderPage {
     this.renderWorlds();
   }
 
+  reCreateWorld() {
+    if (!this.selectedWorld) return;
+
+    const worlds: Record<string, WorldsType> = JSON.parse(
+      localStorage.getItem("worlds") || "{}"
+    );
+
+    const currentWorld = worlds[this.selectedWorld];
+
+    const worldState = currentWorld;
+
+    let worldId = v4();
+
+    const worldsFormat: WorldsType = {
+      ...worldState,
+      createdDate: new Date(),
+      blocksWorldChunk: {},
+      initPos: undefined,
+      rotation: undefined,
+    };
+
+    localStorage.setItem(
+      "worlds",
+      JSON.stringify({ ...worlds, [worldId]: worldsFormat })
+    );
+
+    this.handleRenderWorld(worldId);
+  }
+
   disableInteractButton() {
     $$<HTMLButtonElement>(".interactSelected").forEach((item) => {
       item.classList.add("disabled");
@@ -116,12 +145,16 @@ export default class SelectWorld extends RenderPage {
 
     $("#play").onclick = () => {
       if (!this.selectedWorld) return;
-      
+
       this.handleRenderWorld(this.selectedWorld);
     };
 
     $("#delete").onclick = () => {
       this.deleteWorld();
+    };
+
+    $("#reCreate").onclick = () => {
+      this.reCreateWorld();
     };
   }
 
@@ -144,7 +177,6 @@ export default class SelectWorld extends RenderPage {
           <h4 class="text-xl leading-[22px] w-full overflow-hidden text-ellipsis">${name}</h4>
           
           <span class="text-textGray text-xl leading-[22px] flex items-center">
-            <span class="max-w-[25%] overflow-hidden text-ellipsis inline-block">${key}&nbsp;</span> 
             (${format(createdDate, "MM/dd/yy HH:mm a")})
           </span>
 

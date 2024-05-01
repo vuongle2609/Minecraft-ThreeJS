@@ -177,6 +177,7 @@ export default class ChunkManager extends BlockManager {
         ...chunk,
         type: this.worldStorage?.worldType,
         chunkBlocksCustom: this.blocksWorldChunk[chunkName],
+        seed: this.worldStorage?.seed,
       });
 
       this.chunksWorkers[chunkName].onmessage = (e) => {

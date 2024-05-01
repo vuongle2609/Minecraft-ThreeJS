@@ -18,6 +18,7 @@ export interface WorldsType {
   blocksWorldChunk: Record<string, BlocksMappingType>;
   name: string;
   worldType: number;
+  seed?: number;
   initPos?: number[];
   rotation?: number[];
 }
