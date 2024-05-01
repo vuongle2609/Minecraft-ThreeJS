@@ -1,5 +1,5 @@
-import { Face } from "../../constants/block";
 import { CHUNK_SIZE, FLAT_WORLD_HEIGHT } from "../../constants";
+import { Face } from "../../constants/block";
 import blocks from "../../constants/blocks";
 import { detailFromName } from "../helpers/detailFromName";
 import { nameFromCoordinate } from "../helpers/nameFromCoordinate";

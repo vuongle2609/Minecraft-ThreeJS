@@ -110,7 +110,8 @@ export default class ChunkManager extends BlockManager {
         type: keyof typeof blocks;
       }
     > = {},
-    blocksToRender: Record<string, 1>
+    blocksToRender: Record<string, 1>,
+    shouldInitPos?: boolean
   ) {
     // if after process blocks in chunk and return data but chunk no
     // longer active then abort
@@ -123,6 +124,7 @@ export default class ChunkManager extends BlockManager {
         blocks: Object.keys(blocksRenderWorker).reduce((prev, key) => {
           return { ...prev, [key]: blocksRenderWorker[key].type };
         }, {}),
+        shouldInitPos,
       },
     });
 

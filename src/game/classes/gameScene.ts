@@ -5,6 +5,7 @@ import { WorldsType } from "@/type";
 import {
   Clock,
   Color,
+  Fog,
   PerspectiveCamera,
   SRGBTransfer,
   Scene,
@@ -71,7 +72,7 @@ export default class GameScene extends RenderPage {
 
   initialize() {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.enabled = false;
 
     window.addEventListener(
       "resize",
@@ -85,8 +86,8 @@ export default class GameScene extends RenderPage {
 
     document.body.appendChild(this.element);
 
-    this.scene.background = new Color("#87CEEB");
-    // this.scene.fog = new Fog(0xcccccc, 3, 40);
+    this.scene.background = new Color("#6EB1FF");
+    this.scene.fog = new Fog(0xcccccc, 3, 40);
 
     if (this.worldStorage.rotation)
       this.camera.rotation.fromArray(this.worldStorage.rotation as any);

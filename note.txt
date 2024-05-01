@@ -6,3 +6,10 @@
 convert to instanced mesh
 detect face using rotation
 each face only hold type using name
+
+/// 
+
+make ambient collusion
+https://github.com/mrdoob/three.js/blob/350f0a021943d6fa1d039a7c14c303653daa463f/examples/webgl_geometry_minecraft_ao.html
+https://threejs.org/examples/#webgl_postprocessing_ssao
+https://www.google.com/search?q=Ambient+occlusion+for+voxels+threejs&rlz=1C1ONGR_enVN1074VN1074&oq=Ambient+occlusion+for+voxels+threejs&gs_lcrp=EgZjaHJvbWUyCwgAEEUYChg5GKAB0gEIMjA5NmowajeoAgCwAgA&sourceid=chrome&ie=UTF-8
