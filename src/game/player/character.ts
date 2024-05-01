@@ -1,14 +1,10 @@
+import { CHUNK_SIZE } from "@/constants";
 import blocks from "@/constants/blocks";
-import {
-  CHARACTER_LENGTH,
-  CHARACTER_MIDDLE_LENGTH,
-  CHARACTER_RADIUS,
-} from "@/constants/player";
+import { CHARACTER_LENGTH, CHARACTER_WIDTH } from "@/constants/player";
 import BasicCharacterControllerInput from "@/game/action/input";
 import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
-import { CapsuleGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
+import { BoxGeometry, Mesh, MeshToonMaterial, Vector3 } from "three";
 import { getChunkCoordinate } from "../helpers/chunkHelpers";
-import { CHUNK_SIZE } from "@/constants";
 
 export default class Player extends BaseEntity {
   input = new BasicCharacterControllerInput();
@@ -40,19 +36,17 @@ export default class Player extends BaseEntity {
   initialize(initPos?: number[]) {
     // init player render
     this.player = new Mesh(
-      new CapsuleGeometry(CHARACTER_RADIUS, CHARACTER_MIDDLE_LENGTH),
-      new MeshStandardMaterial()
+      new BoxGeometry(CHARACTER_WIDTH, CHARACTER_LENGTH, CHARACTER_WIDTH),
+      new MeshToonMaterial()
     );
-    this.player.visible = false;
 
-    if (initPos) this.player.position.set(initPos[0], initPos[1], initPos[2]);
-    else {
-      this.player.position.set(
-        CHUNK_SIZE / 2,
-        CHARACTER_LENGTH + 60,
-        CHUNK_SIZE / 2
-      );
-    }
+    // if (initPos) this.player.position.set(initPos[0], initPos[1], initPos[2]);
+    // else
+    this.player.position.set(
+      CHUNK_SIZE / 2,
+      CHARACTER_LENGTH + 20,
+      CHUNK_SIZE / 2
+    );
 
     const roundedPos = this.player.position.clone().round();
 

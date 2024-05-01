@@ -67,7 +67,8 @@ const calculateMovement = ({
     physicsEngine.calculateCorrectMovement(
       new Vector3(moveVector.x, moveVector.y + vy * delta, moveVector.z),
       playerPostion,
-      blocksMapping
+      blocksMapping,
+      onGround
     );
 
   if (collideObject) {

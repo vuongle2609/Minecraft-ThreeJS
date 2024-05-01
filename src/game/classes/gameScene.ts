@@ -9,6 +9,7 @@ import {
   PerspectiveCamera,
   SRGBTransfer,
   Scene,
+  Vector3,
   WebGLRenderer,
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
@@ -36,6 +37,13 @@ export default class GameScene extends RenderPage {
   scene = new Scene();
 
   camera = new PerspectiveCamera(
+    80,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    500
+  );
+
+  devCamera = new PerspectiveCamera(
     80,
     window.innerWidth / window.innerHeight,
     0.1,
@@ -165,6 +173,13 @@ export default class GameScene extends RenderPage {
     }
   }
 
+  renderDevCam() {
+    const { x, y, z } = this.player.player.position;
+    this.devCamera.position.set(x, y , z + 6);
+    // this.devCamera.lookAt(new Vector3(x, y, z));
+    this.devCamera.rotation.copy(this.camera.rotation);
+  }
+
   disposeRender() {
     this.renderer.dispose();
     this.chunkManager.dispose();
@@ -192,7 +207,7 @@ export default class GameScene extends RenderPage {
       this.renderFps();
 
       this.player?.update(delta, t);
-
+      this.renderDevCam();
       this.chunkManager?.update();
 
       this.renderer.render(this.scene, this.camera);
