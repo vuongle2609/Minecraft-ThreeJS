@@ -98,6 +98,25 @@ export default class BlockManager extends BaseEntity {
     };
   }
 
+  getIntersectObject() {
+    const { raycaster } = this.mouseControl! || {};
+
+    if (!this.camera || !this.scene || !this.control?.isLocked) return;
+
+    raycaster.setFromCamera(new Vector2(), this.camera);
+
+    const intersects = raycaster.intersectObjects(this.scene.children, false);
+
+    if (!intersects[0]) return;
+
+    const intersectObject =
+      intersects[0]?.object.name == "player" ? intersects[1] : intersects[0];
+
+    if (intersectObject?.distance > 12) return;
+
+    return intersectObject;
+  }
+
   removeBlock(x: number, y: number, z: number, temporary?: boolean) {
     const blockToRemove = this.blocksMapping[x][y][z];
 
@@ -122,17 +141,11 @@ export default class BlockManager extends BaseEntity {
   handleHoverBlock() {}
 
   handleGetBlock() {
-    const { raycaster } = this.mouseControl! || {};
+    const intersectObj = this.getIntersectObject();
 
-    if (!this.camera || !this.scene || !this.control?.isLocked) return;
+    if (!intersectObj) return;
 
-    raycaster.setFromCamera(new Vector2(), this.camera);
-
-    const intersects = raycaster.intersectObjects(this.scene.children, false);
-
-    if (intersects[0]?.distance > 12) return;
-
-    const clickedDetail = detailFromName(intersects[0].object.name);
+    const clickedDetail = detailFromName(intersectObj.object.name);
 
     const { type } = clickedDetail;
 
@@ -146,17 +159,11 @@ export default class BlockManager extends BaseEntity {
   }
 
   handleBreakBlock() {
-    const { raycaster } = this.mouseControl! || {};
+    const intersectObj = this.getIntersectObject();
 
-    if (!this.camera || !this.scene || !this.control?.isLocked) return;
+    if (!intersectObj) return;
 
-    raycaster.setFromCamera(new Vector2(), this.camera);
-
-    const intersects = raycaster.intersectObjects(this.scene.children, false);
-
-    if (intersects[0]?.distance > 12 || !intersects[0]) return;
-
-    const clickedDetail = detailFromName(intersects[0].object.name);
+    const clickedDetail = detailFromName(intersectObj.object.name);
 
     const { x, y, z, type } = clickedDetail;
 
@@ -176,17 +183,11 @@ export default class BlockManager extends BaseEntity {
   }
 
   handlePlaceBlock() {
-    const { raycaster } = this.mouseControl! || {};
+    const intersectObj = this.getIntersectObject();
 
-    if (!this.camera || !this.scene || !this.control?.isLocked) return;
+    if (!intersectObj) return;
 
-    raycaster.setFromCamera(new Vector2(), this.camera);
-
-    const intersects = raycaster.intersectObjects(this.scene.children, false);
-
-    if (intersects[0]?.distance > 12 || !intersects[0]) return;
-
-    const clickedDetail = detailFromName(intersects[0].object.name);
+    const clickedDetail = detailFromName(intersectObj.object.name);
     // console.log(intersects[0].object.rotation);
 
     const clickedFace = clickedDetail.face;

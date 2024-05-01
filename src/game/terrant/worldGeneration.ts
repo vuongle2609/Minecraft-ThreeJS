@@ -9,7 +9,7 @@ const noise = new FastNoiseLite();
 noise.SetFrequency(0.026);
 noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
 noise.SetFractalType(FastNoiseLite.FractalType.FBm);
-noise.SetFractalOctaves(2.2);
+noise.SetFractalOctaves(1.7);
 noise.SetFractalLacunarity(0.3);
 noise.SetFractalGain(4);
 noise.SetFractalWeightedStrength(3.4);

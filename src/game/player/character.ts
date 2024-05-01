@@ -44,6 +44,7 @@ export default class Player extends BaseEntity {
       new MeshStandardMaterial()
     );
     this.player.visible = false;
+    this.player.name = 'player'
 
     if (initPos) this.player.position.set(initPos[0], initPos[1], initPos[2]);
     else {
