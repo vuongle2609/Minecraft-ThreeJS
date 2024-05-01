@@ -1,16 +1,4 @@
-export interface CharacterAnimationType {
-  running: THREE.AnimationAction | undefined;
-  runningBack: THREE.AnimationAction | undefined;
-  walking: THREE.AnimationAction | undefined;
-  idle: THREE.AnimationAction | undefined;
-  jump: THREE.AnimationAction | undefined;
-  leftRun: THREE.AnimationAction | undefined;
-  rightRun: THREE.AnimationAction | undefined;
-  hit: THREE.AnimationAction | undefined;
-  hitSecond: THREE.AnimationAction | undefined;
-  getHit: THREE.AnimationAction | undefined;
-  roll: THREE.AnimationAction | undefined;
-}
+import blocks from "./constants/blocks";
 
 export interface PlayerInput {
   forward: boolean;
@@ -23,25 +11,13 @@ export interface PlayerInput {
   rightClick: boolean;
 }
 
-export type CoordinateType = number[];
+export type BlocksMappingType = Record<string, keyof typeof blocks | 0>;
 
-export interface VerticesType {
-  [key: string]: PointsType;
-}
-
-export interface PointsType {
-  points: CoordinateType;
-  neighBors: CoordinateType[];
-}
-
-export interface PointsFormatObj<T> extends PointsType {
-  g: null | number;
-  f: null | number;
-  prev: T | null;
-}
-export interface PointsFormatObjRecusive
-  extends PointsFormatObj<PointsFormatObjRecusive> {}
-
-export interface PointsFormatType {
-  [key: string]: PointsFormatObjRecusive;
+export interface WorldsType {
+  createdDate: Date;
+  blocksWorldChunk: Record<string, BlocksMappingType>;
+  name: string;
+  worldType: number;
+  initPos?: number[];
+  rotation?: number[];
 }
