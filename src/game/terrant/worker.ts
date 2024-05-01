@@ -9,12 +9,12 @@ const { leftZ, rightZ, leftX, rightX, bottom, top } = Face;
 type FaceCustom = typeof leftZ | typeof rightZ | typeof leftX | typeof rightX;
 
 self.onmessage = (e) => {
-  const { x, z, chunkBlocksCustom, sides, type } = e.data;
+  const { x, z, chunkBlocksCustom, type } = e.data;
 
   const { blocksInChunk, boundaries } =
     type === FLAT_WORLD_TYPE
-      ? getBlocksInChunkFlat(x, z, chunkBlocksCustom, sides)
-      : getBlocksInChunk(x, z, chunkBlocksCustom, sides);
+      ? getBlocksInChunkFlat(x, z, chunkBlocksCustom)
+      : getBlocksInChunk(x, z, chunkBlocksCustom);
 
   const blocksRender: Record<string, 1> = {};
 
@@ -24,86 +24,6 @@ self.onmessage = (e) => {
     const [x, y, z] = position;
 
     let shouldRender = true;
-
-    const sideFunc = (side: FaceCustom) => {
-      const calFuncMap: Record<FaceCustom, Function> = {
-        [leftZ]: () => [
-          z == boundaries[side],
-          getNeighbors(
-            blocksInChunk,
-            { x, y, z },
-            {
-              [leftZ]: false,
-              [rightZ]: true,
-              [leftX]: true,
-              [rightX]: true,
-              [bottom]: true,
-              [top]: true,
-            },
-            BLOCK_WIDTH
-          ),
-        ],
-        [rightZ]: () => [
-          z == boundaries[side],
-          getNeighbors(
-            blocksInChunk,
-            { x, y, z },
-            {
-              [leftZ]: true,
-              [rightZ]: false,
-              [leftX]: true,
-              [rightX]: true,
-              [bottom]: true,
-              [top]: true,
-            },
-            BLOCK_WIDTH
-          ),
-        ],
-
-        [leftX]: () => [
-          x == boundaries[side],
-          getNeighbors(
-            blocksInChunk,
-            { x, y, z },
-            {
-              [leftZ]: true,
-              [rightZ]: true,
-              [leftX]: false,
-              [rightX]: true,
-              [bottom]: true,
-              [top]: true,
-            },
-            BLOCK_WIDTH
-          ),
-        ],
-        [rightX]: () => [
-          x == boundaries[side],
-          getNeighbors(
-            blocksInChunk,
-            { x, y, z },
-            {
-              [leftZ]: true,
-              [rightZ]: true,
-              [leftX]: true,
-              [rightX]: false,
-              [bottom]: true,
-              [top]: true,
-            },
-            BLOCK_WIDTH
-          ),
-        ],
-      };
-
-      const [isBoundaryCal, neighborCondition] = calFuncMap[side]();
-
-      return isBoundaryCal && neighborCondition;
-    };
-
-    // sides.forEach((side: FaceCustom) => {
-    //   if (sideFunc(side)) {
-    //     shouldRender = false;
-    //   }
-    // });
 
     if (
       y == boundaries.lowestY &&

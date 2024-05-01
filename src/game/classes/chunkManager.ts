@@ -1,15 +1,14 @@
+import { DEFAULT_CHUNK_VIEW } from "@/constants";
 import blocks from "@/constants/blocks";
 import {
   nameChunkFromCoordinate,
   nameFromCoordinate,
 } from "@/game/helpers/nameFromCoordinate";
+import { calNeighborsOffset } from "../helpers/calNeighborsOffset";
 import { detailFromName } from "../helpers/detailFromName";
 import { BasePropsType } from "./baseEntity";
 import BlockManager from "./blockManager";
 import InventoryManager from "./inventoryManager";
-import { Face } from "@/constants/block";
-
-const { leftZ, rightZ, leftX, rightX } = Face;
 
 interface PropsType {
   inventoryManager: InventoryManager;
@@ -31,23 +30,12 @@ export default class ChunkManager extends BlockManager {
 
   handleRequestChunks(currentChunk: { x: number; z: number }) {
     // get neighbors
-    const neighborOffset = [
-      { x: 0, z: 0, sides: [] },
-      { x: -1, z: 0, sides: [leftX] },
-      { x: 1, z: 0, sides: [rightX] },
-      { x: 0, z: -1, sides: [leftZ] },
-      { x: 0, z: 1, sides: [rightZ] },
-      { x: -1, z: -1, sides: [leftX, leftZ] },
-      { x: -1, z: 1, sides: [leftX, rightZ] },
-      { x: 1, z: -1, sides: [leftZ, rightX] },
-      { x: 1, z: 1, sides: [rightX, rightZ] },
-    ];
+    const neighborOffset = calNeighborsOffset(DEFAULT_CHUNK_VIEW);
 
     const neighborChunksKeys = neighborOffset.map((offset) => {
       const chunk = {
         x: currentChunk.x + offset.x,
         z: currentChunk.z + offset.z,
-        sides: offset.sides,
       };
 
       const chunkName = nameChunkFromCoordinate(chunk.x, chunk.z);

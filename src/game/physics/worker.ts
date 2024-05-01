@@ -129,7 +129,6 @@ const getPlayerShouldSpawn = (blocks: Record<string, any>) => {
 };
 
 const requestPosY = () => {
-  console.log("123");
   shouldReturnPosY = true;
 };
 
@@ -141,7 +140,6 @@ const bulkAddBlock = ({ blocks }: { blocks: Record<string, string | 0> }) => {
   };
 
   if (shouldReturnPosY) {
-    console.log("🚀 ~ shouldInitPos:", shouldReturnPosY);
     self.postMessage({
       type: "changePosition",
       data: {

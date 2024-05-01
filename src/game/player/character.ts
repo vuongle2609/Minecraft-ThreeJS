@@ -43,9 +43,7 @@ export default class Player extends BaseEntity {
       new CapsuleGeometry(CHARACTER_RADIUS, CHARACTER_MIDDLE_LENGTH),
       new MeshStandardMaterial()
     );
-
-    this.player.receiveShadow = true;
-    this.player.castShadow = true;
+    this.player.visible = false;
 
     if (initPos) this.player.position.set(initPos[0], initPos[1], initPos[2]);
     else {

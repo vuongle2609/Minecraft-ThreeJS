@@ -1,5 +1,6 @@
 import { Vector3 } from "three";
 import {
+  CHARACTER_LENGTH,
   CHARACTER_LENGTH_CEIL,
   CHARACTER_MIDDLE_LENGTH,
   CHARACTER_RADIUS,
@@ -118,28 +119,28 @@ export default class Physics {
       blocksMapping[
         nameFromCoordinate(
           roundedNextPosition.x,
-          roundedCurrentPosition.y + CHARACTER_MIDDLE_LENGTH,
+          roundedCurrentPosition.y + CHARACTER_LENGTH,
           roundedCurrentPosition.z
         )
       ] ||
       blocksMapping[
         nameFromCoordinate(
           roundedNextPosition1.x,
-          roundedCurrentPosition1.y + CHARACTER_MIDDLE_LENGTH,
+          roundedCurrentPosition1.y + CHARACTER_LENGTH,
           roundedCurrentPosition1.z
         )
       ] ||
       blocksMapping[
         nameFromCoordinate(
           roundedNextPosition2.x,
-          roundedCurrentPosition2.y + CHARACTER_MIDDLE_LENGTH,
+          roundedCurrentPosition2.y + CHARACTER_LENGTH,
           roundedCurrentPosition2.z
         )
       ] ||
       blocksMapping[
         nameFromCoordinate(
           roundedNextPosition3.x,
-          roundedCurrentPosition3.y + CHARACTER_MIDDLE_LENGTH,
+          roundedCurrentPosition3.y + CHARACTER_LENGTH,
           roundedCurrentPosition3.z
         )
       ];
@@ -178,28 +179,28 @@ export default class Physics {
       blocksMapping[
         nameFromCoordinate(
           roundedCurrentPosition.x,
-          roundedNextPosition.y + CHARACTER_LENGTH_CEIL,
+          roundedNextPosition.y + CHARACTER_LENGTH,
           roundedCurrentPosition.z
         )
       ] ||
       blocksMapping[
         nameFromCoordinate(
           roundedCurrentPosition1.x,
-          roundedNextPosition1.y + CHARACTER_LENGTH_CEIL,
+          roundedNextPosition1.y + CHARACTER_LENGTH,
           roundedCurrentPosition1.z
         )
       ] ||
       blocksMapping[
         nameFromCoordinate(
           roundedCurrentPosition2.x,
-          roundedNextPosition2.y + CHARACTER_LENGTH_CEIL,
+          roundedNextPosition2.y + CHARACTER_LENGTH,
           roundedCurrentPosition2.z
         )
       ] ||
       blocksMapping[
         nameFromCoordinate(
           roundedCurrentPosition3.x,
-          roundedNextPosition3.y + CHARACTER_LENGTH_CEIL,
+          roundedNextPosition3.y + CHARACTER_LENGTH,
           roundedCurrentPosition3.z
         )
       ];
@@ -238,28 +239,28 @@ export default class Physics {
       blocksMapping[
         nameFromCoordinate(
           roundedCurrentPosition.x,
-          roundedCurrentPosition.y + CHARACTER_MIDDLE_LENGTH,
+          roundedCurrentPosition.y + CHARACTER_LENGTH,
           roundedNextPosition.z
         )
       ] ||
       blocksMapping[
         nameFromCoordinate(
           roundedCurrentPosition1.x,
-          roundedCurrentPosition1.y + CHARACTER_MIDDLE_LENGTH,
+          roundedCurrentPosition1.y + CHARACTER_LENGTH,
           roundedNextPosition1.z
         )
       ] ||
       blocksMapping[
         nameFromCoordinate(
           roundedCurrentPosition2.x,
-          roundedCurrentPosition2.y + CHARACTER_MIDDLE_LENGTH,
+          roundedCurrentPosition2.y + CHARACTER_LENGTH,
           roundedNextPosition2.z
         )
       ] ||
       blocksMapping[
         nameFromCoordinate(
           roundedCurrentPosition3.x,
-          roundedCurrentPosition3.y + CHARACTER_MIDDLE_LENGTH,
+          roundedCurrentPosition3.y + CHARACTER_LENGTH,
           roundedNextPosition3.z
         )
       ];

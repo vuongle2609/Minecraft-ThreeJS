@@ -1,14 +1,9 @@
+import FastNoiseLite from "fastnoise-lite";
+import { BLOCK_WIDTH, CHUNK_SIZE } from "../../constants";
 import { Face } from "../../constants/block";
-import {
-  BLOCK_WIDTH,
-  CHUNK_SIZE,
-  FLAT_WORLD_HEIGHT,
-  NORMAL_WORLD_HEIGHT,
-} from "../../constants";
 import blocks from "../../constants/blocks";
 import { detailFromName } from "../helpers/detailFromName";
 import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
-import FastNoiseLite from "fastnoise-lite";
 
 const noise = new FastNoiseLite();
 noise.SetFrequency(0.026);
@@ -37,8 +32,7 @@ type FaceCustom = typeof leftZ | typeof rightZ | typeof leftX | typeof rightX;
 export const getBlocksInChunk = (
   x: number,
   z: number,
-  chunkBlocksCustom: Record<string, 0 | keyof typeof blocks>,
-  sides: FaceCustom[]
+  chunkBlocksCustom: Record<string, 0 | keyof typeof blocks>
 ) => {
   let blocksInChunk: Record<
     string,
@@ -58,46 +52,12 @@ export const getBlocksInChunk = (
     [rightX]: 0,
   };
 
-  const sideFunc = (side: FaceCustom, pos: number[]) => {
-    const calFuncMap: Record<FaceCustom, Function> = {
-      [leftZ]: () =>
-        boundaries[side]
-          ? pos[2] < boundaries[side]
-            ? pos[2]
-            : boundaries[side]
-          : pos[2],
-      [rightZ]: () =>
-        boundaries[side]
-          ? pos[2] > boundaries[side]
-            ? pos[2]
-            : boundaries[side]
-          : pos[2],
-
-      [leftX]: () =>
-        boundaries[side]
-          ? pos[0] < boundaries[side]
-            ? pos[0]
-            : boundaries[side]
-          : pos[0],
-      [rightX]: () =>
-        boundaries[side]
-          ? pos[0] > boundaries[side]
-            ? pos[0]
-            : boundaries[side]
-          : pos[0],
-    };
-
-    boundaries[side] = calFuncMap[side]();
-  };
-
   const createBlock = (position: number[], type: keyof typeof blocks) => {
     boundaries.highestY =
       position[1] > boundaries.highestY ? position[1] : boundaries.highestY;
 
     boundaries.lowestY =
       position[1] < boundaries.lowestY ? position[1] : boundaries.lowestY;
-
-    sides.forEach((side) => sideFunc(side, position));
 
     const blockName = nameFromCoordinate(position[0], position[1], position[2]);
 
@@ -114,7 +74,7 @@ export const getBlocksInChunk = (
       };
   };
 
-  const createTree = (position: number[]) => {
+  const createTree = (position: number[], length: number) => {
     const [x, y, z] = position;
 
     const leavesStack = 3;
@@ -145,8 +105,14 @@ export const getBlocksInChunk = (
       { x: 2, z: 1 },
     ];
 
+    createBlock([x, y - BLOCK_WIDTH, z], "dirt");
+
+    for (let l = 0; l < length; l++) {
+      createBlock([x, y + BLOCK_WIDTH * l, z], "wood");
+    }
+
     for (let stack = 0; stack < leavesStack; stack++) {
-      const offset = stack + 3;
+      const offset = stack + length;
       const currentStackY = y + BLOCK_WIDTH * offset;
       createBlock([x, currentStackY, z], "leaves");
 
@@ -173,10 +139,6 @@ export const getBlocksInChunk = (
           );
         });
     }
-
-    createBlock([x, y, z], "wood");
-    createBlock([x, y + BLOCK_WIDTH, z], "wood");
-    createBlock([x, y + BLOCK_WIDTH * 2, z], "wood");
   };
 
   const peakPos = [];
@@ -189,10 +151,12 @@ export const getBlocksInChunk = (
       const xPos = xA * 2;
       const zPos = zA * 2;
       const nY = noise.GetNoise(xA, zA);
-      const yPos =
+      let yPos =
         (Math.round(nY * 10) % 2
           ? Math.round(nY * 10) + 1
-          : Math.round(nY * 10)) + 20;
+          : Math.round(nY * 10)) + 10;
+
+      yPos = yPos <= 0 ? 2 : yPos;
 
       const position = [xPos, yPos, zPos];
 
@@ -201,16 +165,20 @@ export const getBlocksInChunk = (
       {
         if (treePos.length < 1) {
           const nY = noiseTree.GetNoise(xA, zA);
+
           const shouldHaveTree = !Math.floor(nY);
 
           if (shouldHaveTree) {
+            const nYS = noiseTree.GetNoise(xA, zA + 1);
             const positionTree = [
               position[0],
               position[1] + BLOCK_WIDTH,
               position[2],
             ];
 
-            treePos.push(positionTree);
+            const treeLength = Math.round(nYS * 100) % 2 ? 3 : 2;
+
+            treePos.push({ position: positionTree, treeLength });
           }
         }
       }
@@ -228,13 +196,13 @@ export const getBlocksInChunk = (
 
       const newPos = [x, yA, z];
 
-      if (countSurface == 0) blockType = "grass" as const;
+      if (countSurface == 0) blockType = "grass";
 
-      if (countSurface == 1) blockType = "dirt" as const;
+      if (countSurface == 1) blockType = "dirt";
 
-      if (countSurface > 3) blockType = "stone" as const;
+      if (countSurface > 3) blockType = "stone";
 
-      if (yA == 0) blockType = "bedrock" as const;
+      if (yA == 0) blockType = "bedrock";
 
       createBlock(newPos, blockType);
 
@@ -243,8 +211,8 @@ export const getBlocksInChunk = (
   });
 
   // place trees
-  treePos.forEach((pos) => {
-    createTree(pos);
+  treePos.forEach(({ position, treeLength }) => {
+    createTree(position, treeLength);
   });
 
   // merge existing or deleted blocks with generated blocks
@@ -257,8 +225,6 @@ export const getBlocksInChunk = (
         boundaries.highestY = y > boundaries.highestY ? y : boundaries.highestY;
 
         boundaries.lowestY = y < boundaries.lowestY ? y : boundaries.lowestY;
-
-        sides.forEach((side) => sideFunc(side, [x, y, z]));
 
         if (chunkBlocksCustom[currKey] == 0) {
           return prev;

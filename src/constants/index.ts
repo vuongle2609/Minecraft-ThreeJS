@@ -12,7 +12,9 @@ export const DEFAULT_WORLD_NAME = "New World";
 
 export const BLOCK_WIDTH = 2;
 
-export const CHUNK_SIZE = 6;
+export const DEFAULT_CHUNK_VIEW = 1;
+
+export const CHUNK_SIZE = 8;
 
 export const TIME_TO_INTERACT = 300;
 

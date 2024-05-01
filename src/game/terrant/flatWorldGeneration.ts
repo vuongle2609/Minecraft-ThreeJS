@@ -11,8 +11,7 @@ type FaceCustom = typeof leftZ | typeof rightZ | typeof leftX | typeof rightX;
 export const getBlocksInChunkFlat = (
   x: number,
   z: number,
-  chunkBlocksCustom: Record<string, 0 | keyof typeof blocks>,
-  sides: FaceCustom[]
+  chunkBlocksCustom: Record<string, 0 | keyof typeof blocks>
 ) => {
   let blocksInChunk: Record<
     string,
@@ -32,38 +31,6 @@ export const getBlocksInChunkFlat = (
     [rightX]: 0,
   };
 
-  const sideFunc = (side: FaceCustom, pos: number[]) => {
-    const calFuncMap: Record<FaceCustom, Function> = {
-      [leftZ]: () =>
-        boundaries[side]
-          ? pos[2] < boundaries[side]
-            ? pos[2]
-            : boundaries[side]
-          : pos[2],
-      [rightZ]: () =>
-        boundaries[side]
-          ? pos[2] > boundaries[side]
-            ? pos[2]
-            : boundaries[side]
-          : pos[2],
-
-      [leftX]: () =>
-        boundaries[side]
-          ? pos[0] < boundaries[side]
-            ? pos[0]
-            : boundaries[side]
-          : pos[0],
-      [rightX]: () =>
-        boundaries[side]
-          ? pos[0] > boundaries[side]
-            ? pos[0]
-            : boundaries[side]
-          : pos[0],
-    };
-
-    boundaries[side] = calFuncMap[side]();
-  };
-
   // wtf
   for (let yA = 0; yA < FLAT_WORLD_HEIGHT; yA++) {
     for (let xA = x * CHUNK_SIZE; xA < (x + 1) * CHUNK_SIZE; xA++) {
@@ -75,8 +42,6 @@ export const getBlocksInChunkFlat = (
 
         boundaries.lowestY =
           position[1] < boundaries.lowestY ? position[1] : boundaries.lowestY;
-
-        sides.forEach((side) => sideFunc(side, position));
 
         const blockName = nameFromCoordinate(
           position[0],
@@ -110,8 +75,6 @@ export const getBlocksInChunkFlat = (
         boundaries.highestY = y > boundaries.highestY ? y : boundaries.highestY;
 
         boundaries.lowestY = y < boundaries.lowestY ? y : boundaries.lowestY;
-
-        sides.forEach((side) => sideFunc(side, [x, y, z]));
 
         if (chunkBlocksCustom[currKey] == 0) {
           return prev;
