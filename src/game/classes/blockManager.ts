@@ -1,11 +1,11 @@
-import blocks from "@/constants/blocks";
+import blocks, { renderGeometry } from "@/constants/blocks";
 import { getChunkCoordinate } from "@/game/helpers/chunkHelpers";
 import { detailFromName } from "@/game/helpers/detailFromName";
 import {
   nameChunkFromCoordinate,
   nameFromCoordinate,
 } from "@/game/helpers/nameFromCoordinate";
-import { Vector2, Vector3 } from "three";
+import { InstancedMesh, Vector2, Vector3 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 
 import Block from "./block";
@@ -32,9 +32,23 @@ export default class BlockManager extends BaseEntity {
   chunksWorkers: Record<string, Worker> = {};
   chunksActive: string[] = [];
 
+  // blocksIntanced: Record<string, InstancedMesh[]> = Object.keys(blocks).reduce(
+  //   (prev, key) => {
+  //     const currBlock = blocks[key as keyof typeof blocks];
+
+  //     return {
+  //       ...prev,
+  //       [key]: currBlock.texture.map(
+  //         (texture) => new InstancedMesh(renderGeometry, texture, 1002)
+  //       ),
+  //     };
+  //   },
+  //   {}
+  // );
+
   constructor(props: BasePropsType & PropsType) {
     super(props);
-
+    // console.log(this.blocksIntanced);
     this.inventoryManager = props.inventoryManager;
     this.blocksWorldChunk = props.worldStorage?.blocksWorldChunk || {};
   }

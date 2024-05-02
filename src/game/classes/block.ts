@@ -1,6 +1,10 @@
 import { BLOCK_WIDTH } from "@/constants";
 import { BlockFaces, Face } from "@/constants/block";
-import blocks, { BlockAttributeType, renderGeometry } from "@/constants/blocks";
+import blocks, {
+  BlockAttributeType,
+  BlockKeys,
+  renderGeometry,
+} from "@/constants/blocks";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
 import { Mesh, Object3D, Vector3 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
@@ -23,7 +27,7 @@ export default class BlockA extends BaseEntity {
     [top]: null,
     [bottom]: null,
   };
-  type: keyof typeof blocks;
+  type: BlockKeys;
   position: Vector3;
   atttribute: BlockAttributeType;
   blocksMapping: Record<string, Record<string, Record<string, BlockA>>>;
@@ -102,7 +106,11 @@ export default class BlockA extends BaseEntity {
 
   addFace(face: keyof BlockFaces) {
     // console.count('add')
-    const plane = new Mesh(renderGeometry, this.atttribute.texture[face]);
+    const texture = this.atttribute.texture;
+
+    const material =
+      texture[this.atttribute.textureMap[face] as keyof typeof texture];
+    const plane = new Mesh(renderGeometry, material);
 
     const { x, y, z } = this.position;
 
