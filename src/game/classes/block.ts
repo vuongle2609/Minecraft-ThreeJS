@@ -3,10 +3,11 @@ import { BlockFaces, Face } from "@/constants/block";
 import blocks, {
   BlockAttributeType,
   BlockKeys,
+  BlockTextureType,
   renderGeometry,
 } from "@/constants/blocks";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
-import { Mesh, Object3D, Vector3 } from "three";
+import { InstancedMesh, Mesh, Object3D, Vector3 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 
 interface PropsType {
@@ -14,6 +15,8 @@ interface PropsType {
   type: keyof typeof blocks;
   blocksMapping: Record<string, Record<string, Record<string, BlockA>>>;
   shouldNotRender?: boolean;
+  dummy: Object3D;
+  intancedPlanes: Record<BlockTextureType, InstancedMesh>;
 }
 
 const { leftZ, rightZ, leftX, rightX, top, bottom } = Face;
@@ -32,14 +35,27 @@ export default class BlockA extends BaseEntity {
   atttribute: BlockAttributeType;
   blocksMapping: Record<string, Record<string, Record<string, BlockA>>>;
 
+  dummy: Object3D;
+  index: number;
+  intancedPlanes: Record<BlockTextureType, InstancedMesh>;
+
   constructor(props: BasePropsType & PropsType) {
     super(props);
 
-    const { type, position, blocksMapping, shouldNotRender } = props!;
+    const {
+      type,
+      position,
+      blocksMapping,
+      shouldNotRender,
+      dummy,
+      intancedPlanes,
+    } = props!;
 
     this.type = type;
     this.position = position;
     this.atttribute = blocks[type];
+    this.dummy = dummy;
+    this.intancedPlanes = intancedPlanes;
     this.blocksMapping = blocksMapping;
 
     if (!shouldNotRender) {
@@ -110,18 +126,48 @@ export default class BlockA extends BaseEntity {
 
     const material =
       texture[this.atttribute.textureMap[face] as keyof typeof texture];
-    const plane = new Mesh(renderGeometry, material);
 
     const { x, y, z } = this.position;
 
     const { rotation } = this.calFaceAttr(face);
+
+    const plane = new Mesh(renderGeometry, material);
 
     plane.position.copy(this.position);
     plane.rotation.set(rotation[0], rotation[1], rotation[2]);
     plane.name = nameFromCoordinate(x, y, z, this.type, face);
 
     this.blockFaces[face] = plane;
-    this.scene?.add(plane);
+    // this.scene?.add(plane);
+
+    // new
+
+    const oldInstanced = this.intancedPlanes[this.atttribute.textureMap[face]];
+    const oldIntancedCount = oldInstanced.count;
+    const oldMatrix = oldInstanced.instanceMatrix;
+
+    this.scene?.remove(oldInstanced);
+
+    const currInstanced = new InstancedMesh(
+      oldInstanced.geometry,
+      oldInstanced.material,
+      oldIntancedCount + 1
+    );
+
+    currInstanced.instanceMatrix = oldMatrix;
+
+    this.scene?.add(currInstanced);
+
+    this.dummy.position.copy(this.position);
+    this.dummy.rotation.set(rotation[0], rotation[1], rotation[2]);
+    this.dummy.updateMatrix();
+
+    currInstanced.setMatrixAt(currInstanced.count - 1, this.dummy.matrix);
+
+    currInstanced.instanceMatrix.needsUpdate = true;
+
+    this.intancedPlanes[this.atttribute.textureMap[face]] = currInstanced;
+    // currMesh.computeBoundingSphere();
   }
 
   calFaceAttr(face: keyof BlockFaces) {

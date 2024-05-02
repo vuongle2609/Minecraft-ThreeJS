@@ -14,7 +14,7 @@ export const BLOCK_WIDTH = 2;
 
 export const DEFAULT_CHUNK_VIEW = 1;
 
-export const CHUNK_SIZE = 16;
+export const CHUNK_SIZE = 12;
 
 export const TIME_TO_INTERACT = 300;
 

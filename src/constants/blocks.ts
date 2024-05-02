@@ -97,7 +97,7 @@ Object.values(textures).forEach((item) => {
 // const worldMaterial = MeshToonMaterial;
 const worldMaterial = MeshLambertMaterial;
 
-enum BlockTextureType {
+export enum BlockTextureType {
   top,
   side,
   sideOther,

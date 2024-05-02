@@ -1,11 +1,21 @@
-import blocks, { renderGeometry } from "@/constants/blocks";
+import blocks, {
+  BlockKeys,
+  BlockTextureType,
+  renderGeometry,
+} from "@/constants/blocks";
 import { getChunkCoordinate } from "@/game/helpers/chunkHelpers";
 import { detailFromName } from "@/game/helpers/detailFromName";
 import {
   nameChunkFromCoordinate,
   nameFromCoordinate,
 } from "@/game/helpers/nameFromCoordinate";
-import { InstancedMesh, Vector2, Vector3 } from "three";
+import {
+  DynamicDrawUsage,
+  InstancedMesh,
+  Object3D,
+  Vector2,
+  Vector3,
+} from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 
 import Block from "./block";
@@ -32,23 +42,34 @@ export default class BlockManager extends BaseEntity {
   chunksWorkers: Record<string, Worker> = {};
   chunksActive: string[] = [];
 
-  // blocksIntanced: Record<string, InstancedMesh[]> = Object.keys(blocks).reduce(
-  //   (prev, key) => {
-  //     const currBlock = blocks[key as keyof typeof blocks];
+  dummy = new Object3D();
+  blocksIntanced = Object.keys(blocks).reduce((prev, typeKey) => {
+    const currBlock = blocks[typeKey as keyof typeof blocks];
 
-  //     return {
-  //       ...prev,
-  //       [key]: currBlock.texture.map(
-  //         (texture) => new InstancedMesh(renderGeometry, texture, 1002)
-  //       ),
-  //     };
-  //   },
-  //   {}
-  // );
+    return {
+      ...prev,
+      [typeKey]: Object.keys(currBlock.texture).reduce((prev, key) => {
+        const mesh = new InstancedMesh(
+          renderGeometry,
+          currBlock.texture[key as unknown as keyof typeof currBlock.texture],
+          1
+        );
+
+        mesh.instanceMatrix.setUsage(DynamicDrawUsage);
+
+        this.scene?.add(mesh);
+
+        return {
+          ...prev,
+          [key]: mesh,
+        };
+      }, {}),
+    };
+  }, {}) as Record<BlockKeys, Record<BlockTextureType, InstancedMesh>>;
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
-    // console.log(this.blocksIntanced);
+
     this.inventoryManager = props.inventoryManager;
     this.blocksWorldChunk = props.worldStorage?.blocksWorldChunk || {};
   }
@@ -101,6 +122,8 @@ export default class BlockManager extends BaseEntity {
       type: type,
       blocksMapping: this.blocksMapping,
       shouldNotRender: shouldNotRenderIntoScene,
+      dummy: this.dummy,
+      intancedPlanes: this.blocksIntanced[type],
     });
 
     this.blocksMapping[x] = {
