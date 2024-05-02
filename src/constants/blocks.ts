@@ -1,6 +1,7 @@
 import {
   BufferAttribute,
   BufferGeometry,
+  MeshLambertMaterial,
   MeshStandardMaterial,
   MeshToonMaterial,
   NearestFilter,
@@ -95,7 +96,8 @@ Object.values(textures).forEach((item) => {
 // const worldMaterial = MeshStandardMaterial;
 // const worldMaterial = MeshPhongMaterial;
 // const worldMaterial = MeshBasicMaterial;
-const worldMaterial = MeshToonMaterial;
+// const worldMaterial = MeshToonMaterial;
+const worldMaterial = MeshLambertMaterial;
 
 const blocks = {
   grass: {
@@ -277,32 +279,32 @@ const blocks = {
       new worldMaterial({
         map: textures.leavesTexture,
         color: 0x63a948,
-        transparent: true,
+        // transparent: true,
       }),
       new worldMaterial({
         map: textures.leavesTexture,
         color: 0x63a948,
-        transparent: true,
+        // transparent: true,
       }),
       new worldMaterial({
         map: textures.leavesTexture,
         color: 0x63a948,
-        transparent: true,
+        // transparent: true,
       }),
       new worldMaterial({
         map: textures.leavesTexture,
         color: 0x63a948,
-        transparent: true,
+        // transparent: true,
       }),
       new worldMaterial({
         map: textures.leavesTexture,
         color: 0x63a948,
-        transparent: true,
+        // transparent: true,
       }),
       new worldMaterial({
         map: textures.leavesTexture,
         color: 0x63a948,
-        transparent: true,
+        // transparent: true,
       }),
     ],
   },
@@ -539,6 +541,10 @@ Object.values(blocks).forEach((block) => {
   block.step.loop = true;
   block.step.volume = block.volume;
   block.step.playbackRate = 1.3;
+
+  // block.texture.forEach((item) => {
+  //   item.color.setHex(0x606060); // Make the material darker
+  // });
 
   block.place.volume = 0.6;
   block.break.volume = 0.6;

@@ -130,6 +130,10 @@ export default class SelectWorld extends RenderPage {
     this.handleRenderWorld(worldId);
   }
 
+  editWorld(id: string) {
+    this.router.navigate("editWorld", id);
+  }
+
   disableInteractButton() {
     $$<HTMLButtonElement>(".interactSelected").forEach((item) => {
       item.classList.add("disabled");
@@ -155,6 +159,12 @@ export default class SelectWorld extends RenderPage {
 
     $("#reCreate").onclick = () => {
       this.reCreateWorld();
+    };
+
+    $("#edit").onclick = () => {
+      if (!this.selectedWorld) return;
+
+      this.editWorld(this.selectedWorld);
     };
   }
 
