@@ -13,3 +13,8 @@ https://www.google.com/search?q=Ambient+occlusion+for+voxels+threejs&rlz=1C1ONGR
 // 
 make cloud
 https://www.google.com/search?q=Ambient+occlusion+for+voxels+threejs&rlz=1C1ONGR_enVN1074VN1074&oq=Ambient+occlusion+for+voxels+threejs&gs_lcrp=EgZjaHJvbWUyCwgAEEUYChg5GKAB0gEIMjA5NmowajeoAgCwAgA&sourceid=chrome&ie=UTF-8
+
+//
+update physics
+when not detect bellow y => change vY
+using points and neighbors point to detect collision
