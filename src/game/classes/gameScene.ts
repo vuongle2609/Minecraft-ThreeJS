@@ -5,9 +5,8 @@ import { WorldsType } from "@/type";
 import {
   Clock,
   Color,
-  Fog,
+  FogExp2,
   PerspectiveCamera,
-  SRGBTransfer,
   Scene,
   WebGLRenderer,
 } from "three";
@@ -36,7 +35,7 @@ export default class GameScene extends RenderPage {
   scene = new Scene();
 
   camera = new PerspectiveCamera(
-    80,
+    70,
     window.innerWidth / window.innerHeight,
     0.1,
     500
@@ -87,7 +86,8 @@ export default class GameScene extends RenderPage {
     document.body.appendChild(this.element);
 
     this.scene.background = new Color("#6EB1FF");
-    this.scene.fog = new Fog(0xcccccc, 3, 40);
+    // this.scene.fog = new Fog(0xcccccc, 3, 40);
+    this.scene.fog = new FogExp2(0xcccccc, 0.024);
 
     if (this.worldStorage.rotation)
       this.camera.rotation.fromArray(this.worldStorage.rotation as any);

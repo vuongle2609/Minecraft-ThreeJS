@@ -543,7 +543,7 @@ Object.values(blocks).forEach((block) => {
   block.step.playbackRate = 1.3;
 
   // block.texture.forEach((item) => {
-  //   item.color.setHex(0x606060); // Make the material darker
+  //   // item.color.setHex(0x606060); // Make the material darker
   // });
 
   block.place.volume = 0.6;
