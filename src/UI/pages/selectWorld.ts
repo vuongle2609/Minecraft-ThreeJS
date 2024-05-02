@@ -28,7 +28,7 @@ export default class SelectWorld extends RenderPage {
           <div class="w-full grow flex flex-col gap-3 text-white overflow-auto bg-black/50 py-2 px-[200px]" id="world_list">
           </div>
 
-          <div class="w-full flex flex-col gap-2 mt-auto px-[100px]">
+          <div class="w-full flex flex-col gap-2 mt-auto px-[100px] max-w-[1040px]">
             <div class="w-full flex gap-3">
                 <button
                     class="mc-button interactSelected disabled"

@@ -27,7 +27,7 @@ export default class MainScreen extends RenderPage {
             class="max-w-[800px] w-full mb-20"
           />
 
-          <div class="w-full flex flex-col gap-4">
+          <div class="w-full flex flex-col gap-4 max-w-[550px]">
             <button
               class="mc-button"
               id="singleplayer"
@@ -43,7 +43,7 @@ export default class MainScreen extends RenderPage {
             </button>
           </div>
 
-          <div class="w-full flex gap-4 mt-10">
+          <div class="w-full flex gap-4 mt-10 max-w-[550px]">
             <button
               class="mc-button disabled"
             >

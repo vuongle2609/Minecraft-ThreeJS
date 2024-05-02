@@ -9,11 +9,10 @@ import {
 } from "../../constants/player";
 import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
 import Physics from "./physics";
-import { BlockKeys } from "../../constants/blocks";
 
 let blocksMapping: Record<string, string | 0> = {};
 
-let originalVy = -25;
+let originalVy = -40;
 let vy = originalVy;
 let onGround = true;
 
@@ -69,6 +68,11 @@ const calculateMovement = ({
       playerPostion,
       blocksMapping
     );
+
+  if (!collideObject && onGround) {
+    vy = -10;
+    onGround = false;
+  }
 
   if (collideObject) {
     onGround = true;
