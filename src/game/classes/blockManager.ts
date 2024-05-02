@@ -52,20 +52,34 @@ export default class BlockManager extends BaseEntity {
         const mesh = new InstancedMesh(
           renderGeometry,
           currBlock.texture[key as unknown as keyof typeof currBlock.texture],
-          1
+          700000
         );
 
         mesh.instanceMatrix.setUsage(DynamicDrawUsage);
 
         this.scene?.add(mesh);
-
+        mesh.count = 0;
+        mesh.instanceMatrix.needsUpdate = true;
+        mesh.frustumCulled = false;
         return {
           ...prev,
-          [key]: mesh,
+          [key]: {
+            mesh,
+            count: 0,
+          },
         };
       }, {}),
     };
-  }, {}) as Record<BlockKeys, Record<BlockTextureType, InstancedMesh>>;
+  }, {}) as Record<
+    BlockKeys,
+    Record<
+      BlockTextureType,
+      {
+        mesh: InstancedMesh;
+        count: number;
+      }
+    >
+  >;
 
   constructor(props: BasePropsType & PropsType) {
     super(props);

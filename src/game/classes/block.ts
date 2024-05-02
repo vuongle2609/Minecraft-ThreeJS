@@ -16,7 +16,13 @@ interface PropsType {
   blocksMapping: Record<string, Record<string, Record<string, BlockA>>>;
   shouldNotRender?: boolean;
   dummy: Object3D;
-  intancedPlanes: Record<BlockTextureType, InstancedMesh>;
+  intancedPlanes: Record<
+    BlockTextureType,
+    {
+      mesh: InstancedMesh;
+      count: number;
+    }
+  >;
 }
 
 const { leftZ, rightZ, leftX, rightX, top, bottom } = Face;
@@ -37,7 +43,13 @@ export default class BlockA extends BaseEntity {
 
   dummy: Object3D;
   index: number;
-  intancedPlanes: Record<BlockTextureType, InstancedMesh>;
+  intancedPlanes: Record<
+    BlockTextureType,
+    {
+      mesh: InstancedMesh;
+      count: number;
+    }
+  >;
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
@@ -141,32 +153,17 @@ export default class BlockA extends BaseEntity {
     // this.scene?.add(plane);
 
     // new
-
-    const oldInstanced = this.intancedPlanes[this.atttribute.textureMap[face]];
-    const oldIntancedCount = oldInstanced.count;
-    const oldMatrix = oldInstanced.instanceMatrix;
-
-    this.scene?.remove(oldInstanced);
-
-    const currInstanced = new InstancedMesh(
-      oldInstanced.geometry,
-      oldInstanced.material,
-      oldIntancedCount + 1
-    );
-
-    currInstanced.instanceMatrix = oldMatrix;
-
-    this.scene?.add(currInstanced);
+    const currInstanced =
+      this.intancedPlanes[this.atttribute.textureMap[face]].mesh;
 
     this.dummy.position.copy(this.position);
     this.dummy.rotation.set(rotation[0], rotation[1], rotation[2]);
     this.dummy.updateMatrix();
 
-    currInstanced.setMatrixAt(currInstanced.count - 1, this.dummy.matrix);
-
+    currInstanced.setMatrixAt(currInstanced.count, this.dummy.matrix);
+    currInstanced.count += 1;
     currInstanced.instanceMatrix.needsUpdate = true;
 
-    this.intancedPlanes[this.atttribute.textureMap[face]] = currInstanced;
     // currMesh.computeBoundingSphere();
   }
 
