@@ -2,7 +2,7 @@
 convert to instanced mesh
 detect face using rotation
 each face only hold type using name
-
+cache terrant generated so if comeback visited chunk wont need to generated again
 /// 
 
 make ambient collusion

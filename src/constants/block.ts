@@ -1,5 +1,3 @@
-import { Mesh } from "three";
-
 export enum Face {
   leftZ,
   rightZ,
@@ -12,10 +10,10 @@ export enum Face {
 const { leftZ, rightZ, leftX, rightX, top, bottom } = Face;
 
 export type BlockFaces = {
-  [leftZ]: null | Mesh;
-  [rightZ]: null | Mesh;
-  [leftX]: null | Mesh;
-  [rightX]: null | Mesh;
-  [top]: null | Mesh;
-  [bottom]: null | Mesh;
+  [leftZ]: null | number;
+  [rightZ]: null | number;
+  [leftX]: null | number;
+  [rightX]: null | number;
+  [top]: null | number;
+  [bottom]: null | number;
 };

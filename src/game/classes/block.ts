@@ -1,13 +1,8 @@
 import { BLOCK_WIDTH } from "@/constants";
 import { BlockFaces, Face } from "@/constants/block";
-import blocks, {
-  BlockAttributeType,
-  BlockKeys,
-  BlockTextureType,
-  renderGeometry,
-} from "@/constants/blocks";
-import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
-import { InstancedMesh, Mesh, Object3D, Vector3 } from "three";
+import blocks, { BlockAttributeType, BlockKeys } from "@/constants/blocks";
+import { BlocksIntancedType } from "@/type";
+import { Matrix4, Object3D, Vector3 } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 
 interface PropsType {
@@ -16,13 +11,7 @@ interface PropsType {
   blocksMapping: Record<string, Record<string, Record<string, BlockA>>>;
   shouldNotRender?: boolean;
   dummy: Object3D;
-  intancedPlanes: Record<
-    BlockTextureType,
-    {
-      mesh: InstancedMesh;
-      count: number;
-    }
-  >;
+  intancedPlanes: BlocksIntancedType;
 }
 
 const { leftZ, rightZ, leftX, rightX, top, bottom } = Face;
@@ -43,13 +32,7 @@ export default class BlockA extends BaseEntity {
 
   dummy: Object3D;
   index: number;
-  intancedPlanes: Record<
-    BlockTextureType,
-    {
-      mesh: InstancedMesh;
-      count: number;
-    }
-  >;
+  intancedPlanes: BlocksIntancedType;
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
@@ -73,10 +56,6 @@ export default class BlockA extends BaseEntity {
     if (!shouldNotRender) {
       this.render();
     }
-  }
-
-  getObject(name: string) {
-    return this.scene?.getObjectByName(name) as THREE.Object3D;
   }
 
   render() {
@@ -129,42 +108,44 @@ export default class BlockA extends BaseEntity {
   }
 
   removeFace(face: keyof BlockFaces) {
-    this.scene?.remove(this.blockFaces[face] as Object3D);
+    const currInstanced =
+      this.intancedPlanes[this.atttribute.textureMap[face]].mesh;
+
+    const index = this.blockFaces[face];
+
+    if (index !== null) {
+      currInstanced.setMatrixAt(
+        index,
+        new Matrix4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+      );
+
+      this.intancedPlanes[
+        this.atttribute.textureMap[face]
+      ].indexCanAllocate.push(index);
+    }
   }
 
   addFace(face: keyof BlockFaces) {
     // console.count('add')
-    const texture = this.atttribute.texture;
-
-    const material =
-      texture[this.atttribute.textureMap[face] as keyof typeof texture];
-
-    const { x, y, z } = this.position;
-
     const { rotation } = this.calFaceAttr(face);
 
-    const plane = new Mesh(renderGeometry, material);
+    const currInstanced = this.intancedPlanes[this.atttribute.textureMap[face]];
 
-    plane.position.copy(this.position);
-    plane.rotation.set(rotation[0], rotation[1], rotation[2]);
-    plane.name = nameFromCoordinate(x, y, z, this.type, face);
+    const currInstancedMesh = currInstanced.mesh;
+    const indexAllowCate = currInstanced.indexCanAllocate.pop();
 
-    this.blockFaces[face] = plane;
-    // this.scene?.add(plane);
-
-    // new
-    const currInstanced =
-      this.intancedPlanes[this.atttribute.textureMap[face]].mesh;
+    const index =
+      indexAllowCate !== undefined ? indexAllowCate : currInstancedMesh.count;
 
     this.dummy.position.copy(this.position);
     this.dummy.rotation.set(rotation[0], rotation[1], rotation[2]);
     this.dummy.updateMatrix();
 
-    currInstanced.setMatrixAt(currInstanced.count, this.dummy.matrix);
-    currInstanced.count += 1;
-    currInstanced.instanceMatrix.needsUpdate = true;
+    this.blockFaces[face] = index;
 
-    // currMesh.computeBoundingSphere();
+    currInstancedMesh.setMatrixAt(index, this.dummy.matrix);
+    if (indexAllowCate === undefined) currInstancedMesh.count += 1;
+    currInstancedMesh.instanceMatrix.needsUpdate = true;
   }
 
   calFaceAttr(face: keyof BlockFaces) {
@@ -195,11 +176,8 @@ export default class BlockA extends BaseEntity {
   destroy() {
     const { x, y, z } = this.position;
 
-    Object.values(this.blockFaces).forEach((item) => {
-      if (item) {
-        item.geometry.dispose();
-        this.scene?.remove(item);
-      }
+    Object.keys(this.blockFaces).forEach((face) => {
+      this.removeFace(face as unknown as keyof BlockFaces);
     });
 
     const leftZBlock = this.blocksMapping[x]?.[y]?.[z + BLOCK_WIDTH];

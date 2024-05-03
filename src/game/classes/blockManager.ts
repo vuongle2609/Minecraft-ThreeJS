@@ -21,6 +21,7 @@ import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
 import { Face } from "@/constants/block";
+import { BlocksIntancedMapping, BlocksIntancedType } from "@/type";
 
 interface PropsType {
   inventoryManager: InventoryManager;
@@ -52,7 +53,7 @@ export default class BlockManager extends BaseEntity {
         const mesh = new InstancedMesh(
           renderGeometry,
           currBlock.texture[key as unknown as keyof typeof currBlock.texture],
-          700000
+          1000000
         );
 
         mesh.instanceMatrix.setUsage(DynamicDrawUsage);
@@ -66,20 +67,12 @@ export default class BlockManager extends BaseEntity {
           [key]: {
             mesh,
             count: 0,
+            indexCanAllocate: [],
           },
         };
       }, {}),
     };
-  }, {}) as Record<
-    BlockKeys,
-    Record<
-      BlockTextureType,
-      {
-        mesh: InstancedMesh;
-        count: number;
-      }
-    >
-  >;
+  }, {}) as BlocksIntancedMapping;
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
@@ -89,7 +82,7 @@ export default class BlockManager extends BaseEntity {
   }
 
   async initialize() {
-    document.addEventListener("mousedown", this.onMouseDown.bind(this), false);
+    document.addEventListener("mousedown", this.onMouseDown.bind(this), false); 
   }
 
   getObject(name: string) {
@@ -202,7 +195,9 @@ export default class BlockManager extends BaseEntity {
 
     this.inventoryManager.inventory[this.inventoryManager.currentFocusIndex] =
       type as keyof typeof blocks;
+
     this.inventoryManager.renderHotbar();
+
     if (this.inventoryManager.currentFocus)
       this.inventoryManager.renderLabelFocusItem(
         blocks[this.inventoryManager.currentFocus].name
