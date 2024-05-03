@@ -112,6 +112,12 @@ const addBlock = ({ position, type }: { position: number[]; type: string }) => {
   };
 };
 
+const changeChunk = ({
+  neighborChunksKeys,
+}: {
+  neighborChunksKeys: string[];
+}) => {};
+
 let playerInitPos = [CHUNK_SIZE / 2, CHARACTER_LENGTH + 0.5, CHUNK_SIZE / 2];
 let shouldReturnPosY = false;
 
@@ -165,6 +171,7 @@ let eventMapping: Record<string, Function> = {
   jumpCharacter,
   bulkAddBlock,
   requestPosY,
+  changeChunk,
 };
 
 self.onmessage = (

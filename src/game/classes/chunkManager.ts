@@ -32,6 +32,7 @@ export default class ChunkManager extends BlockManager {
 
   handleRequestChunks(currentChunk: { x: number; z: number }) {
     // get neighbors
+
     const neighborOffset = calNeighborsOffset(DEFAULT_CHUNK_VIEW);
 
     const neighborChunksKeys = neighborOffset.map((offset) => {
@@ -45,6 +46,13 @@ export default class ChunkManager extends BlockManager {
       this.handleAssignWorkerChunk(chunkName, chunk);
 
       return chunkName;
+    });
+
+    this.worker?.postMessage({
+      type: "changeChunk",
+      data: {
+        neighborChunksKeys,
+      },
     });
 
     this.handleClearChunks(neighborChunksKeys);
@@ -107,14 +115,14 @@ export default class ChunkManager extends BlockManager {
     if (!this.chunksActive.includes(chunkName)) return;
 
     // priority add to physics cal first
-    this.worker?.postMessage({
-      type: "bulkAddBlock",
-      data: {
-        blocks: Object.keys(blocksRenderWorker).reduce((prev, key) => {
-          return { ...prev, [key]: blocksRenderWorker[key].type };
-        }, {}),
-      },
-    });
+    // this.worker?.postMessage({
+    //   type: "bulkAddBlock",
+    //   data: {
+    //     blocks: Object.keys(blocksRenderWorker).reduce((prev, key) => {
+    //       return { ...prev, [key]: blocksRenderWorker[key].type };
+    //     }, {}),
+    //   },
+    // });
 
     // maybe the queue things is not working :(
     let shouldStart = false;
