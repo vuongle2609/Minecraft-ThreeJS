@@ -1,72 +1,29 @@
-import { BLOCK_WIDTH, FLAT_WORLD_TYPE } from "../../constants";
+import { FLAT_WORLD_TYPE } from "../../constants";
 import { Face } from "../../constants/block";
-import { getNeighbors } from "../helpers/blocksHelpers";
-import { getBlocksInChunkFlat } from "./flatWorldGeneration";
-import { getBlocksInChunk } from "./worldGeneration";
+import { BlockKeys } from "../../constants/blocks";
+import { FlatWorld } from "./flatWorldGeneration";
+import { DefaultWorld } from "./worldGeneration";
 
 const { leftZ, rightZ, leftX, rightX, bottom, top } = Face;
 
 self.onmessage = (e) => {
-  const { x, z, chunkBlocksCustom, type, seed } = e.data;
+  const { x, z, chunkBlocksCustom, type, seed, neighborsChunkData } =
+    e.data as {
+      type: number;
+      chunkBlocksCustom: Record<string, 0 | BlockKeys>;
+      neighborsChunkData: Record<string, Record<string, 0 | BlockKeys>>;
+      seed: number;
+      x: number;
+      z: number;
+    };
 
-  const { blocksInChunk, boundaries } =
+  const { blocksInChunk, facesToRender } =
     type === FLAT_WORLD_TYPE
-      ? getBlocksInChunkFlat(x, z, chunkBlocksCustom, seed)
-      : getBlocksInChunk(x, z, chunkBlocksCustom, seed);
-
-  const blocksRender: Record<string, 1> = {};
-
-  Object.keys(blocksInChunk).forEach((key) => {
-    const { position } = blocksInChunk[key];
-
-    const [x, y, z] = position;
-
-    let shouldRender = true;
-
-    if (
-      y == boundaries.lowestY &&
-      getNeighbors(
-        blocksInChunk,
-        { x, y, z },
-        {
-          [leftZ]: true,
-          [rightZ]: true,
-          [leftX]: true,
-          [rightX]: true,
-          [bottom]: false,
-          [top]: true,
-        },
-        BLOCK_WIDTH
-      )
-    ) {
-      shouldRender = false;
-    }
-
-    if (
-      getNeighbors(
-        blocksInChunk,
-        { x, y, z },
-        {
-          [leftZ]: true,
-          [rightZ]: true,
-          [leftX]: true,
-          [rightX]: true,
-          [bottom]: true,
-          [top]: true,
-        },
-        BLOCK_WIDTH
-      )
-    ) {
-      shouldRender = false;
-    }
-
-    if (shouldRender) {
-      blocksRender[key] = 1;
-    }
-  });
+      ? new FlatWorld(x, z, chunkBlocksCustom, seed, neighborsChunkData)
+      : new DefaultWorld(x, z, chunkBlocksCustom, seed, neighborsChunkData);
 
   self.postMessage({
     blocks: blocksInChunk,
-    blocksRender,
+    facesToRender,
   });
 };

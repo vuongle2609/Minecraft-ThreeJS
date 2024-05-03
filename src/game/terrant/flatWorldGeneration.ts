@@ -1,96 +1,103 @@
-import { CHUNK_SIZE, FLAT_WORLD_HEIGHT } from "../../constants";
-import { Face } from "../../constants/block";
-import blocks from "../../constants/blocks";
-import { detailFromName } from "../helpers/detailFromName";
+import { BLOCK_WIDTH, CHUNK_SIZE, FLAT_WORLD_HEIGHT } from "../../constants";
+import { BlockKeys } from "../../constants/blocks";
 import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
+import { BaseGeneration } from "./baseUtilsGeneration";
 
-const { leftZ, rightZ, leftX, rightX } = Face;
+export class FlatWorld extends BaseGeneration {
+  constructor(
+    x: number,
+    z: number,
+    chunkBlocksCustom: Record<string, 0 | BlockKeys>,
+    seed: number,
+    neighborsChunkData: Record<string, Record<string, 0 | BlockKeys>>
+  ) {
+    super(x, z, chunkBlocksCustom, seed, neighborsChunkData);
 
-type FaceCustom = typeof leftZ | typeof rightZ | typeof leftX | typeof rightX;
-
-export const getBlocksInChunkFlat = (
-  x: number,
-  z: number,
-  chunkBlocksCustom: Record<string, 0 | keyof typeof blocks>,
-  seed: number
-) => {
-  let blocksInChunk: Record<
-    string,
-    {
-      position: number[];
-      type: keyof typeof blocks;
-    }
-  > = {};
-
-  const boundaries: Record<FaceCustom | string, number> = {
-    highestY: 0,
-    lowestY: 0,
-
-    [leftZ]: 0,
-    [rightZ]: 0,
-    [leftX]: 0,
-    [rightX]: 0,
-  };
-
-  // wtf
-  for (let yA = 0; yA < FLAT_WORLD_HEIGHT; yA++) {
-    for (let xA = x * CHUNK_SIZE; xA < (x + 1) * CHUNK_SIZE; xA++) {
-      for (let zA = z * CHUNK_SIZE; zA < (z + 1) * CHUNK_SIZE; zA++) {
-        const position = [xA * 2, yA * -2 || 0, zA * 2];
-
-        boundaries.highestY =
-          position[1] > boundaries.highestY ? position[1] : boundaries.highestY;
-
-        boundaries.lowestY =
-          position[1] < boundaries.lowestY ? position[1] : boundaries.lowestY;
-
-        const blockName = nameFromCoordinate(
-          position[0],
-          position[1],
-          position[2]
-        );
-
-        let shouldAssignBlock = true;
-
-        if (chunkBlocksCustom?.[blockName] == 0) {
-          shouldAssignBlock = false;
-        }
-
-        if (shouldAssignBlock)
-          blocksInChunk[blockName] = {
-            position,
-            type: position[1] ? "dirt" : "grass",
-          };
-      }
-    }
+    this.initialize();
   }
 
-  // merge existing or deleted blocks with generated blocks
+  getBlocksInChunk(
+    x: number,
+    z: number,
+    chunkBlocksCustom: Record<string, 0 | BlockKeys>
+  ) {
+    const blocksInChunk: Record<
+      string,
+      {
+        position: number[];
+        type: BlockKeys;
+      }
+    > = {};
+    let isFirstLayer = true;
 
-  if (chunkBlocksCustom) {
-    blocksInChunk = {
-      ...blocksInChunk,
-      ...Object.keys(chunkBlocksCustom).reduce((prev, currKey) => {
-        const { x, y, z } = detailFromName(currKey);
+    for (let yA = FLAT_WORLD_HEIGHT - 1; yA >= 0; yA--) {
+      for (let xA = x * CHUNK_SIZE; xA < (x + 1) * CHUNK_SIZE; xA++) {
+        for (let zA = z * CHUNK_SIZE; zA < (z + 1) * CHUNK_SIZE; zA++) {
+          const position = [
+            xA * BLOCK_WIDTH,
+            yA * BLOCK_WIDTH || 0,
+            zA * BLOCK_WIDTH,
+          ];
 
-        boundaries.highestY = y > boundaries.highestY ? y : boundaries.highestY;
+          this.lowestY =
+            this.lowestY === undefined
+              ? position[1]
+              : position[1] < this.lowestY
+              ? position[1]
+              : this.lowestY;
 
-        boundaries.lowestY = y < boundaries.lowestY ? y : boundaries.lowestY;
+          const blockName = nameFromCoordinate(
+            position[0],
+            position[1],
+            position[2]
+          );
 
-        if (chunkBlocksCustom[currKey] == 0) {
-          return prev;
+          let shouldAssignBlock = true;
+
+          if (chunkBlocksCustom?.[blockName] == 0) {
+            shouldAssignBlock = false;
+          }
+
+          if (shouldAssignBlock) {
+            blocksInChunk[blockName] = {
+              position,
+              type: isFirstLayer ? "grass" : "dirt",
+            };
+          }
         }
+      }
+      isFirstLayer = false;
+    }
+
+    return blocksInChunk;
+  }
+
+  initialize() {
+    const blocksInChunk = this.getBlocksInChunk(
+      this.x,
+      this.z,
+      this.chunkBlocksCustom
+    );
+
+    const blocksInChunkNeighbor = Object.keys(this.neighborsChunkData).reduce(
+      (prev, key) => {
+        const [x, z] = key.split("_");
 
         return {
           ...prev,
-          [currKey]: {
-            position: [x, y, z],
-            type: chunkBlocksCustom[currKey],
-          },
+          ...this.getBlocksInChunk(
+            Number(x),
+            Number(z),
+            this.neighborsChunkData[key]
+          ),
         };
-      }, {}),
-    };
-  }
+      },
+      {}
+    );
+    this.blocksInChunk = blocksInChunk;
 
-  return { blocksInChunk, boundaries };
-};
+    this.mergeBlocks();
+
+    this.calFaceToRender(blocksInChunkNeighbor);
+  }
+}

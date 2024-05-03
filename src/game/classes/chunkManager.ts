@@ -1,5 +1,5 @@
 import { DEFAULT_CHUNK_VIEW } from "@/constants";
-import blocks from "@/constants/blocks";
+import blocks, { BlockKeys } from "@/constants/blocks";
 import {
   nameChunkFromCoordinate,
   nameFromCoordinate,
@@ -9,6 +9,8 @@ import { detailFromName } from "../helpers/detailFromName";
 import { BasePropsType } from "./baseEntity";
 import BlockManager from "./blockManager";
 import InventoryManager from "./inventoryManager";
+import { getChunkNeighborsCoor } from "../helpers/chunkHelpers";
+import { Face } from "@/constants/block";
 
 interface PropsType {
   inventoryManager: InventoryManager;
@@ -60,7 +62,7 @@ export default class ChunkManager extends BlockManager {
         type: keyof typeof blocks;
       }
     > = {},
-    blocksToRender: Record<string, 1>
+    facesToRender: Record<string, Record<Face, boolean>>
   ) => {
     const blocksRender = Object.keys(blocksRenderWorker);
     const blocksInChunk: string[] = [];
@@ -74,7 +76,7 @@ export default class ChunkManager extends BlockManager {
         z: position[2],
         type,
         isRenderChunk: true,
-        shouldNotRenderIntoScene: !(key in blocksToRender),
+        facesToRender: facesToRender[key],
       });
 
       blocksInChunk.push(
@@ -98,8 +100,7 @@ export default class ChunkManager extends BlockManager {
         type: keyof typeof blocks;
       }
     > = {},
-    blocksToRender: Record<string, 1>,
-    shouldInitPos?: boolean
+    facesToRender: Record<string, Record<Face, boolean>> = {}
   ) {
     // if after process blocks in chunk and return data but chunk no
     // longer active then abort
@@ -112,7 +113,6 @@ export default class ChunkManager extends BlockManager {
         blocks: Object.keys(blocksRenderWorker).reduce((prev, key) => {
           return { ...prev, [key]: blocksRenderWorker[key].type };
         }, {}),
-        shouldInitPos,
       },
     });
 
@@ -126,7 +126,7 @@ export default class ChunkManager extends BlockManager {
       this.handleRenderChunkBlocks(
         chunkName,
         blocksRenderWorker,
-        blocksToRender
+        facesToRender
       );
       this.chunkRenderQueue.pop();
 
@@ -173,18 +173,32 @@ export default class ChunkManager extends BlockManager {
         }
       );
 
-      this.chunksWorkers[chunkName].postMessage({
+      const neighborsChunkData: Record<
+        string,
+        Record<string, 0 | BlockKeys>
+      > = {};
+
+      const neighbors = getChunkNeighborsCoor(chunk.x, chunk.z);
+
+      Object.keys(neighbors).forEach((key) => {
+        neighborsChunkData[key] = this.blocksWorldChunk[key] || {};
+      });
+
+      const workerData = {
         ...chunk,
         type: this.worldStorage?.worldType,
-        chunkBlocksCustom: this.blocksWorldChunk[chunkName],
+        chunkBlocksCustom: this.blocksWorldChunk[chunkName] || {},
+        neighborsChunkData,
         seed: this.worldStorage?.seed,
-      });
+      };
+
+      this.chunksWorkers[chunkName].postMessage(workerData);
 
       this.chunksWorkers[chunkName].onmessage = (e) => {
         this.handleRenderChunkQueue(
           chunkName,
           e.data.blocks,
-          e.data.blocksRender
+          e.data.facesToRender
         );
       };
     }

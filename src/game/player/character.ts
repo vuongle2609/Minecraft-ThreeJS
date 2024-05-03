@@ -50,7 +50,7 @@ export default class Player extends BaseEntity {
     else {
       this.player.position.set(
         CHUNK_SIZE / 2,
-        CHARACTER_LENGTH + 20,
+        CHARACTER_LENGTH + 40,
         CHUNK_SIZE / 2
       );
     }

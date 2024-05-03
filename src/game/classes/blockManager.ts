@@ -32,20 +32,6 @@ export default class BlockManager extends BaseEntity {
   chunksWorkers: Record<string, Worker> = {};
   chunksActive: string[] = [];
 
-  // blocksIntanced: Record<string, InstancedMesh[]> = Object.keys(blocks).reduce(
-  //   (prev, key) => {
-  //     const currBlock = blocks[key as keyof typeof blocks];
-
-  //     return {
-  //       ...prev,
-  //       [key]: currBlock.texture.map(
-  //         (texture) => new InstancedMesh(renderGeometry, texture, 1002)
-  //       ),
-  //     };
-  //   },
-  //   {}
-  // );
-
   constructor(props: BasePropsType & PropsType) {
     super(props);
     // console.log(this.blocksIntanced);
@@ -67,14 +53,14 @@ export default class BlockManager extends BaseEntity {
     z,
     type,
     isRenderChunk,
-    shouldNotRenderIntoScene,
+    facesToRender,
   }: {
     x: number;
     y: number;
     z: number;
     type: keyof typeof blocks;
     isRenderChunk?: boolean;
-    shouldNotRenderIntoScene?: boolean;
+    facesToRender?: Record<Face, boolean>;
   }) {
     const newUpdateBlockChunk = getChunkCoordinate(x, z);
     const chunkName = nameChunkFromCoordinate(
@@ -100,7 +86,7 @@ export default class BlockManager extends BaseEntity {
       scene: this.scene,
       type: type,
       blocksMapping: this.blocksMapping,
-      shouldNotRender: shouldNotRenderIntoScene,
+      facesToRender,
     });
 
     this.blocksMapping[x] = {
@@ -258,7 +244,6 @@ export default class BlockManager extends BaseEntity {
       }
 
       // play sound
-
       if (this.currentPlaceSound) {
         this.currentPlaceSound.pause();
         this.currentPlaceSound.currentTime = 0;
