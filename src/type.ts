@@ -1,4 +1,4 @@
-import blocks from "./constants/blocks";
+import blocks, { BlockKeys } from "./constants/blocks";
 
 export interface PlayerInput {
   forward: boolean;
@@ -11,7 +11,7 @@ export interface PlayerInput {
   rightClick: boolean;
 }
 
-export type BlocksMappingType = Record<string, keyof typeof blocks | 0>;
+export type BlocksMappingType = Record<string, BlockKeys | 0>;
 
 export interface WorldsType {
   createdDate: Date;

@@ -7,62 +7,71 @@ import { detailFromName } from "../helpers/detailFromName";
 const { leftZ, rightZ, leftX, rightX, bottom, top } = Face;
 
 export class BaseGeneration {
-  blocksInChunk: Record<
-    string,
-    {
-      position: number[];
-      type: BlockKeys;
-    }
-  > = {};
-
-  chunkBlocksCustom: Record<string, 0 | BlockKeys>;
-  neighborsChunkData: Record<string, Record<string, 0 | BlockKeys>>;
   seed: number;
-
-  neiborsBlocksCustom = () =>
-    Object.values(this.neighborsChunkData).reduce((prev, data) => {
-      return {
-        ...prev,
-        ...data,
-      };
-    }, {});
-  facesToRender: Record<string, Record<Face, boolean>>;
 
   lowestY: number;
 
-  constructor(
-    chunkBlocksCustom: Record<string, 0 | BlockKeys>,
-    seed: number,
-    neighborsChunkData: Record<string, Record<string, 0 | BlockKeys>>
-  ) {
-    this.chunkBlocksCustom = chunkBlocksCustom;
-    this.neighborsChunkData = neighborsChunkData;
+  constructor(seed: number) {
     this.seed = seed;
   }
 
   // merge existing or deleted blocks with generated blocks
-  mergeBlocks() {
-    this.blocksInChunk = {
-      ...this.blocksInChunk,
-      ...Object.keys(this.chunkBlocksCustom).reduce((prev, currKey) => {
+  mergeBlocks(
+    blocksInChunk: Record<
+      string,
+      {
+        position: number[];
+        type: BlockKeys;
+      }
+    > = {},
+    chunkBlocksCustom: Record<string, 0 | BlockKeys>,
+    blocksInChunkTypeOnlyTerrant: Record<string, BlockKeys | 0>
+  ) {
+    const blocksInChunkTypeOnly: Record<string, BlockKeys | 0> = {
+      ...blocksInChunkTypeOnlyTerrant,
+    };
+
+    const mergedBlocksInChunk: Record<
+      string,
+      {
+        position: number[];
+        type: BlockKeys;
+      }
+    > = ({} = {
+      ...blocksInChunk,
+      ...Object.keys(chunkBlocksCustom).reduce((prev, currKey) => {
         const { x, y, z } = detailFromName(currKey);
 
-        if (this.chunkBlocksCustom[currKey] == 0) {
+        if (chunkBlocksCustom[currKey] == 0) {
+          blocksInChunkTypeOnly[currKey] = 0;
           return prev;
         }
 
+        blocksInChunkTypeOnly[currKey] = chunkBlocksCustom[currKey];
         return {
           ...prev,
           [currKey]: {
             position: [x, y, z],
-            type: this.chunkBlocksCustom[currKey],
+            type: chunkBlocksCustom[currKey],
           },
         };
       }, {}),
+    });
+
+    return {
+      mergedBlocksInChunk,
+      mergedBlocksInChunkTypeOnly: blocksInChunkTypeOnly,
     };
   }
 
   calFaceToRender(
+    blocksInChunk: Record<
+      string,
+      {
+        position: number[];
+        type: BlockKeys;
+      }
+    > = {},
     blocksInChunkNeighbor: Record<
       string,
       {
@@ -72,14 +81,14 @@ export class BaseGeneration {
     > = {}
   ) {
     const blockExisting = {
-      ...this.blocksInChunk,
+      ...blocksInChunk,
       ...blocksInChunkNeighbor,
     };
 
-    this.facesToRender = Object.keys(this.blocksInChunk).reduce<
+    const facesToRender = Object.keys(blocksInChunk).reduce<
       Record<string, Record<Face, boolean>>
     >((prev, key) => {
-      const { position } = this.blocksInChunk[key];
+      const { position } = blocksInChunk[key];
 
       const [x, y, z] = position;
 
@@ -109,5 +118,7 @@ export class BaseGeneration {
         },
       };
     }, {});
+
+    return facesToRender;
   }
 }

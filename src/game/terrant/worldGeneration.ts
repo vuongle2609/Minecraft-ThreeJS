@@ -8,12 +8,8 @@ export class DefaultWorld extends BaseGeneration {
   noise = new FastNoiseLite();
   noiseTree = new FastNoiseLite();
 
-  constructor(
-    chunkBlocksCustom: Record<string, 0 | BlockKeys>,
-    seed: number,
-    neighborsChunkData: Record<string, Record<string, 0 | BlockKeys>>
-  ) {
-    super(chunkBlocksCustom, seed, neighborsChunkData);
+  constructor(seed: number) {
+    super(seed);
 
     this.setupNoise();
   }
@@ -51,6 +47,8 @@ export class DefaultWorld extends BaseGeneration {
       }
     > = {};
 
+    const blocksInChunkTypeOnly: Record<string, BlockKeys | 0> = {};
+
     const createBlock = (position: number[], type: keyof typeof blocks) => {
       const blockName = nameFromCoordinate(
         position[0],
@@ -62,6 +60,7 @@ export class DefaultWorld extends BaseGeneration {
 
       if (chunkBlocksCustom?.[blockName] == 0) {
         shouldAssignBlock = false;
+        blocksInChunkTypeOnly[blockName] = 0;
       }
 
       if (shouldAssignBlock) {
@@ -69,6 +68,8 @@ export class DefaultWorld extends BaseGeneration {
           position,
           type,
         };
+
+        blocksInChunkTypeOnly[blockName] = type;
       }
     };
 
@@ -218,13 +219,24 @@ export class DefaultWorld extends BaseGeneration {
       createTree(position, treeLength);
     });
 
-    return blocksInChunk;
+    const { mergedBlocksInChunkTypeOnly, mergedBlocksInChunk } =
+      this.mergeBlocks(blocksInChunk, chunkBlocksCustom, blocksInChunkTypeOnly);
+
+    return {
+      blocksInChunk: mergedBlocksInChunk,
+      blocksInChunkTypeOnly: mergedBlocksInChunkTypeOnly,
+    };
   }
 
-  initialize(x: number, z: number) {
-    const blocksInChunk = this.getBlocksInChunk(x, z, this.chunkBlocksCustom);
+  initialize(
+    x: number,
+    z: number,
+    chunkBlocksCustom: Record<string, 0 | BlockKeys>,
+    neighborsChunkData: Record<string, Record<string, 0 | BlockKeys>>
+  ) {
+    const { blocksInChunk } = this.getBlocksInChunk(x, z, chunkBlocksCustom);
 
-    const blocksInChunkNeighbor = Object.keys(this.neighborsChunkData).reduce(
+    const blocksInChunkNeighbor = Object.keys(neighborsChunkData).reduce(
       (prev, key) => {
         const [x, z] = key.split("_");
 
@@ -233,17 +245,21 @@ export class DefaultWorld extends BaseGeneration {
           ...this.getBlocksInChunk(
             Number(x),
             Number(z),
-            this.neighborsChunkData[key]
+            (neighborsChunkData || {})[key]
           ),
         };
       },
       {}
     );
 
-    this.blocksInChunk = blocksInChunk;
+    const facesToRender = this.calFaceToRender(
+      blocksInChunk,
+      blocksInChunkNeighbor
+    );
 
-    this.mergeBlocks();
-
-    this.calFaceToRender(blocksInChunkNeighbor);
+    return {
+      facesToRender,
+      blocksInChunk,
+    };
   }
 }

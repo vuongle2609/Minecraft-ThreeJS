@@ -48,6 +48,8 @@ export default class ChunkManager extends BlockManager {
       return chunkName;
     });
 
+    console.log("changeChunk");
+
     this.worker?.postMessage({
       type: "changeChunk",
       data: {

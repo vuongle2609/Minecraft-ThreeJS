@@ -1,10 +1,7 @@
 import { FLAT_WORLD_TYPE } from "../../constants";
-import { Face } from "../../constants/block";
 import { BlockKeys } from "../../constants/blocks";
 import { FlatWorld } from "./flatWorldGeneration";
 import { DefaultWorld } from "./worldGeneration";
-
-const { leftZ, rightZ, leftX, rightX, bottom, top } = Face;
 
 self.onmessage = (e) => {
   const { x, z, chunkBlocksCustom, type, seed, neighborsChunkData } =
@@ -18,13 +15,14 @@ self.onmessage = (e) => {
     };
 
   const world =
-    type === FLAT_WORLD_TYPE
-      ? new FlatWorld(chunkBlocksCustom, seed, neighborsChunkData)
-      : new DefaultWorld(chunkBlocksCustom, seed, neighborsChunkData);
+    type === FLAT_WORLD_TYPE ? new FlatWorld(seed) : new DefaultWorld(seed);
 
-  world.initialize(x, z);
-
-  const { blocksInChunk, facesToRender } = world;
+  const { blocksInChunk, facesToRender } = world.initialize(
+    x,
+    z,
+    chunkBlocksCustom,
+    neighborsChunkData
+  );
 
   self.postMessage({
     blocks: blocksInChunk,

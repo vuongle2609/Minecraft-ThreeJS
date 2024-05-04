@@ -16,8 +16,9 @@ import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
 import Physics from "./physics";
 import { DefaultWorld } from "../terrant/worldGeneration";
 import { FlatWorld } from "../terrant/flatWorldGeneration";
+import { BlocksMappingType } from "@/type";
 
-let blocksMapping: Record<string, string | 0> = {};
+let blocksMapping: Record<string, any> = {};
 
 let originalVy = -40;
 let vy = originalVy;
@@ -119,17 +120,68 @@ const addBlock = ({ position, type }: { position: number[]; type: string }) => {
   };
 };
 
-let worldGen;
+let worldGen: FlatWorld | DefaultWorld;
 
-const initSeed = ({ seed, type }: { seed: number; type: number }) => {
-  // worldGen = type === FLAT_WORLD_TYPE ? new FlatWorld() : DefaultWorld();
+let chunkBlocksCustom: Record<string, BlocksMappingType> = {};
+
+const initSeed = ({
+  seed,
+  type,
+  chunkBlocksCustomInit,
+}: {
+  seed: number;
+  type: number;
+  chunkBlocksCustomInit: Record<string, BlocksMappingType>;
+}) => {
+  console.log("init seed");
+  worldGen =
+    type === FLAT_WORLD_TYPE ? new FlatWorld(seed) : new DefaultWorld(seed);
+
+  chunkBlocksCustom = chunkBlocksCustomInit;
 };
 
-const changeChunk = ({
+const chunkGenerated: Record<string, boolean> = {};
+
+const changeChunk = async ({
   neighborChunksKeys,
 }: {
   neighborChunksKeys: string[];
-}) => {};
+}) => {
+  await (() =>
+    new Promise((resolve, reject) => {
+      const check = setInterval(() => {
+        if (worldGen) {
+          clearInterval(check);
+          resolve(true);
+        }
+      }, 200);
+    }))();
+
+  neighborChunksKeys.forEach((key) => {
+    if (!chunkGenerated[key]) {
+      const [x, z] = key.split("_");
+
+      const { blocksInChunkTypeOnly } = worldGen.getBlocksInChunk(
+        Number(x),
+        Number(z),
+        chunkBlocksCustom?.[key] || {}
+      );
+      console.log(
+        "🚀 ~ neighborChunksKeys.forEach ~ blocksInChunkTypeOnly:",
+        blocksInChunkTypeOnly
+      );
+
+      chunkGenerated[key] = true;
+
+      blocksMapping = {
+        ...blocksMapping,
+        ...blocksInChunkTypeOnly,
+      };
+    }
+  });
+
+  if (Object.values(chunkGenerated).length === 9) initPhysics();
+};
 
 let playerInitPos = [CHUNK_SIZE / 2, CHARACTER_LENGTH + 0.5, CHUNK_SIZE / 2];
 let shouldReturnPosY = false;
@@ -155,23 +207,6 @@ const requestPosY = () => {
   shouldReturnPosY = true;
 };
 
-const bulkAddBlock = ({ blocks }: { blocks: Record<string, string | 0> }) => {
-  initPhysics();
-  blocksMapping = {
-    ...blocksMapping,
-    ...blocks,
-  };
-
-  if (shouldReturnPosY) {
-    self.postMessage({
-      type: "changePosition",
-      data: {
-        position: getPlayerShouldSpawn(blocksMapping),
-      },
-    });
-  }
-};
-
 const removeBlock = ({ position }: { position: number[] }) => {
   delete blocksMapping[
     nameFromCoordinate(position[0], position[1], position[2])
@@ -182,7 +217,6 @@ let eventMapping: Record<string, Function> = {
   addBlock,
   removeBlock,
   jumpCharacter,
-  bulkAddBlock,
   requestPosY,
   changeChunk,
   initSeed,

@@ -109,6 +109,15 @@ export default class GameScene extends RenderPage {
       mouseControl: this.mouseControl,
     });
 
+    this.worker.postMessage({
+      type: "initSeed",
+      data: {
+        seed: this.worldStorage?.seed,
+        type: this.worldStorage?.worldType,
+        chunkBlocksCustom: this.worldStorage.blocksWorldChunk,
+      },
+    });
+
     this.chunkManager = new ChunkManager({
       mouseControl: this.mouseControl,
       scene: this.scene,
@@ -126,14 +135,6 @@ export default class GameScene extends RenderPage {
       chunkManager: this.chunkManager,
       worker: this.worker,
       initPos: this.worldStorage.initPos,
-    });
-
-    this.worker.postMessage({
-      type: "initSeed",
-      data: {
-        seed: this.worldStorage?.seed,
-        type: this.worldStorage?.worldType,
-      },
     });
 
     this.inventoryManager.renderHotbar();

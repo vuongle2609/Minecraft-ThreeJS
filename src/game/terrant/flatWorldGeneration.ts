@@ -4,12 +4,8 @@ import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
 import { BaseGeneration } from "./baseUtilsGeneration";
 
 export class FlatWorld extends BaseGeneration {
-  constructor(
-    chunkBlocksCustom: Record<string, 0 | BlockKeys>,
-    seed: number,
-    neighborsChunkData: Record<string, Record<string, 0 | BlockKeys>>
-  ) {
-    super(chunkBlocksCustom, seed, neighborsChunkData);
+  constructor(seed: number) {
+    super(seed);
   }
 
   getBlocksInChunk(
@@ -25,6 +21,8 @@ export class FlatWorld extends BaseGeneration {
       }
     > = {};
     let isFirstLayer = true;
+
+    const blocksInChunkTypeOnly: Record<string, BlockKeys | 0> = {};
 
     for (let yA = FLAT_WORLD_HEIGHT - 1; yA >= 0; yA--) {
       for (let xA = x * CHUNK_SIZE; xA < (x + 1) * CHUNK_SIZE; xA++) {
@@ -52,26 +50,40 @@ export class FlatWorld extends BaseGeneration {
 
           if (chunkBlocksCustom?.[blockName] == 0) {
             shouldAssignBlock = false;
+            blocksInChunkTypeOnly[blockName] = 0;
           }
 
           if (shouldAssignBlock) {
+            const type = isFirstLayer ? "grass" : "dirt";
             blocksInChunk[blockName] = {
               position,
-              type: isFirstLayer ? "grass" : "dirt",
+              type,
             };
+            blocksInChunkTypeOnly[blockName] = type;
           }
         }
       }
       isFirstLayer = false;
     }
 
-    return blocksInChunk;
+    const { mergedBlocksInChunk, mergedBlocksInChunkTypeOnly } =
+      this.mergeBlocks(blocksInChunk, chunkBlocksCustom, blocksInChunkTypeOnly);
+
+    return {
+      blocksInChunk: mergedBlocksInChunk,
+      blocksInChunkTypeOnly: mergedBlocksInChunkTypeOnly,
+    };
   }
 
-  initialize(x: number, z: number) {
-    const blocksInChunk = this.getBlocksInChunk(x, z, this.chunkBlocksCustom);
+  initialize(
+    x: number,
+    z: number,
+    chunkBlocksCustom: Record<string, 0 | BlockKeys>,
+    neighborsChunkData: Record<string, Record<string, 0 | BlockKeys>>
+  ) {
+    const { blocksInChunk } = this.getBlocksInChunk(x, z, chunkBlocksCustom);
 
-    const blocksInChunkNeighbor = Object.keys(this.neighborsChunkData).reduce(
+    const blocksInChunkNeighbor = Object.keys(neighborsChunkData).reduce(
       (prev, key) => {
         const [x, z] = key.split("_");
 
@@ -80,16 +92,21 @@ export class FlatWorld extends BaseGeneration {
           ...this.getBlocksInChunk(
             Number(x),
             Number(z),
-            this.neighborsChunkData[key]
+            (neighborsChunkData || {})[key]
           ),
         };
       },
       {}
     );
-    this.blocksInChunk = blocksInChunk;
 
-    this.mergeBlocks();
+    const facesToRender = this.calFaceToRender(
+      blocksInChunk,
+      blocksInChunkNeighbor
+    );
 
-    this.calFaceToRender(blocksInChunkNeighbor);
+    return {
+      facesToRender,
+      blocksInChunk,
+    };
   }
 }
