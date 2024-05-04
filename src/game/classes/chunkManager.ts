@@ -1,16 +1,16 @@
-import { DEFAULT_CHUNK_VIEW } from "@/constants";
+import { CHUNK_VIEW_WORKER_PHYSICS, DEFAULT_CHUNK_VIEW } from "@/constants";
+import { Face } from "@/constants/block";
 import blocks, { BlockKeys } from "@/constants/blocks";
 import {
   nameChunkFromCoordinate,
   nameFromCoordinate,
 } from "@/game/helpers/nameFromCoordinate";
 import { calNeighborsOffset } from "../helpers/calNeighborsOffset";
+import { getChunkNeighborsCoor } from "../helpers/chunkHelpers";
 import { detailFromName } from "../helpers/detailFromName";
 import { BasePropsType } from "./baseEntity";
 import BlockManager from "./blockManager";
 import InventoryManager from "./inventoryManager";
-import { getChunkNeighborsCoor } from "../helpers/chunkHelpers";
-import { Face } from "@/constants/block";
 
 interface PropsType {
   inventoryManager: InventoryManager;
@@ -31,9 +31,8 @@ export default class ChunkManager extends BlockManager {
   }
 
   handleRequestChunks(currentChunk: { x: number; z: number }) {
-    // get neighbors
-
     const neighborOffset = calNeighborsOffset(DEFAULT_CHUNK_VIEW);
+    const neighborOffsetPhysics = calNeighborsOffset(CHUNK_VIEW_WORKER_PHYSICS);
 
     const neighborChunksKeys = neighborOffset.map((offset) => {
       const chunk = {
@@ -48,12 +47,21 @@ export default class ChunkManager extends BlockManager {
       return chunkName;
     });
 
-    console.log("changeChunk");
+    const neighborChunksKeysPhysics = neighborOffsetPhysics.map((offset) => {
+      const chunk = {
+        x: currentChunk.x + offset.x,
+        z: currentChunk.z + offset.z,
+      };
+
+      const chunkName = nameChunkFromCoordinate(chunk.x, chunk.z);
+
+      return chunkName;
+    });
 
     this.worker?.postMessage({
       type: "changeChunk",
       data: {
-        neighborChunksKeys,
+        neighborChunksKeys: neighborChunksKeysPhysics,
       },
     });
 
@@ -115,16 +123,6 @@ export default class ChunkManager extends BlockManager {
     // if after process blocks in chunk and return data but chunk no
     // longer active then abort
     if (!this.chunksActive.includes(chunkName)) return;
-
-    // priority add to physics cal first
-    // this.worker?.postMessage({
-    //   type: "bulkAddBlock",
-    //   data: {
-    //     blocks: Object.keys(blocksRenderWorker).reduce((prev, key) => {
-    //       return { ...prev, [key]: blocksRenderWorker[key].type };
-    //     }, {}),
-    //   },
-    // });
 
     // maybe the queue things is not working :(
     let shouldStart = false;

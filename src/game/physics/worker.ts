@@ -133,7 +133,6 @@ const initSeed = ({
   type: number;
   chunkBlocksCustomInit: Record<string, BlocksMappingType>;
 }) => {
-  console.log("init seed");
   worldGen =
     type === FLAT_WORLD_TYPE ? new FlatWorld(seed) : new DefaultWorld(seed);
 
@@ -165,10 +164,6 @@ const changeChunk = async ({
         Number(x),
         Number(z),
         chunkBlocksCustom?.[key] || {}
-      );
-      console.log(
-        "🚀 ~ neighborChunksKeys.forEach ~ blocksInChunkTypeOnly:",
-        blocksInChunkTypeOnly
       );
 
       chunkGenerated[key] = true;

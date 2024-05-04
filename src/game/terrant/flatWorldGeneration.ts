@@ -87,13 +87,15 @@ export class FlatWorld extends BaseGeneration {
       (prev, key) => {
         const [x, z] = key.split("_");
 
+        const { blocksInChunkTypeOnly } = this.getBlocksInChunk(
+          Number(x),
+          Number(z),
+          (neighborsChunkData || {})[key]
+        );
+
         return {
           ...prev,
-          ...this.getBlocksInChunk(
-            Number(x),
-            Number(z),
-            (neighborsChunkData || {})[key]
-          ),
+          ...blocksInChunkTypeOnly,
         };
       },
       {}

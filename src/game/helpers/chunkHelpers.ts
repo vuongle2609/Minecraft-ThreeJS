@@ -1,7 +1,11 @@
 import { CHUNK_SIZE } from "../../constants/index";
 
-export const getChunkCoordinate = (x: number, z: number) => {
-  const chunkCal = CHUNK_SIZE * 2;
+export const getChunkCoordinate = (
+  x: number,
+  z: number,
+  chunkSize?: number
+) => {
+  const chunkCal = (chunkSize || CHUNK_SIZE) * 2;
 
   const chunkX = Math.floor(x / chunkCal) || 0;
   const chunkZ = Math.floor(z / chunkCal) || 0;
