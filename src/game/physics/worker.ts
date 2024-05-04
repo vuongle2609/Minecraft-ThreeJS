@@ -1,15 +1,24 @@
-import { Vector3 } from 'three';
+import { Vector3 } from "three";
 
-import { BlocksMappingType } from '@/type';
+import { BlocksMappingType } from "@/type";
 
-import { BLOCK_WIDTH, CHUNK_SIZE, FLAT_WORLD_TYPE, TIME_TO_INTERACT } from '../../constants';
 import {
-    CHARACTER_LENGTH, GRAVITY, GRAVITY_SCALE, JUMP_FORCE, SPEED
-} from '../../constants/player';
-import { nameFromCoordinate } from '../helpers/nameFromCoordinate';
-import { FlatWorld } from '../terrant/flatWorldGeneration';
-import { DefaultWorld } from '../terrant/worldGeneration';
-import Physics from './physics';
+  BLOCK_WIDTH,
+  CHUNK_SIZE,
+  FLAT_WORLD_TYPE,
+  TIME_TO_INTERACT,
+} from "../../constants";
+import {
+  CHARACTER_LENGTH,
+  GRAVITY,
+  GRAVITY_SCALE,
+  JUMP_FORCE,
+  SPEED,
+} from "../../constants/player";
+import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
+import { FlatWorld } from "../terrant/flatWorldGeneration";
+import { DefaultWorld } from "../terrant/worldGeneration";
+import Physics from "./physics";
 
 let blocksMapping: Record<string, any> = {};
 
@@ -115,21 +124,21 @@ const addBlock = ({ position, type }: { position: number[]; type: string }) => {
 
 let worldGen: FlatWorld | DefaultWorld;
 
-let chunkBlocksCustom: Record<string, BlocksMappingType> = {};
+let chunkBlocksCustomMap: Record<string, BlocksMappingType> = {};
 
 const initSeed = ({
   seed,
   type,
-  chunkBlocksCustomInit,
+  chunkBlocksCustom,
 }: {
   seed: number;
   type: number;
-  chunkBlocksCustomInit: Record<string, BlocksMappingType>;
+  chunkBlocksCustom: Record<string, BlocksMappingType>;
 }) => {
   worldGen =
     type === FLAT_WORLD_TYPE ? new FlatWorld(seed) : new DefaultWorld(seed);
 
-  chunkBlocksCustom = chunkBlocksCustomInit;
+  chunkBlocksCustomMap = chunkBlocksCustom;
 };
 
 const chunkGenerated: Record<string, boolean> = {};
@@ -156,7 +165,7 @@ const changeChunk = async ({
       const { blocksInChunkTypeOnly } = worldGen.getBlocksInChunk(
         Number(x),
         Number(z),
-        chunkBlocksCustom?.[key] || {}
+        chunkBlocksCustomMap?.[key] || {}
       );
 
       chunkGenerated[key] = true;

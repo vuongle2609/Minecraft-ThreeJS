@@ -1,14 +1,17 @@
-import { InstancedMesh, Vector2, Vector3 } from 'three';
+import { InstancedMesh, Vector2, Vector3 } from "three";
 
-import { Face } from '@/constants/block';
-import blocks, { renderGeometry } from '@/constants/blocks';
-import { getChunkCoordinate } from '@/game/helpers/chunkHelpers';
-import { detailFromName } from '@/game/helpers/detailFromName';
-import { nameChunkFromCoordinate, nameFromCoordinate } from '@/game/helpers/nameFromCoordinate';
+import { Face } from "@/constants/block";
+import blocks, { renderGeometry } from "@/constants/blocks";
+import { getChunkCoordinate } from "@/game/helpers/chunkHelpers";
+import { detailFromName } from "@/game/helpers/detailFromName";
+import {
+  nameChunkFromCoordinate,
+  nameFromCoordinate,
+} from "@/game/helpers/nameFromCoordinate";
 
-import BaseEntity, { BasePropsType } from './baseEntity';
-import Block from './block';
-import InventoryManager from './inventoryManager';
+import BaseEntity, { BasePropsType } from "./baseEntity";
+import Block from "./block";
+import InventoryManager from "./inventoryManager";
 
 interface PropsType {
   inventoryManager: InventoryManager;
@@ -32,7 +35,7 @@ export default class BlockManager extends BaseEntity {
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
-    // console.log(this.blocksIntanced);
+
     this.inventoryManager = props.inventoryManager;
     this.blocksWorldChunk = props.worldStorage?.blocksWorldChunk || {};
   }
