@@ -1,7 +1,13 @@
-import { Vector2, Vector3 } from "three";
+import {
+  DynamicDrawUsage,
+  InstancedMesh,
+  Object3D,
+  Vector2,
+  Vector3,
+} from "three";
 
 import { Face } from "@/constants/block";
-import blocks, { BlockKeys } from "@/constants/blocks";
+import blocks, { BlockKeys, renderGeometry } from "@/constants/blocks";
 import { getChunkCoordinate } from "@/game/helpers/chunkHelpers";
 import { detailFromName } from "@/game/helpers/detailFromName";
 import {
@@ -12,6 +18,7 @@ import {
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
+import { BlocksIntancedMapping } from "@/type";
 
 interface PropsType {
   inventoryManager: InventoryManager;
@@ -31,6 +38,40 @@ export default class BlockManager extends BaseEntity {
 
   chunksWorkers: Record<string, Worker> = {};
   chunksActive: string[] = [];
+
+  dummy = new Object3D();
+  blocksIntanced = Object.keys(blocks).reduce((prev, typeKey) => {
+    const currBlock = blocks[typeKey as keyof typeof blocks];
+
+    return {
+      ...prev,
+      [typeKey]: Object.keys(currBlock.texture).reduce((prev, key) => {
+        const mesh = new InstancedMesh(
+          renderGeometry,
+          currBlock.texture[key as unknown as keyof typeof currBlock.texture],
+          1000000
+        );
+
+        mesh.instanceMatrix.setUsage(DynamicDrawUsage);
+
+        this.scene?.add(mesh);
+        mesh.count = 0;
+        mesh.instanceMatrix.needsUpdate = true;
+        mesh.computeBoundingSphere();
+        // mesh.computeBoundingBox();
+
+        mesh.frustumCulled = false;
+        return {
+          ...prev,
+          [key]: {
+            mesh,
+            count: 0,
+            indexCanAllocate: [],
+          },
+        };
+      }, {}),
+    };
+  }, {}) as BlocksIntancedMapping;
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
@@ -83,6 +124,8 @@ export default class BlockManager extends BaseEntity {
       type: type,
       blocksMapping: this.blocksMapping,
       facesToRender,
+      dummy: this.dummy,
+      intancedPlanes: this.blocksIntanced[type],
     });
 
     this.blocksMapping[x] = {
@@ -102,6 +145,10 @@ export default class BlockManager extends BaseEntity {
     raycaster.setFromCamera(new Vector2(), this.camera);
 
     const intersects = raycaster.intersectObjects(this.scene.children, false);
+    // console.log(
+    //   "🚀 ~ BlockManager ~ getIntersectObject ~ intersects:",
+    //   intersects
+    // );
 
     if (!intersects[0]) return;
 

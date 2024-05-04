@@ -20,6 +20,14 @@ interface PropsType {
 export default class ChunkManager extends BlockManager {
   chunkRenderQueue: Function[] = [];
 
+  chunkWorkers: Record<
+    string,
+    {
+      isBusy: boolean;
+      worker: Worker;
+    }
+  >;
+
   constructor(props: BasePropsType & PropsType) {
     super(props);
 
@@ -101,6 +109,13 @@ export default class ChunkManager extends BlockManager {
       blocksInChunk.push(
         nameFromCoordinate(position[0], position[1], position[2])
       );
+    });
+
+    Object.values(this.blocksIntanced).forEach((block: any) => {
+      Object.values(block).forEach((item: any) => {
+        item.mesh.instanceMatrix.needsUpdate = true;
+        item.mesh.computeBoundingSphere();
+      });
     });
 
     this.chunksBlocks[chunkName] = blocksInChunk;

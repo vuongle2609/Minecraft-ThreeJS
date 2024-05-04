@@ -44,6 +44,12 @@ seed 865375 render 4210 times
 // each chunking have its own intanced manager
 avoid render too much chunk at same time (queue chunk)
 
-DEFAULT_CHUNK_VIEW = 2;
-before optimize drop to 34 fps in chunk transition
-after optimize
+DEFAULT_CHUNK_VIEW = 4;
+before optimize 20 fps  
+after optimize 60 fps
+
+but time to add blocks increase
+
+// TODO
+// using face to render to cal minium of blocks
+// need to loop over => reduce loop (handleRenderChunkBlocks)
