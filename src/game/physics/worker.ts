@@ -148,15 +148,16 @@ const changeChunk = async ({
 }: {
   neighborChunksKeys: string[];
 }) => {
-  await (() =>
-    new Promise((resolve, reject) => {
-      const check = setInterval(() => {
-        if (worldGen) {
-          clearInterval(check);
-          resolve(true);
-        }
-      }, 200);
-    }))();
+  if (!worldGen)
+    await (() =>
+      new Promise((resolve, reject) => {
+        const check = setInterval(() => {
+          if (worldGen) {
+            clearInterval(check);
+            resolve(true);
+          }
+        }, 200);
+      }))();
 
   neighborChunksKeys.forEach((key) => {
     if (!chunkGenerated[key]) {
