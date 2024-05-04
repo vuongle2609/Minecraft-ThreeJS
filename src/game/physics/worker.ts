@@ -1,5 +1,10 @@
 import { Vector3 } from "three";
-import { BLOCK_WIDTH, CHUNK_SIZE, TIME_TO_INTERACT } from "../../constants";
+import {
+  BLOCK_WIDTH,
+  CHUNK_SIZE,
+  FLAT_WORLD_TYPE,
+  TIME_TO_INTERACT,
+} from "../../constants";
 import {
   CHARACTER_LENGTH,
   GRAVITY,
@@ -9,6 +14,8 @@ import {
 } from "../../constants/player";
 import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
 import Physics from "./physics";
+import { DefaultWorld } from "../terrant/worldGeneration";
+import { FlatWorld } from "../terrant/flatWorldGeneration";
 
 let blocksMapping: Record<string, string | 0> = {};
 
@@ -112,6 +119,12 @@ const addBlock = ({ position, type }: { position: number[]; type: string }) => {
   };
 };
 
+let worldGen;
+
+const initSeed = ({ seed, type }: { seed: number; type: number }) => {
+  // worldGen = type === FLAT_WORLD_TYPE ? new FlatWorld() : DefaultWorld();
+};
+
 const changeChunk = ({
   neighborChunksKeys,
 }: {
@@ -172,6 +185,7 @@ let eventMapping: Record<string, Function> = {
   bulkAddBlock,
   requestPosY,
   changeChunk,
+  initSeed,
 };
 
 self.onmessage = (

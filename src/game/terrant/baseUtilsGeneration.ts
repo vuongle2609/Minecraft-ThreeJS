@@ -18,8 +18,7 @@ export class BaseGeneration {
   chunkBlocksCustom: Record<string, 0 | BlockKeys>;
   neighborsChunkData: Record<string, Record<string, 0 | BlockKeys>>;
   seed: number;
-  x: number;
-  z: number;
+
   neiborsBlocksCustom = () =>
     Object.values(this.neighborsChunkData).reduce((prev, data) => {
       return {
@@ -32,8 +31,6 @@ export class BaseGeneration {
   lowestY: number;
 
   constructor(
-    x: number,
-    z: number,
     chunkBlocksCustom: Record<string, 0 | BlockKeys>,
     seed: number,
     neighborsChunkData: Record<string, Record<string, 0 | BlockKeys>>
@@ -41,8 +38,6 @@ export class BaseGeneration {
     this.chunkBlocksCustom = chunkBlocksCustom;
     this.neighborsChunkData = neighborsChunkData;
     this.seed = seed;
-    this.x = x;
-    this.z = z;
   }
 
   // merge existing or deleted blocks with generated blocks

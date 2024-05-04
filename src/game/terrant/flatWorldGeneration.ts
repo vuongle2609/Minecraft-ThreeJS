@@ -5,15 +5,11 @@ import { BaseGeneration } from "./baseUtilsGeneration";
 
 export class FlatWorld extends BaseGeneration {
   constructor(
-    x: number,
-    z: number,
     chunkBlocksCustom: Record<string, 0 | BlockKeys>,
     seed: number,
     neighborsChunkData: Record<string, Record<string, 0 | BlockKeys>>
   ) {
-    super(x, z, chunkBlocksCustom, seed, neighborsChunkData);
-
-    this.initialize();
+    super(chunkBlocksCustom, seed, neighborsChunkData);
   }
 
   getBlocksInChunk(
@@ -72,12 +68,8 @@ export class FlatWorld extends BaseGeneration {
     return blocksInChunk;
   }
 
-  initialize() {
-    const blocksInChunk = this.getBlocksInChunk(
-      this.x,
-      this.z,
-      this.chunkBlocksCustom
-    );
+  initialize(x: number, z: number) {
+    const blocksInChunk = this.getBlocksInChunk(x, z, this.chunkBlocksCustom);
 
     const blocksInChunkNeighbor = Object.keys(this.neighborsChunkData).reduce(
       (prev, key) => {

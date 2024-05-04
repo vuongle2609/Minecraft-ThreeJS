@@ -17,10 +17,14 @@ self.onmessage = (e) => {
       z: number;
     };
 
-  const { blocksInChunk, facesToRender } =
+  const world =
     type === FLAT_WORLD_TYPE
-      ? new FlatWorld(x, z, chunkBlocksCustom, seed, neighborsChunkData)
-      : new DefaultWorld(x, z, chunkBlocksCustom, seed, neighborsChunkData);
+      ? new FlatWorld(chunkBlocksCustom, seed, neighborsChunkData)
+      : new DefaultWorld(chunkBlocksCustom, seed, neighborsChunkData);
+
+  world.initialize(x, z);
+
+  const { blocksInChunk, facesToRender } = world;
 
   self.postMessage({
     blocks: blocksInChunk,

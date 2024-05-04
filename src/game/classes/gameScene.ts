@@ -128,6 +128,14 @@ export default class GameScene extends RenderPage {
       initPos: this.worldStorage.initPos,
     });
 
+    this.worker.postMessage({
+      type: "initSeed",
+      data: {
+        seed: this.worldStorage?.seed,
+        type: this.worldStorage?.worldType,
+      },
+    });
+
     this.inventoryManager.renderHotbar();
 
     this.control?.lock();
