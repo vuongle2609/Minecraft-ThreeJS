@@ -2,7 +2,7 @@
 convert to instanced mesh
 detect face using rotation
 each face only hold type using name
-
+cache terrant generated so if comeback visited chunk wont need to generated again
 /// 
 
 make ambient collusion
@@ -21,3 +21,27 @@ update run (change fov)
 when not detect bellow y => change vY (done -> can make it better)
 using points and neighbors point to detect collision
 
+// add villager
+
+
+
+
+
+// 3-5-2024
+// chunking blocks face optimization
+when generate chunk
+send blocks custom in neibogh chunks
+using sonme function and noise to know blocks will gen and merge with custom block
+if we know neibors then we could know what face of the block we should render
+
+before optimize
+21744 times / 16 chunk size / height 3
+2304 times / 16 chunk size / height 3
+
+865375 20373
+865375 4210
+
+// each chunking have its own intanced manager
+
+// in physics instead of send blocks to worker we gonna cal it self
+=> reduce data to send that worker and not freezing after enter worker
