@@ -38,6 +38,9 @@ before optimize
 21744 times / 16 chunk size / height 3
 2304 times / 16 chunk size / height 3
 
+865375 20373
+865375 4210
+
 // each chunking have its own intanced manager
 
 // in physics instead of send blocks to worker we gonna cal it self
