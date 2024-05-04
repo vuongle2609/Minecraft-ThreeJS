@@ -1,7 +1,7 @@
-import { InstancedMesh, Vector2, Vector3 } from "three";
+import { Vector2, Vector3 } from "three";
 
 import { Face } from "@/constants/block";
-import blocks, { renderGeometry } from "@/constants/blocks";
+import blocks, { BlockKeys } from "@/constants/blocks";
 import { getChunkCoordinate } from "@/game/helpers/chunkHelpers";
 import { detailFromName } from "@/game/helpers/detailFromName";
 import {
@@ -26,8 +26,7 @@ export default class BlockManager extends BaseEntity {
 
   blocksMapping: Record<string, Record<string, Record<string, Block>>> = {};
 
-  blocksWorldChunk: Record<string, Record<string, keyof typeof blocks | 0>> =
-    {};
+  blocksWorldChunk: Record<string, Record<string, BlockKeys | 0>> = {};
   chunksBlocks: Record<string, string[]> = {};
 
   chunksWorkers: Record<string, Worker> = {};
@@ -44,10 +43,6 @@ export default class BlockManager extends BaseEntity {
     document.addEventListener("mousedown", this.onMouseDown.bind(this), false);
   }
 
-  getObject(name: string) {
-    return this.scene?.getObjectByName(name) as THREE.Object3D;
-  }
-
   updateBlock({
     x,
     y,
@@ -59,7 +54,7 @@ export default class BlockManager extends BaseEntity {
     x: number;
     y: number;
     z: number;
-    type: keyof typeof blocks;
+    type: BlockKeys;
     isRenderChunk?: boolean;
     facesToRender?: Record<Face, boolean>;
   }) {
@@ -151,7 +146,7 @@ export default class BlockManager extends BaseEntity {
     const { type } = clickedDetail;
 
     this.inventoryManager.inventory[this.inventoryManager.currentFocusIndex] =
-      type as keyof typeof blocks;
+      type as BlockKeys;
     this.inventoryManager.renderHotbar();
     if (this.inventoryManager.currentFocus)
       this.inventoryManager.renderLabelFocusItem(
@@ -178,7 +173,7 @@ export default class BlockManager extends BaseEntity {
       this.currentBreakSound.currentTime = 0;
     }
 
-    this.currentBreakSound = blocks[type as keyof typeof blocks].break;
+    this.currentBreakSound = blocks[type as BlockKeys].break;
 
     this.currentBreakSound.play();
   }

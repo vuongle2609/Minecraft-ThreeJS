@@ -93,7 +93,7 @@ Object.values(textures).forEach((item) => {
 // const worldMaterial = MeshToonMaterial;
 const worldMaterial = MeshLambertMaterial;
 
-enum BlockTextureType {
+export enum BlockTextureType {
   top,
   side,
   sideOther,
@@ -437,7 +437,7 @@ const blocks = {
   },
 };
 export type BlockKeys = keyof typeof blocks;
-export type BlockAttributeType = (typeof blocks)[keyof typeof blocks];
+export type BlockAttributeType = (typeof blocks)[BlockKeys];
 
 Object.values(blocks).forEach((block) => {
   block.step.loop = true;

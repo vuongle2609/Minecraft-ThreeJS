@@ -23,25 +23,27 @@ using points and neighbors point to detect collision
 
 // add villager
 
-
-
-
-
 // 3-5-2024
 // chunking blocks face optimization (done)
 when generate chunk
 send blocks custom in neibogh chunks
-using sonme function and noise to know blocks will gen and merge with custom block
-if we know neibors then we could know what face of the block we should render
+using some function and noise to know blocks will gen and merge with custom block
+if we know neighbors then we could know what face of the block we should render
 
 before optimize
 21744 times / 16 chunk size / height 3
 2304 times / 16 chunk size / height 3
 
-865375 20373
-865375 4210
-
-// each chunking have its own intanced manager
+seed 865375 render 20373 times
+seed 865375 render 4210 times
 
 // in physics instead of send blocks to worker we gonna cal it self (done)
 => reduce data to send that worker and not freezing after enter worker  
+
+// 4-5-2024
+// each chunking have its own intanced manager
+avoid render too much chunk at same time (queue chunk)
+
+DEFAULT_CHUNK_VIEW = 2;
+before optimize drop to 34 fps in chunk transition
+after optimize

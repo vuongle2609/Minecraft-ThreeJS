@@ -1,9 +1,9 @@
-import FastNoiseLite from 'fastnoise-lite';
+import FastNoiseLite from "fastnoise-lite";
 
-import { BLOCK_WIDTH, CHUNK_SIZE } from '../../constants';
-import blocks, { BlockKeys } from '../../constants/blocks';
-import { nameFromCoordinate } from '../helpers/nameFromCoordinate';
-import { BaseGeneration } from './baseUtilsGeneration';
+import { BLOCK_WIDTH, CHUNK_SIZE } from "../../constants";
+import { BlockKeys } from "../../constants/blocks";
+import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
+import { BaseGeneration } from "./baseUtilsGeneration";
 
 export class DefaultWorld extends BaseGeneration {
   noise = new FastNoiseLite();
@@ -50,7 +50,7 @@ export class DefaultWorld extends BaseGeneration {
 
     const blocksInChunkTypeOnly: Record<string, BlockKeys | 0> = {};
 
-    const createBlock = (position: number[], type: keyof typeof blocks) => {
+    const createBlock = (position: number[], type: BlockKeys) => {
       const blockName = nameFromCoordinate(
         position[0],
         position[1],
@@ -190,7 +190,7 @@ export class DefaultWorld extends BaseGeneration {
       let countSurface = 0;
 
       for (let yA = y; yA >= 0; yA -= 2) {
-        let blockType: keyof typeof blocks = "stone";
+        let blockType: BlockKeys = "stone";
 
         const newPos = [x, yA, z];
 

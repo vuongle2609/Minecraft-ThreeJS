@@ -1,15 +1,19 @@
-import { Mesh, Object3D, Vector3 } from 'three';
+import { Mesh, Object3D, Vector3 } from "three";
 
-import { BLOCK_WIDTH } from '@/constants';
-import { BlockFaces, Face } from '@/constants/block';
-import blocks, { BlockAttributeType, BlockKeys, renderGeometry } from '@/constants/blocks';
-import { nameFromCoordinate } from '@/game/helpers/nameFromCoordinate';
+import { BLOCK_WIDTH } from "@/constants";
+import { BlockFaces, Face } from "@/constants/block";
+import blocks, {
+  BlockAttributeType,
+  BlockKeys,
+  renderGeometry,
+} from "@/constants/blocks";
+import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
 
-import BaseEntity, { BasePropsType } from './baseEntity';
+import BaseEntity, { BasePropsType } from "./baseEntity";
 
 interface PropsType {
   position: Vector3;
-  type: keyof typeof blocks;
+  type: BlockKeys;
   blocksMapping: Record<string, Record<string, Record<string, Block>>>;
   shouldNotRender?: boolean;
   facesToRender?: Record<Face, boolean>;

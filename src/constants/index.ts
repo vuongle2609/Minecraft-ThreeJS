@@ -12,10 +12,10 @@ export const DEFAULT_WORLD_NAME = "New World";
 
 export const BLOCK_WIDTH = 2;
 
-//number of chunk should render in render world
+// number of chunk should render in render world
 export const DEFAULT_CHUNK_VIEW = 1;
 
-//number of chunk should render in physics world
+// number of chunk should render in physics world
 export const CHUNK_VIEW_WORKER_PHYSICS = 1;
 
 // size of chunk in x and z (CHUNK_SIZE * CHUNK_SIZE)
