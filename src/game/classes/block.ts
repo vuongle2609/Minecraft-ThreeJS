@@ -1,13 +1,11 @@
-import { BLOCK_WIDTH } from "@/constants";
-import { BlockFaces, Face } from "@/constants/block";
-import blocks, {
-  BlockAttributeType,
-  BlockKeys,
-  renderGeometry,
-} from "@/constants/blocks";
-import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
-import { Mesh, Object3D, Vector3 } from "three";
-import BaseEntity, { BasePropsType } from "./baseEntity";
+import { Mesh, Object3D, Vector3 } from 'three';
+
+import { BLOCK_WIDTH } from '@/constants';
+import { BlockFaces, Face } from '@/constants/block';
+import blocks, { BlockAttributeType, BlockKeys, renderGeometry } from '@/constants/blocks';
+import { nameFromCoordinate } from '@/game/helpers/nameFromCoordinate';
+
+import BaseEntity, { BasePropsType } from './baseEntity';
 
 interface PropsType {
   position: Vector3;

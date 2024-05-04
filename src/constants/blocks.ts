@@ -1,62 +1,54 @@
 import {
-  BufferAttribute,
-  BufferGeometry,
-  MeshLambertMaterial,
-  NearestFilter,
-  TextureLoader,
-} from "three";
+    BufferAttribute, BufferGeometry, MeshLambertMaterial, NearestFilter, TextureLoader
+} from 'three';
 
 // textures image
-import bedrock from "@/assets/block/bedrock.png";
-import cobblestoneSide from "@/assets/block/cobblestone.png";
-import diamondBlockSide from "@/assets/block/diamond_block.png";
-import dirt from "@/assets/block/dirt.png";
-import emeraldBlockSide from "@/assets/block/emerald_block.png";
-import furnaceFront from "@/assets/block/furnace_front_on.png";
-import furnaceSide from "@/assets/block/furnace_side.png";
-import furnaceTop from "@/assets/block/furnace_top.png";
-import goldBlockSide from "@/assets/block/gold_block.png";
-import grassTopGreen from "@/assets/block/grassBlockTop.png";
-import grassSide from "@/assets/block/grass_side.png";
-import ironBlockSide from "@/assets/block/iron_block.png";
-import lapisBlockSide from "@/assets/block/lapis_block.png";
-import leavesOak from "@/assets/block/leaves_oak.png";
-import woodSide from "@/assets/block/log_oak.png";
-import woodTop from "@/assets/block/log_oak_top.png";
-import oakPlanksSide from "@/assets/block/planks_oak.png";
-import sand from "@/assets/block/sand.png";
-import stone from "@/assets/block/stone.png";
-
+import bedrock from '@/assets/block/bedrock.png';
+import cobblestoneSide from '@/assets/block/cobblestone.png';
+import diamondBlockSide from '@/assets/block/diamond_block.png';
+import dirt from '@/assets/block/dirt.png';
+import emeraldBlockSide from '@/assets/block/emerald_block.png';
+import furnaceFront from '@/assets/block/furnace_front_on.png';
+import furnaceSide from '@/assets/block/furnace_side.png';
+import furnaceTop from '@/assets/block/furnace_top.png';
+import goldBlockSide from '@/assets/block/gold_block.png';
+import grassSide from '@/assets/block/grass_side.png';
+import grassTopGreen from '@/assets/block/grassBlockTop.png';
+import ironBlockSide from '@/assets/block/iron_block.png';
+import lapisBlockSide from '@/assets/block/lapis_block.png';
+import leavesOak from '@/assets/block/leaves_oak.png';
+import woodSide from '@/assets/block/log_oak.png';
+import woodTop from '@/assets/block/log_oak_top.png';
+import oakPlanksSide from '@/assets/block/planks_oak.png';
+import sand from '@/assets/block/sand.png';
+import stone from '@/assets/block/stone.png';
 //icon
-import bedRockIcon from "@/assets/blockIcon/Bedrock_JE2_BE2.webp";
-import blockOfEmeraldIcon from "@/assets/blockIcon/Block_of_Emerald_JE4_BE3.webp";
-import blockOfGoldIcon from "@/assets/blockIcon/Block_of_Gold_JE6_BE3.webp";
-import blockOfIronIcon from "@/assets/blockIcon/Block_of_Iron_JE4_BE3.webp";
-import blockOfLapisIcon from "@/assets/blockIcon/Block_of_Lapis_Lazuli_JE3_BE3.webp";
-import cobblestoneIcon from "@/assets/blockIcon/Cobblestone.webp";
-import dirtIcon from "@/assets/blockIcon/Dirt.webp";
-import furnanceIcon from "@/assets/blockIcon/Furnace_29_JE4.webp";
-import grassIcon from "@/assets/blockIcon/Grass_Block.webp";
-import leavesIcon from "@/assets/blockIcon/Oak_Leaves.webp";
-import woodIcon from "@/assets/blockIcon/Oak_Log_29_JE5_BE3.webp";
-import oakPlanksIcon from "@/assets/blockIcon/Oak_Planks.webp";
-import sandIcon from "@/assets/blockIcon/Sand_JE5_BE3.webp";
-import stoneIcon from "@/assets/blockIcon/Stone.webp";
-import blockOfDiamondIcon from "@/assets/blockIcon/block_of_diamond.webp";
-
-// soundStep
-import stepGrass from "@/assets/sound/step/grass3.ogg";
-import stepStone from "@/assets/sound/step/stone3.ogg";
-
-// sound place
-import placeBlock from "@/assets/sound/place/block.mp3";
-import placeGrass from "@/assets/sound/place/grass.mp3";
-import placeWood from "@/assets/sound/place/wood.mp3";
-
+import bedRockIcon from '@/assets/blockIcon/Bedrock_JE2_BE2.webp';
+import blockOfDiamondIcon from '@/assets/blockIcon/block_of_diamond.webp';
+import blockOfEmeraldIcon from '@/assets/blockIcon/Block_of_Emerald_JE4_BE3.webp';
+import blockOfGoldIcon from '@/assets/blockIcon/Block_of_Gold_JE6_BE3.webp';
+import blockOfIronIcon from '@/assets/blockIcon/Block_of_Iron_JE4_BE3.webp';
+import blockOfLapisIcon from '@/assets/blockIcon/Block_of_Lapis_Lazuli_JE3_BE3.webp';
+import cobblestoneIcon from '@/assets/blockIcon/Cobblestone.webp';
+import dirtIcon from '@/assets/blockIcon/Dirt.webp';
+import furnanceIcon from '@/assets/blockIcon/Furnace_29_JE4.webp';
+import grassIcon from '@/assets/blockIcon/Grass_Block.webp';
+import leavesIcon from '@/assets/blockIcon/Oak_Leaves.webp';
+import woodIcon from '@/assets/blockIcon/Oak_Log_29_JE5_BE3.webp';
+import oakPlanksIcon from '@/assets/blockIcon/Oak_Planks.webp';
+import sandIcon from '@/assets/blockIcon/Sand_JE5_BE3.webp';
+import stoneIcon from '@/assets/blockIcon/Stone.webp';
 // sound break
-import breakBlock from "@/assets/sound/break/block.mp3";
-import breakGrass from "@/assets/sound/break/grass.mp3";
-import breakWood from "@/assets/sound/break/wood.mp3";
+import breakBlock from '@/assets/sound/break/block.mp3';
+import breakGrass from '@/assets/sound/break/grass.mp3';
+import breakWood from '@/assets/sound/break/wood.mp3';
+// sound place
+import placeBlock from '@/assets/sound/place/block.mp3';
+import placeGrass from '@/assets/sound/place/grass.mp3';
+import placeWood from '@/assets/sound/place/wood.mp3';
+// soundStep
+import stepGrass from '@/assets/sound/step/grass3.ogg';
+import stepStone from '@/assets/sound/step/stone3.ogg';
 
 // texture load
 const textureLoader = new TextureLoader();

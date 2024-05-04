@@ -1,16 +1,14 @@
-import blocks, { renderGeometry } from "@/constants/blocks";
-import { getChunkCoordinate } from "@/game/helpers/chunkHelpers";
-import { detailFromName } from "@/game/helpers/detailFromName";
-import {
-  nameChunkFromCoordinate,
-  nameFromCoordinate,
-} from "@/game/helpers/nameFromCoordinate";
-import { InstancedMesh, Vector2, Vector3 } from "three";
-import BaseEntity, { BasePropsType } from "./baseEntity";
+import { InstancedMesh, Vector2, Vector3 } from 'three';
 
-import Block from "./block";
-import InventoryManager from "./inventoryManager";
-import { Face } from "@/constants/block";
+import { Face } from '@/constants/block';
+import blocks, { renderGeometry } from '@/constants/blocks';
+import { getChunkCoordinate } from '@/game/helpers/chunkHelpers';
+import { detailFromName } from '@/game/helpers/detailFromName';
+import { nameChunkFromCoordinate, nameFromCoordinate } from '@/game/helpers/nameFromCoordinate';
+
+import BaseEntity, { BasePropsType } from './baseEntity';
+import Block from './block';
+import InventoryManager from './inventoryManager';
 
 interface PropsType {
   inventoryManager: InventoryManager;

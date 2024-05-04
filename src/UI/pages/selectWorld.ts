@@ -1,10 +1,13 @@
-import { WORLD_TYPE_MAPPING } from "@/constants";
-import { RenderPage } from "@/game/classes/renderPage";
-import { WorldsType } from "@/type";
-import { format } from "date-fns";
-import { v4 } from "uuid";
-import Router from "../router";
-import { $, $$ } from "../utils/selector";
+import { format } from 'date-fns';
+import { v4 } from 'uuid';
+
+import { WORLD_TYPE_MAPPING } from '@/constants';
+import { RenderPage } from '@/game/classes/renderPage';
+import { WorldsType } from '@/type';
+
+import Router from '../router';
+import { $, $$ } from '../utils/selector';
+
 export default class SelectWorld extends RenderPage {
   router: Router;
   selectedWorld: string | null = null;

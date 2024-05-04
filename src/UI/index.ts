@@ -1,5 +1,6 @@
-import SoundManager from "@/game/classes/soundManager";
-import Router from "./router";
+import SoundManager from '@/game/classes/soundManager';
+
+import Router from './router';
 
 export default class UI {
   soundManager = new SoundManager();

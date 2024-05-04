@@ -1,6 +1,7 @@
-import { RenderPage } from "@/game/classes/renderPage";
-import Router from "../router";
-import { $ } from "../utils/selector";
+import { RenderPage } from '@/game/classes/renderPage';
+
+import Router from '../router';
+import { $ } from '../utils/selector';
 
 export default class InitScreen extends RenderPage {
   router: Router;

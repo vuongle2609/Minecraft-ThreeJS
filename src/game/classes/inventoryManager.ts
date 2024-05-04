@@ -1,7 +1,8 @@
-import blocks from "@/constants/blocks";
-import { $, $$ } from "@/UI/utils/selector";
-import BaseEntity, { BasePropsType } from "./baseEntity";
-import { HOTBAR_LENGTH } from "@/constants/player";
+import blocks from '@/constants/blocks';
+import { HOTBAR_LENGTH } from '@/constants/player';
+import { $, $$ } from '@/UI/utils/selector';
+
+import BaseEntity, { BasePropsType } from './baseEntity';
 
 export default class InventoryManager extends BaseEntity {
   blocksList = [

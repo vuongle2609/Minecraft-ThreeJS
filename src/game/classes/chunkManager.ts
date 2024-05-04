@@ -1,16 +1,14 @@
-import { CHUNK_VIEW_WORKER_PHYSICS, DEFAULT_CHUNK_VIEW } from "@/constants";
-import { Face } from "@/constants/block";
-import blocks, { BlockKeys } from "@/constants/blocks";
-import {
-  nameChunkFromCoordinate,
-  nameFromCoordinate,
-} from "@/game/helpers/nameFromCoordinate";
-import { calNeighborsOffset } from "../helpers/calNeighborsOffset";
-import { getChunkNeighborsCoor } from "../helpers/chunkHelpers";
-import { detailFromName } from "../helpers/detailFromName";
-import { BasePropsType } from "./baseEntity";
-import BlockManager from "./blockManager";
-import InventoryManager from "./inventoryManager";
+import { CHUNK_VIEW_WORKER_PHYSICS, DEFAULT_CHUNK_VIEW } from '@/constants';
+import { Face } from '@/constants/block';
+import blocks, { BlockKeys } from '@/constants/blocks';
+import { nameChunkFromCoordinate, nameFromCoordinate } from '@/game/helpers/nameFromCoordinate';
+
+import { calNeighborsOffset } from '../helpers/calNeighborsOffset';
+import { getChunkNeighborsCoor } from '../helpers/chunkHelpers';
+import { detailFromName } from '../helpers/detailFromName';
+import { BasePropsType } from './baseEntity';
+import BlockManager from './blockManager';
+import InventoryManager from './inventoryManager';
 
 interface PropsType {
   inventoryManager: InventoryManager;

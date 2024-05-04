@@ -1,8 +1,9 @@
-import FastNoiseLite from "fastnoise-lite";
-import { BLOCK_WIDTH, CHUNK_SIZE } from "../../constants";
-import blocks, { BlockKeys } from "../../constants/blocks";
-import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
-import { BaseGeneration } from "./baseUtilsGeneration";
+import FastNoiseLite from 'fastnoise-lite';
+
+import { BLOCK_WIDTH, CHUNK_SIZE } from '../../constants';
+import blocks, { BlockKeys } from '../../constants/blocks';
+import { nameFromCoordinate } from '../helpers/nameFromCoordinate';
+import { BaseGeneration } from './baseUtilsGeneration';
 
 export class DefaultWorld extends BaseGeneration {
   noise = new FastNoiseLite();

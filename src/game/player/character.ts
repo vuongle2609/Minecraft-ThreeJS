@@ -1,14 +1,12 @@
-import { CHUNK_SIZE } from "@/constants";
-import blocks from "@/constants/blocks";
-import {
-  CHARACTER_LENGTH,
-  CHARACTER_MIDDLE_LENGTH,
-  CHARACTER_RADIUS,
-} from "@/constants/player";
-import BasicCharacterControllerInput from "@/game/action/input";
-import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
-import { CapsuleGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
-import { getChunkCoordinate } from "../helpers/chunkHelpers";
+import { CapsuleGeometry, Mesh, MeshStandardMaterial, Vector3 } from 'three';
+
+import { CHUNK_SIZE } from '@/constants';
+import blocks from '@/constants/blocks';
+import { CHARACTER_LENGTH, CHARACTER_MIDDLE_LENGTH, CHARACTER_RADIUS } from '@/constants/player';
+import BasicCharacterControllerInput from '@/game/action/input';
+import BaseEntity, { BasePropsType } from '@/game/classes/baseEntity';
+
+import { getChunkCoordinate } from '../helpers/chunkHelpers';
 
 export default class Player extends BaseEntity {
   input = new BasicCharacterControllerInput();

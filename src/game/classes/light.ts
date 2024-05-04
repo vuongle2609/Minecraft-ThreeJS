@@ -1,5 +1,6 @@
-import { AmbientLight, DirectionalLight } from "three";
-import BaseEntity, { BasePropsType } from "./baseEntity";
+import { AmbientLight, DirectionalLight } from 'three';
+
+import BaseEntity, { BasePropsType } from './baseEntity';
 
 export default class Light extends BaseEntity {
   constructor(props: BasePropsType) {

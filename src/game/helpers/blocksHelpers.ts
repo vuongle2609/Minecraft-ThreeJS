@@ -1,5 +1,5 @@
-import { Face } from "../../constants/block";
-import { nameFromCoordinate } from "./nameFromCoordinate";
+import { Face } from '../../constants/block';
+import { nameFromCoordinate } from './nameFromCoordinate';
 
 const { leftZ, rightZ, leftX, rightX, top, bottom } = Face;
 

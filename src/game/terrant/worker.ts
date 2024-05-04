@@ -1,7 +1,7 @@
-import { FLAT_WORLD_TYPE } from "../../constants";
-import { BlockKeys } from "../../constants/blocks";
-import { FlatWorld } from "./flatWorldGeneration";
-import { DefaultWorld } from "./worldGeneration";
+import { FLAT_WORLD_TYPE } from '../../constants';
+import { BlockKeys } from '../../constants/blocks';
+import { FlatWorld } from './flatWorldGeneration';
+import { DefaultWorld } from './worldGeneration';
 
 self.onmessage = (e) => {
   const { x, z, chunkBlocksCustom, type, seed, neighborsChunkData } =

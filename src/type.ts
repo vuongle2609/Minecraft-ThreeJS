@@ -1,4 +1,4 @@
-import blocks, { BlockKeys } from "./constants/blocks";
+import blocks, { BlockKeys } from './constants/blocks';
 
 export interface PlayerInput {
   forward: boolean;

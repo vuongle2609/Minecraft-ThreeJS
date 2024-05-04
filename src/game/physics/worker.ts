@@ -1,22 +1,15 @@
-import { Vector3 } from "three";
+import { Vector3 } from 'three';
+
+import { BlocksMappingType } from '@/type';
+
+import { BLOCK_WIDTH, CHUNK_SIZE, FLAT_WORLD_TYPE, TIME_TO_INTERACT } from '../../constants';
 import {
-  BLOCK_WIDTH,
-  CHUNK_SIZE,
-  FLAT_WORLD_TYPE,
-  TIME_TO_INTERACT,
-} from "../../constants";
-import {
-  CHARACTER_LENGTH,
-  GRAVITY,
-  GRAVITY_SCALE,
-  JUMP_FORCE,
-  SPEED,
-} from "../../constants/player";
-import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
-import Physics from "./physics";
-import { DefaultWorld } from "../terrant/worldGeneration";
-import { FlatWorld } from "../terrant/flatWorldGeneration";
-import { BlocksMappingType } from "@/type";
+    CHARACTER_LENGTH, GRAVITY, GRAVITY_SCALE, JUMP_FORCE, SPEED
+} from '../../constants/player';
+import { nameFromCoordinate } from '../helpers/nameFromCoordinate';
+import { FlatWorld } from '../terrant/flatWorldGeneration';
+import { DefaultWorld } from '../terrant/worldGeneration';
+import Physics from './physics';
 
 let blocksMapping: Record<string, any> = {};
 

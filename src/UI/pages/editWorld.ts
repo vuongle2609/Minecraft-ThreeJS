@@ -1,7 +1,8 @@
-import { RenderPage } from "@/game/classes/renderPage";
-import { WorldsType } from "@/type";
-import Router from "../router";
-import { $ } from "../utils/selector";
+import { RenderPage } from '@/game/classes/renderPage';
+import { WorldsType } from '@/type';
+
+import Router from '../router';
+import { $ } from '../utils/selector';
 
 export default class EditWorld extends RenderPage {
   router: Router;

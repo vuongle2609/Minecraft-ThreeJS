@@ -1,16 +1,15 @@
-import { RenderPage } from "@/game/classes/renderPage";
-import Router from "../router";
-import { $ } from "../utils/selector";
+import { v4 } from 'uuid';
+
 import {
-  DEFAULT_WORLD_NAME,
-  FLAT_WORLD_TYPE,
-  NORMAL_WORLD_TYPE,
-  WORLD_TYPE_MAPPING,
-  DEFAULT_WORLD_TYPE,
-} from "@/constants";
-import { WorldsType } from "@/type";
-import { v4 } from "uuid";
-import MersenneTwister from "../utils/random";
+    DEFAULT_WORLD_NAME, DEFAULT_WORLD_TYPE, FLAT_WORLD_TYPE, NORMAL_WORLD_TYPE, WORLD_TYPE_MAPPING
+} from '@/constants';
+import { RenderPage } from '@/game/classes/renderPage';
+import { WorldsType } from '@/type';
+
+import Router from '../router';
+import MersenneTwister from '../utils/random';
+import { $ } from '../utils/selector';
+
 export default class CreateWorld extends RenderPage {
   router: Router;
 

@@ -1,20 +1,15 @@
-import { $ } from "@/UI/utils/selector";
-import MouseControl from "@/game/action/mouseControl";
-import Player from "@/game/player/character";
-import { WorldsType } from "@/type";
-import {
-  Clock,
-  Color,
-  FogExp2,
-  PerspectiveCamera,
-  Scene,
-  WebGLRenderer,
-} from "three";
-import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
-import ChunkManager from "./chunkManager";
-import InventoryManager from "./inventoryManager";
-import Light from "./light";
-import { RenderPage } from "./renderPage";
+import { Clock, Color, FogExp2, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
+import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
+
+import MouseControl from '@/game/action/mouseControl';
+import Player from '@/game/player/character';
+import { WorldsType } from '@/type';
+import { $ } from '@/UI/utils/selector';
+
+import ChunkManager from './chunkManager';
+import InventoryManager from './inventoryManager';
+import Light from './light';
+import { RenderPage } from './renderPage';
 
 export default class GameScene extends RenderPage {
   id: string;
