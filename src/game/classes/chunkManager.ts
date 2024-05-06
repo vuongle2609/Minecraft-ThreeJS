@@ -150,7 +150,7 @@ export default class ChunkManager extends BlockManager {
         if (e.data.type === "renderBlocks") {
           const { chunkName, blocks, facesToRender } = e.data.data;
 
-          this.handleRenderChunkQueue(chunkName, blocks, facesToRender);
+          this.handleRenderChunkBlocks(chunkName, blocks, facesToRender);
 
           this.startWorker(currWorker, this.chunkPendingQueueProxy.pop());
         }
@@ -263,43 +263,6 @@ export default class ChunkManager extends BlockManager {
     this.chunksWorkers[chunkName]?.terminate();
     delete this.chunksWorkers[chunkName];
   };
-
-  handleRenderChunkQueue(
-    chunkName: string,
-    blocksRenderWorker: Record<
-      string,
-      {
-        position: number[];
-        type: BlockKeys;
-      }
-    > = {},
-    facesToRender: Record<string, Record<Face, boolean>> = {}
-  ) {
-    // if after process blocks in chunk and return data but chunk no
-    // longer active then abort
-    if (!this.chunksActive.includes(chunkName)) return;
-
-    // maybe the queue things is not working :(
-    let shouldStart = false;
-    if (this.chunkRenderQueue.length === 0) {
-      shouldStart = true;
-    }
-
-    this.chunkRenderQueue.unshift(() => {
-      this.handleRenderChunkBlocks(
-        chunkName,
-        blocksRenderWorker,
-        facesToRender
-      );
-      this.chunkRenderQueue.pop();
-
-      this.chunkRenderQueue.at(-1)?.();
-    });
-
-    if (shouldStart) {
-      this.chunkRenderQueue.at(-1)?.();
-    }
-  }
 
   handleClearChunks = (neighborChunksKeys: string[]) => {
     const inactiveChunk = this.chunksActive.filter(
