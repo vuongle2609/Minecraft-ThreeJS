@@ -1,8 +1,8 @@
-import { BLOCK_WIDTH } from '../../constants';
-import { Face } from '../../constants/block';
-import { BlockKeys } from '../../constants/blocks';
-import { getNeighborsSeparate } from '../helpers/blocksHelpers';
-import { detailFromName } from '../helpers/detailFromName';
+import { BLOCK_WIDTH } from "../../constants";
+import { Face } from "../../constants/block";
+import { BlockKeys } from "../../constants/blocks";
+import { getNeighborsSeparate } from "../helpers/blocksHelpers";
+import { detailFromName } from "../helpers/detailFromName";
 
 const { leftZ, rightZ, leftX, rightX, bottom, top } = Face;
 
@@ -39,7 +39,7 @@ export class BaseGeneration {
       }
     > = ({} = {
       ...blocksInChunk,
-      ...Object.keys(chunkBlocksCustom).reduce((prev, currKey) => {
+      ...Object.keys(chunkBlocksCustom || {}).reduce((prev, currKey) => {
         const { x, y, z } = detailFromName(currKey);
 
         if (chunkBlocksCustom[currKey] == 0) {
