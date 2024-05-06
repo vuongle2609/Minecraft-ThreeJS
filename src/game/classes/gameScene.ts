@@ -1,17 +1,18 @@
-import { $ } from "@/UI/utils/selector";
-import MouseControl from "@/game/action/mouseControl";
-import Player from "@/game/player/character";
-import { WorldsType } from "@/type";
 import {
   Clock,
   Color,
-  Fog,
+  FogExp2,
   PerspectiveCamera,
-  SRGBTransfer,
   Scene,
   WebGLRenderer,
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
+
+import MouseControl from "@/game/action/mouseControl";
+import Player from "@/game/player/character";
+import { WorldsType } from "@/type";
+import { $ } from "@/UI/utils/selector";
+
 import ChunkManager from "./chunkManager";
 import InventoryManager from "./inventoryManager";
 import Light from "./light";
@@ -25,7 +26,7 @@ export default class GameScene extends RenderPage {
 
   renderer = new WebGLRenderer({
     antialias: true,
-    alpha: true,
+    // alpha: true,
     canvas: document.querySelector("#gameScene") as HTMLCanvasElement,
   });
 
@@ -36,7 +37,7 @@ export default class GameScene extends RenderPage {
   scene = new Scene();
 
   camera = new PerspectiveCamera(
-    80,
+    70,
     window.innerWidth / window.innerHeight,
     0.1,
     500
@@ -87,7 +88,8 @@ export default class GameScene extends RenderPage {
     document.body.appendChild(this.element);
 
     this.scene.background = new Color("#6EB1FF");
-    this.scene.fog = new Fog(0xcccccc, 3, 40);
+    // this.scene.fog = new Fog(0xcccccc, 3, 40);
+    // this.scene.fog = new FogExp2(0xcccccc, 0.014);
 
     if (this.worldStorage.rotation)
       this.camera.rotation.fromArray(this.worldStorage.rotation as any);
@@ -107,6 +109,15 @@ export default class GameScene extends RenderPage {
     this.inventoryManager = new InventoryManager({
       control: this.control,
       mouseControl: this.mouseControl,
+    });
+
+    this.worker.postMessage({
+      type: "initSeed",
+      data: {
+        seed: this.worldStorage?.seed,
+        type: this.worldStorage?.worldType,
+        chunkBlocksCustom: this.worldStorage.blocksWorldChunk,
+      },
     });
 
     this.chunkManager = new ChunkManager({

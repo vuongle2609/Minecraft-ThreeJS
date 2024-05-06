@@ -1,5 +1,5 @@
-export const $ = (selector: string) => {
-  return document.querySelector(selector) as HTMLElement;
+export const $ = <T extends Node = HTMLElement>(selector: string) => {
+  return document.querySelector(selector) as unknown as T;
 };
 
 export const $$ = <T extends Node = Element>(selector: string) => {

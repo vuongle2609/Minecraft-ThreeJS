@@ -1,20 +1,28 @@
-import { RenderPage } from "@/game/classes/renderPage";
-import Router from "../router";
-import { $ } from "../utils/selector";
+import { v4 } from 'uuid';
+
 import {
-  DEFAULT_WORLD_NAME,
-  FLAT_WORLD_TYPE,
-  NORMAL_WORLD_TYPE,
-  WORLD_TYPE_MAPPING,
-  DEFAULT_WORLD_TYPE,
-} from "@/constants";
-import { WorldsType } from "@/type";
-import { v4 } from "uuid";
-import MersenneTwister from "../utils/random";
+    DEFAULT_WORLD_NAME, DEFAULT_WORLD_TYPE, FLAT_WORLD_TYPE, NORMAL_WORLD_TYPE, WORLD_TYPE_MAPPING
+} from '@/constants';
+import { RenderPage } from '@/game/classes/renderPage';
+import { WorldsType } from '@/type';
+
+import Router from '../router';
+import MersenneTwister from '../utils/random';
+import { $ } from '../utils/selector';
+
 export default class CreateWorld extends RenderPage {
   router: Router;
 
-  state = { name: DEFAULT_WORLD_NAME, worldType: DEFAULT_WORLD_TYPE };
+  state = {
+    seed: (() => {
+      //@ts-ignore
+      var m = new MersenneTwister();
+      var randomNumber = m.random();
+      return Math.round(randomNumber * 1000000);
+    })(),
+    name: DEFAULT_WORLD_NAME,
+    worldType: DEFAULT_WORLD_TYPE,
+  };
 
   constructor(router: Router) {
     super();
@@ -64,6 +72,11 @@ export default class CreateWorld extends RenderPage {
             </button>
           </div>
 
+          <div class="w-full flex flex-col items-start max-w-[400px]" id="seed_container">
+            <label for="seed" class="text-left text-gameGray">Seed (Numbers only)</label>
+            <input id="seed" class="text-white text-lg bg-black p-3 py-2 outline-none border-2 border-solid border-white w-full"  type="number" />
+          </div>
+
           <div class="w-full flex gap-3 mt-auto">
             <button
               class="mc-button"
@@ -92,6 +105,8 @@ export default class CreateWorld extends RenderPage {
   }
 
   afterRender = () => {
+    $<HTMLInputElement>("#seed").value = String(this.state.seed);
+
     $("#cancel").onclick = () => {
       const worlds: Record<string, WorldsType> = JSON.parse(
         localStorage.getItem("worlds") || "{}"
@@ -109,10 +124,6 @@ export default class CreateWorld extends RenderPage {
     $("#create").onclick = () => {
       if (this.state.name === "") return;
 
-      //@ts-ignore
-      var m = new MersenneTwister();
-      var randomNumber = m.random();
-
       const worlds: Record<string, WorldsType> = JSON.parse(
         localStorage.getItem("worlds") || "{}"
       );
@@ -125,7 +136,7 @@ export default class CreateWorld extends RenderPage {
         ...worldState,
         createdDate: new Date(),
         blocksWorldChunk: {},
-        seed: Math.round(randomNumber * 1000000),
+        seed: Number(worldState.seed),
       };
 
       localStorage.setItem(
@@ -137,16 +148,32 @@ export default class CreateWorld extends RenderPage {
     };
 
     $("#world_name").onchange = (e) => {
-      const newName = (e.target as HTMLInputElement)?.value;
+      const nameValue = $<HTMLInputElement>("#world_name").value;
+      const seedValue = $<HTMLInputElement>("#seed").value;
 
-      if (newName === "") {
+      if (nameValue === "" || seedValue === "") {
         $("#create").classList.add("disabled");
-      } else {
+      } else if (nameValue && seedValue) {
         $("#create").classList.remove("disabled");
       }
 
       this.setState({
-        name: newName,
+        name: nameValue,
+      });
+    };
+
+    $<HTMLInputElement>("#seed").onchange = (e) => {
+      const nameValue = $<HTMLInputElement>("#world_name").value;
+      const seedValue = $<HTMLInputElement>("#seed").value;
+
+      if (nameValue === "" || seedValue === "") {
+        $("#create").classList.add("disabled");
+      } else if (nameValue && seedValue) {
+        $("#create").classList.remove("disabled");
+      }
+
+      this.setState({
+        seed: seedValue,
       });
     };
 
@@ -157,6 +184,12 @@ export default class CreateWorld extends RenderPage {
             ? NORMAL_WORLD_TYPE
             : FLAT_WORLD_TYPE,
       });
+
+      if (this.state.worldType === FLAT_WORLD_TYPE) {
+        $("#seed_container").classList.add("hidden");
+      } else if (this.state.worldType === DEFAULT_WORLD_TYPE) {
+        $("#seed_container").classList.remove("hidden");
+      }
 
       $("#world_type_id").innerText =
         WORLD_TYPE_MAPPING[

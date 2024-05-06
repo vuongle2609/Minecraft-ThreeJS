@@ -1,7 +1,9 @@
-import { Cache } from "three";
-import GameScene from "./game/classes/gameScene";
-import "./style.css";
-import UI from "./UI";
+import './style.css';
+
+import { Cache } from 'three';
+
+import GameScene from './game/classes/gameScene';
+import UI from './UI';
 
 Cache.enabled = true;
 

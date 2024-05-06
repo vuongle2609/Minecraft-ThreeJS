@@ -1,20 +1,27 @@
+import { Mesh, Object3D, Vector3 } from "three";
+
 import { BLOCK_WIDTH } from "@/constants";
 import { BlockFaces, Face } from "@/constants/block";
-import blocks, { BlockAttributeType, renderGeometry } from "@/constants/blocks";
+import blocks, {
+  BlockAttributeType,
+  BlockKeys,
+  renderGeometry,
+} from "@/constants/blocks";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
-import { Mesh, Object3D, Vector3 } from "three";
+
 import BaseEntity, { BasePropsType } from "./baseEntity";
 
 interface PropsType {
   position: Vector3;
-  type: keyof typeof blocks;
-  blocksMapping: Record<string, Record<string, Record<string, BlockA>>>;
+  type: BlockKeys;
+  blocksMapping: Record<string, Record<string, Record<string, Block>>>;
   shouldNotRender?: boolean;
+  facesToRender?: Record<Face, boolean>;
 }
 
 const { leftZ, rightZ, leftX, rightX, top, bottom } = Face;
 
-export default class BlockA extends BaseEntity {
+export default class Block extends BaseEntity {
   blockFaces: BlockFaces = {
     [leftZ]: null,
     [rightZ]: null,
@@ -23,28 +30,36 @@ export default class BlockA extends BaseEntity {
     [top]: null,
     [bottom]: null,
   };
-  type: keyof typeof blocks;
+  type: BlockKeys;
   position: Vector3;
   atttribute: BlockAttributeType;
-  blocksMapping: Record<string, Record<string, Record<string, BlockA>>>;
+  blocksMapping: Record<string, Record<string, Record<string, Block>>>;
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
 
-    const { type, position, blocksMapping, shouldNotRender } = props!;
+    const { type, position, blocksMapping, shouldNotRender, facesToRender } =
+      props!;
 
     this.type = type;
     this.position = position;
     this.atttribute = blocks[type];
     this.blocksMapping = blocksMapping;
 
-    if (!shouldNotRender) {
-      this.render();
-    }
+    facesToRender ? this.renderWithKnownFace(facesToRender) : this.render();
   }
 
   getObject(name: string) {
     return this.scene?.getObjectByName(name) as THREE.Object3D;
+  }
+
+  renderWithKnownFace(facesToRender: Record<Face, boolean>) {
+    if (facesToRender[leftZ]) this.addFace(leftZ);
+    if (facesToRender[rightZ]) this.addFace(rightZ);
+    if (facesToRender[leftX]) this.addFace(leftX);
+    if (facesToRender[rightX]) this.addFace(rightX);
+    if (facesToRender[top]) this.addFace(top);
+    if (facesToRender[bottom]) this.addFace(bottom);
   }
 
   render() {
@@ -101,8 +116,11 @@ export default class BlockA extends BaseEntity {
   }
 
   addFace(face: keyof BlockFaces) {
-    // console.count('add')
-    const plane = new Mesh(renderGeometry, this.atttribute.texture[face]);
+    const texture = this.atttribute.texture;
+
+    const material =
+      texture[this.atttribute.textureMap[face] as keyof typeof texture];
+    const plane = new Mesh(renderGeometry, material);
 
     const { x, y, z } = this.position;
 

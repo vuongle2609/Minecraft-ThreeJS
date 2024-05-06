@@ -1,10 +1,13 @@
-import { WORLD_TYPE_MAPPING } from "@/constants";
-import { RenderPage } from "@/game/classes/renderPage";
-import { WorldsType } from "@/type";
-import { format } from "date-fns";
-import { v4 } from "uuid";
-import Router from "../router";
-import { $, $$ } from "../utils/selector";
+import { format } from 'date-fns';
+import { v4 } from 'uuid';
+
+import { WORLD_TYPE_MAPPING } from '@/constants';
+import { RenderPage } from '@/game/classes/renderPage';
+import { WorldsType } from '@/type';
+
+import Router from '../router';
+import { $, $$ } from '../utils/selector';
+
 export default class SelectWorld extends RenderPage {
   router: Router;
   selectedWorld: string | null = null;
@@ -28,7 +31,7 @@ export default class SelectWorld extends RenderPage {
           <div class="w-full grow flex flex-col gap-3 text-white overflow-auto bg-black/50 py-2 px-[200px]" id="world_list">
           </div>
 
-          <div class="w-full flex flex-col gap-2 mt-auto px-[100px]">
+          <div class="w-full flex flex-col gap-2 mt-auto px-[100px] max-w-[1040px]">
             <div class="w-full flex gap-3">
                 <button
                     class="mc-button interactSelected disabled"
@@ -130,6 +133,10 @@ export default class SelectWorld extends RenderPage {
     this.handleRenderWorld(worldId);
   }
 
+  editWorld(id: string) {
+    this.router.navigate("editWorld", id);
+  }
+
   disableInteractButton() {
     $$<HTMLButtonElement>(".interactSelected").forEach((item) => {
       item.classList.add("disabled");
@@ -155,6 +162,12 @@ export default class SelectWorld extends RenderPage {
 
     $("#reCreate").onclick = () => {
       this.reCreateWorld();
+    };
+
+    $("#edit").onclick = () => {
+      if (!this.selectedWorld) return;
+
+      this.editWorld(this.selectedWorld);
     };
   }
 

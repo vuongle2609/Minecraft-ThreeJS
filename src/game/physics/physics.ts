@@ -1,11 +1,9 @@
-import { Vector3 } from "three";
+import { Vector3 } from 'three';
+
 import {
-  CHARACTER_LENGTH,
-  CHARACTER_LENGTH_CEIL,
-  CHARACTER_MIDDLE_LENGTH,
-  CHARACTER_RADIUS,
-} from "../../constants/player";
-import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
+    CHARACTER_LENGTH, CHARACTER_LENGTH_CEIL, CHARACTER_MIDDLE_LENGTH, CHARACTER_RADIUS
+} from '../../constants/player';
+import { nameFromCoordinate } from '../helpers/nameFromCoordinate';
 
 export default class Physics {
   constructor() {}

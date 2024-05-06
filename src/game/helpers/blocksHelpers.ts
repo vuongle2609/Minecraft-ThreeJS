@@ -1,5 +1,5 @@
-import { Face } from "../../constants/block";
-import { nameFromCoordinate } from "./nameFromCoordinate";
+import { Face } from '../../constants/block';
+import { nameFromCoordinate } from './nameFromCoordinate';
 
 const { leftZ, rightZ, leftX, rightX, top, bottom } = Face;
 
@@ -10,16 +10,16 @@ export const getNeighbors = (
   offSet: number = 0
 ) => {
   const neighbor1 = faces[rightZ]
-    ? blocks[nameFromCoordinate(x, y, z + offSet)]
-    : true;
-  const neighbor2 = faces[leftZ]
     ? blocks[nameFromCoordinate(x, y, z - offSet)]
     : true;
+  const neighbor2 = faces[leftZ]
+    ? blocks[nameFromCoordinate(x, y, z + offSet)]
+    : true;
   const neighbor3 = faces[rightX]
-    ? blocks[nameFromCoordinate(x + offSet, y, z)]
+    ? blocks[nameFromCoordinate(x - offSet, y, z)]
     : true;
   const neighbor4 = faces[leftX]
-    ? blocks[nameFromCoordinate(x - offSet, y, z)]
+    ? blocks[nameFromCoordinate(x + offSet, y, z)]
     : true;
   const neighbor5 = faces[top]
     ? blocks[nameFromCoordinate(x, y + offSet, z)]
@@ -40,16 +40,16 @@ export const getNeighborsSeparate = (
   offSet: number = 0
 ) => {
   const neighbor1 = faces[rightZ]
-    ? blocks[nameFromCoordinate(x, y, z + offSet)]
-    : true;
-  const neighbor2 = faces[leftZ]
     ? blocks[nameFromCoordinate(x, y, z - offSet)]
     : true;
+  const neighbor2 = faces[leftZ]
+    ? blocks[nameFromCoordinate(x, y, z + offSet)]
+    : true;
   const neighbor3 = faces[rightX]
-    ? blocks[nameFromCoordinate(x + offSet, y, z)]
+    ? blocks[nameFromCoordinate(x - offSet, y, z)]
     : true;
   const neighbor4 = faces[leftX]
-    ? blocks[nameFromCoordinate(x - offSet, y, z)]
+    ? blocks[nameFromCoordinate(x + offSet, y, z)]
     : true;
   const neighbor5 = faces[top]
     ? blocks[nameFromCoordinate(x, y + offSet, z)]

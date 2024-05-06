@@ -1,4 +1,7 @@
-import blocks from "@/constants/blocks";
+import { CapsuleGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
+
+import { CHUNK_SIZE } from "@/constants";
+import blocks, { BlockKeys } from "@/constants/blocks";
 import {
   CHARACTER_LENGTH,
   CHARACTER_MIDDLE_LENGTH,
@@ -6,9 +9,8 @@ import {
 } from "@/constants/player";
 import BasicCharacterControllerInput from "@/game/action/input";
 import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
-import { CapsuleGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
+
 import { getChunkCoordinate } from "../helpers/chunkHelpers";
-import { CHUNK_SIZE } from "@/constants";
 
 export default class Player extends BaseEntity {
   input = new BasicCharacterControllerInput();
@@ -23,11 +25,15 @@ export default class Player extends BaseEntity {
   tCounter = 0;
   cameraOffset = 0;
 
-  currentStepKey: keyof typeof blocks | undefined = undefined;
-  prevStepKey: keyof typeof blocks | undefined = undefined;
+  currentStepKey: BlockKeys | undefined = undefined;
+  prevStepKey: BlockKeys | undefined = undefined;
   currentStepSound: HTMLAudioElement;
 
   currentChunk: {
+    x: number;
+    z: number;
+  };
+  currentChunkPhysics: {
     x: number;
     z: number;
   };
@@ -44,13 +50,13 @@ export default class Player extends BaseEntity {
       new MeshStandardMaterial()
     );
     this.player.visible = false;
-    this.player.name = 'player'
+    this.player.name = "player";
 
     if (initPos) this.player.position.set(initPos[0], initPos[1], initPos[2]);
     else {
       this.player.position.set(
         CHUNK_SIZE / 2,
-        CHARACTER_LENGTH + 20,
+        CHARACTER_LENGTH + 40,
         CHUNK_SIZE / 2
       );
     }
@@ -61,7 +67,7 @@ export default class Player extends BaseEntity {
 
     this.scene?.add(this.player);
 
-    this.handleChangeChunk();
+    this.chunkManager?.handleRequestChunks(this.currentChunk);
 
     this.worker?.addEventListener("message", (e) => {
       if (e.data.type === "updatePosition") {
@@ -98,12 +104,8 @@ export default class Player extends BaseEntity {
     ) {
       this.currentChunk = newCalChunk;
 
-      this.handleChangeChunk();
+      this.chunkManager?.handleRequestChunks(this.currentChunk);
     }
-  };
-
-  handleChangeChunk = () => {
-    this.chunkManager?.handleRequestChunks(this.currentChunk);
   };
 
   handleMovement(delta: number) {

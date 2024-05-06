@@ -1,4 +1,4 @@
-import { Mesh } from "three";
+import { Mesh } from 'three';
 
 export enum Face {
   leftZ,

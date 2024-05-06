@@ -1,21 +1,22 @@
-import blocks from "@/constants/blocks";
-import { $, $$ } from "@/UI/utils/selector";
-import BaseEntity, { BasePropsType } from "./baseEntity";
+import blocks, { BlockKeys } from "@/constants/blocks";
 import { HOTBAR_LENGTH } from "@/constants/player";
+import { $, $$ } from "@/UI/utils/selector";
+
+import BaseEntity, { BasePropsType } from "./baseEntity";
 
 export default class InventoryManager extends BaseEntity {
   blocksList = [
     ...Object.keys(blocks),
     ...Array(45 - Object.keys(blocks).length).fill(null),
-  ] as (keyof typeof blocks | null)[];
+  ] as (BlockKeys | null)[];
 
-  inventory: (keyof typeof blocks | null)[] = Array(HOTBAR_LENGTH).fill(null);
+  inventory: (BlockKeys | null)[] = Array(HOTBAR_LENGTH).fill(null);
 
   tooltipElement: HTMLDivElement | undefined;
   currentDragElement: HTMLImageElement | undefined;
   inventoryContainerElement: HTMLDivElement | undefined;
 
-  currentDragItem: null | keyof typeof blocks;
+  currentDragItem: null | BlockKeys;
 
   currentFocusIndex = 0;
   currentFocus = this.inventory[this.currentFocusIndex];
@@ -30,8 +31,8 @@ export default class InventoryManager extends BaseEntity {
   }
 
   initialize() {
-    this.inventory[0] = 'dirt'
-    
+    this.inventory[0] = "dirt";
+
     document.addEventListener(
       "keydown",
       (e) => {
@@ -88,7 +89,7 @@ export default class InventoryManager extends BaseEntity {
   handleMouseMoveHoverBlock(e: MouseEvent) {
     if (!this.tooltipElement || !this.inventoryContainerElement) return;
 
-    const hoverId = (e.target as HTMLImageElement).id as keyof typeof blocks;
+    const hoverId = (e.target as HTMLImageElement).id as BlockKeys;
     const blockHover = blocks[hoverId];
 
     if (!blockHover || this.currentDragItem) {
@@ -144,7 +145,7 @@ export default class InventoryManager extends BaseEntity {
   }
 
   renderBlockList = (
-    listKey: (keyof typeof blocks | null)[],
+    listKey: (BlockKeys | null)[],
     elementSelector: string,
     customClickClass: string,
     customClickClassNull: string
@@ -253,7 +254,7 @@ export default class InventoryManager extends BaseEntity {
     $$<HTMLDivElement>(".blockInventory").forEach((item) => {
       item.addEventListener("mousedown", (e) => {
         this.handleMouseDownInventory(
-          item.getAttribute("block_data") as keyof typeof blocks
+          item.getAttribute("block_data") as BlockKeys
         );
       });
     });
@@ -269,7 +270,7 @@ export default class InventoryManager extends BaseEntity {
     this.control?.unlock();
   }
 
-  handleMouseDownInventory(itemKey: keyof typeof blocks) {
+  handleMouseDownInventory(itemKey: BlockKeys) {
     if (!this.currentDragItem) {
       this.currentDragItem = itemKey;
     } else {

@@ -1,69 +1,64 @@
 import {
   BufferAttribute,
   BufferGeometry,
-  MeshStandardMaterial,
-  MeshToonMaterial,
+  MeshLambertMaterial,
   NearestFilter,
   TextureLoader,
 } from "three";
 
 // textures image
+import bedrock from "@/assets/block/bedrock.png";
 import cobblestoneSide from "@/assets/block/cobblestone.png";
-import stone from "@/assets/block/stone.png";
-import leavesOak from "@/assets/block/leaves_oak.png";
-import sand from "@/assets/block/sand.png";
 import diamondBlockSide from "@/assets/block/diamond_block.png";
 import dirt from "@/assets/block/dirt.png";
-import bedrock from "@/assets/block/bedrock.png";
-import woodSide from "@/assets/block/log_oak.png";
-import woodTop from "@/assets/block/log_oak_top.png";
 import emeraldBlockSide from "@/assets/block/emerald_block.png";
 import furnaceFront from "@/assets/block/furnace_front_on.png";
 import furnaceSide from "@/assets/block/furnace_side.png";
 import furnaceTop from "@/assets/block/furnace_top.png";
 import goldBlockSide from "@/assets/block/gold_block.png";
-import grassTopGreen from "@/assets/block/grassBlockTop.png";
 import grassSide from "@/assets/block/grass_side.png";
+import grassTop from "@/assets/block/grass.jpg";
 import ironBlockSide from "@/assets/block/iron_block.png";
 import lapisBlockSide from "@/assets/block/lapis_block.png";
+import leavesOak from "@/assets/block/leaves_oak.png";
+import woodSide from "@/assets/block/log_oak.png";
+import woodTop from "@/assets/block/log_oak_top.png";
 import oakPlanksSide from "@/assets/block/planks_oak.png";
-
+import sand from "@/assets/block/sand.png";
+import stone from "@/assets/block/stone.png";
 //icon
+import bedRockIcon from "@/assets/blockIcon/Bedrock_JE2_BE2.webp";
+import blockOfDiamondIcon from "@/assets/blockIcon/block_of_diamond.webp";
 import blockOfEmeraldIcon from "@/assets/blockIcon/Block_of_Emerald_JE4_BE3.webp";
 import blockOfGoldIcon from "@/assets/blockIcon/Block_of_Gold_JE6_BE3.webp";
 import blockOfIronIcon from "@/assets/blockIcon/Block_of_Iron_JE4_BE3.webp";
 import blockOfLapisIcon from "@/assets/blockIcon/Block_of_Lapis_Lazuli_JE3_BE3.webp";
 import cobblestoneIcon from "@/assets/blockIcon/Cobblestone.webp";
-import stoneIcon from "@/assets/blockIcon/Stone.webp";
-import bedRockIcon from "@/assets/blockIcon/Bedrock_JE2_BE2.webp";
 import dirtIcon from "@/assets/blockIcon/Dirt.webp";
-import leavesIcon from "@/assets/blockIcon/Oak_Leaves.webp";
 import furnanceIcon from "@/assets/blockIcon/Furnace_29_JE4.webp";
 import grassIcon from "@/assets/blockIcon/Grass_Block.webp";
-import oakPlanksIcon from "@/assets/blockIcon/Oak_Planks.webp";
+import leavesIcon from "@/assets/blockIcon/Oak_Leaves.webp";
 import woodIcon from "@/assets/blockIcon/Oak_Log_29_JE5_BE3.webp";
-import blockOfDiamondIcon from "@/assets/blockIcon/block_of_diamond.webp";
+import oakPlanksIcon from "@/assets/blockIcon/Oak_Planks.webp";
 import sandIcon from "@/assets/blockIcon/Sand_JE5_BE3.webp";
-
-// soundStep
-import stepGrass from "@/assets/sound/step/grass3.ogg";
-import stepStone from "@/assets/sound/step/stone3.ogg";
-
-// sound place
-import placeBlock from "@/assets/sound/place/block.mp3";
-import placeGrass from "@/assets/sound/place/grass.mp3";
-import placeWood from "@/assets/sound/place/wood.mp3";
-
+import stoneIcon from "@/assets/blockIcon/Stone.webp";
 // sound break
 import breakBlock from "@/assets/sound/break/block.mp3";
 import breakGrass from "@/assets/sound/break/grass.mp3";
 import breakWood from "@/assets/sound/break/wood.mp3";
+// sound place
+import placeBlock from "@/assets/sound/place/block.mp3";
+import placeGrass from "@/assets/sound/place/grass.mp3";
+import placeWood from "@/assets/sound/place/wood.mp3";
+// soundStep
+import stepGrass from "@/assets/sound/step/grass3.ogg";
+import stepStone from "@/assets/sound/step/stone3.ogg";
 
 // texture load
 const textureLoader = new TextureLoader();
 
 const textures = {
-  grassTopGreenTexture: textureLoader.load(grassTopGreen),
+  grassTopTexture: textureLoader.load(grassTop),
   grassSideTexture: textureLoader.load(grassSide),
   dirtTexture: textureLoader.load(dirt),
   sandTexture: textureLoader.load(sand),
@@ -95,8 +90,19 @@ Object.values(textures).forEach((item) => {
 // const worldMaterial = MeshStandardMaterial;
 // const worldMaterial = MeshPhongMaterial;
 // const worldMaterial = MeshBasicMaterial;
-const worldMaterial = MeshToonMaterial;
+// const worldMaterial = MeshToonMaterial;
+const worldMaterial = MeshLambertMaterial;
 
+export enum BlockTextureType {
+  top,
+  side,
+  sideOther,
+  bottom,
+  front,
+  back,
+}
+
+// back front side sideleft top bottom
 const blocks = {
   grass: {
     name: "Grass",
@@ -105,25 +111,24 @@ const blocks = {
     place: new Audio(placeGrass),
     break: new Audio(breakGrass),
     volume: 0.1,
-    texture: [
-      new worldMaterial({
+    texture: {
+      [BlockTextureType.side]: new worldMaterial({
         map: textures.grassSideTexture,
       }),
-      new worldMaterial({
-        map: textures.grassSideTexture,
+      [BlockTextureType.top]: new worldMaterial({
+        map: textures.grassTopTexture,
       }),
-      new worldMaterial({
-        map: textures.grassSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.grassSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.grassTopGreenTexture,
-      }),
-      new worldMaterial({
+      [BlockTextureType.bottom]: new worldMaterial({
         map: textures.dirtTexture,
       }),
+    },
+    textureMap: [
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.top,
+      BlockTextureType.bottom,
     ],
   },
   bedrock: {
@@ -133,25 +138,18 @@ const blocks = {
     place: new Audio(placeBlock),
     break: new Audio(placeBlock),
     volume: 0.1,
-    texture: [
-      new worldMaterial({
+    texture: {
+      [BlockTextureType.side]: new worldMaterial({
         map: textures.bedRockTexture,
       }),
-      new worldMaterial({
-        map: textures.bedRockTexture,
-      }),
-      new worldMaterial({
-        map: textures.bedRockTexture,
-      }),
-      new worldMaterial({
-        map: textures.bedRockTexture,
-      }),
-      new worldMaterial({
-        map: textures.bedRockTexture,
-      }),
-      new worldMaterial({
-        map: textures.bedRockTexture,
-      }),
+    },
+    textureMap: [
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
     ],
   },
   stone: {
@@ -161,25 +159,18 @@ const blocks = {
     place: new Audio(placeBlock),
     break: new Audio(placeBlock),
     volume: 0.1,
-    texture: [
-      new worldMaterial({
+    texture: {
+      [BlockTextureType.side]: new worldMaterial({
         map: textures.stoneTexture,
       }),
-      new worldMaterial({
-        map: textures.stoneTexture,
-      }),
-      new worldMaterial({
-        map: textures.stoneTexture,
-      }),
-      new worldMaterial({
-        map: textures.stoneTexture,
-      }),
-      new worldMaterial({
-        map: textures.stoneTexture,
-      }),
-      new worldMaterial({
-        map: textures.stoneTexture,
-      }),
+    },
+    textureMap: [
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
     ],
   },
   sand: {
@@ -189,25 +180,18 @@ const blocks = {
     place: new Audio(placeBlock),
     break: new Audio(placeBlock),
     volume: 0.1,
-    texture: [
-      new worldMaterial({
+    texture: {
+      [BlockTextureType.side]: new worldMaterial({
         map: textures.sandTexture,
       }),
-      new worldMaterial({
-        map: textures.sandTexture,
-      }),
-      new worldMaterial({
-        map: textures.sandTexture,
-      }),
-      new worldMaterial({
-        map: textures.sandTexture,
-      }),
-      new worldMaterial({
-        map: textures.sandTexture,
-      }),
-      new worldMaterial({
-        map: textures.sandTexture,
-      }),
+    },
+    textureMap: [
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
     ],
   },
   dirt: {
@@ -217,25 +201,18 @@ const blocks = {
     place: new Audio(placeGrass),
     break: new Audio(breakGrass),
     volume: 0.1,
-    texture: [
-      new worldMaterial({
+    texture: {
+      [BlockTextureType.side]: new worldMaterial({
         map: textures.dirtTexture,
       }),
-      new worldMaterial({
-        map: textures.dirtTexture,
-      }),
-      new worldMaterial({
-        map: textures.dirtTexture,
-      }),
-      new worldMaterial({
-        map: textures.dirtTexture,
-      }),
-      new worldMaterial({
-        map: textures.dirtTexture,
-      }),
-      new worldMaterial({
-        map: textures.dirtTexture,
-      }),
+    },
+    textureMap: [
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
     ],
   },
   cobblestone: {
@@ -245,25 +222,18 @@ const blocks = {
     place: new Audio(placeBlock),
     break: new Audio(breakBlock),
     volume: 0.1,
-    texture: [
-      new worldMaterial({
+    texture: {
+      [BlockTextureType.side]: new worldMaterial({
         map: textures.cobblestoneSideTexture,
       }),
-      new worldMaterial({
-        map: textures.cobblestoneSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.cobblestoneSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.cobblestoneSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.cobblestoneSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.cobblestoneSideTexture,
-      }),
+    },
+    textureMap: [
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
     ],
   },
   leaves: {
@@ -273,37 +243,19 @@ const blocks = {
     place: new Audio(placeGrass),
     break: new Audio(breakGrass),
     volume: 0.1,
-    texture: [
-      new worldMaterial({
+    texture: {
+      [BlockTextureType.side]: new worldMaterial({
         map: textures.leavesTexture,
         color: 0x63a948,
-        transparent: true,
       }),
-      new worldMaterial({
-        map: textures.leavesTexture,
-        color: 0x63a948,
-        transparent: true,
-      }),
-      new worldMaterial({
-        map: textures.leavesTexture,
-        color: 0x63a948,
-        transparent: true,
-      }),
-      new worldMaterial({
-        map: textures.leavesTexture,
-        color: 0x63a948,
-        transparent: true,
-      }),
-      new worldMaterial({
-        map: textures.leavesTexture,
-        color: 0x63a948,
-        transparent: true,
-      }),
-      new worldMaterial({
-        map: textures.leavesTexture,
-        color: 0x63a948,
-        transparent: true,
-      }),
+    },
+    textureMap: [
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
     ],
   },
   wood: {
@@ -313,25 +265,21 @@ const blocks = {
     place: new Audio(placeWood),
     break: new Audio(breakWood),
     volume: 0.5,
-    texture: [
-      new worldMaterial({
+    texture: {
+      [BlockTextureType.side]: new worldMaterial({
         map: textures.woodSideTexture,
       }),
-      new worldMaterial({
-        map: textures.woodSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.woodSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.woodSideTexture,
-      }),
-      new worldMaterial({
+      [BlockTextureType.top]: new worldMaterial({
         map: textures.woodTopTexture,
       }),
-      new worldMaterial({
-        map: textures.woodTopTexture,
-      }),
+    },
+    textureMap: [
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.top,
+      BlockTextureType.top,
     ],
   },
   furnace: {
@@ -341,26 +289,24 @@ const blocks = {
     place: new Audio(placeBlock),
     break: new Audio(breakBlock),
     volume: 0.1,
-    texture: [
-      new worldMaterial({
+    texture: {
+      [BlockTextureType.side]: new worldMaterial({
         map: textures.furnaceSideTexture,
       }),
-      new worldMaterial({
+      [BlockTextureType.top]: new worldMaterial({
+        map: textures.furnaceTopTexture,
+      }),
+      [BlockTextureType.front]: new worldMaterial({
         map: textures.furnaceFrontTexture,
       }),
-
-      new worldMaterial({
-        map: textures.furnaceSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.furnaceSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.furnaceTopTexture,
-      }),
-      new worldMaterial({
-        map: textures.furnaceTopTexture,
-      }),
+    },
+    textureMap: [
+      BlockTextureType.side,
+      BlockTextureType.front,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.top,
+      BlockTextureType.top,
     ],
   },
   oakPlanks: {
@@ -370,25 +316,18 @@ const blocks = {
     place: new Audio(placeWood),
     break: new Audio(breakWood),
     volume: 0.5,
-    texture: [
-      new worldMaterial({
+    texture: {
+      [BlockTextureType.side]: new worldMaterial({
         map: textures.oakPlanksSideTexture,
       }),
-      new worldMaterial({
-        map: textures.oakPlanksSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.oakPlanksSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.oakPlanksSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.oakPlanksSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.oakPlanksSideTexture,
-      }),
+    },
+    textureMap: [
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
     ],
   },
   blockOfDiamond: {
@@ -398,25 +337,18 @@ const blocks = {
     place: new Audio(placeBlock),
     break: new Audio(breakBlock),
     volume: 0.5,
-    texture: [
-      new worldMaterial({
+    texture: {
+      [BlockTextureType.side]: new worldMaterial({
         map: textures.diamondBlockSideTexture,
       }),
-      new worldMaterial({
-        map: textures.diamondBlockSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.diamondBlockSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.diamondBlockSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.diamondBlockSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.diamondBlockSideTexture,
-      }),
+    },
+    textureMap: [
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
     ],
   },
   blockOfIron: {
@@ -426,25 +358,18 @@ const blocks = {
     place: new Audio(placeBlock),
     break: new Audio(breakBlock),
     volume: 0.5,
-    texture: [
-      new worldMaterial({
+    texture: {
+      [BlockTextureType.side]: new worldMaterial({
         map: textures.ironBlockSideTexture,
       }),
-      new worldMaterial({
-        map: textures.ironBlockSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.ironBlockSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.ironBlockSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.ironBlockSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.ironBlockSideTexture,
-      }),
+    },
+    textureMap: [
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
     ],
   },
   blockOfGold: {
@@ -454,25 +379,18 @@ const blocks = {
     place: new Audio(placeBlock),
     break: new Audio(breakBlock),
     volume: 0.5,
-    texture: [
-      new worldMaterial({
+    texture: {
+      [BlockTextureType.side]: new worldMaterial({
         map: textures.goldBlockSideTexture,
       }),
-      new worldMaterial({
-        map: textures.goldBlockSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.goldBlockSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.goldBlockSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.goldBlockSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.goldBlockSideTexture,
-      }),
+    },
+    textureMap: [
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
     ],
   },
   blockOfLapis: {
@@ -482,25 +400,18 @@ const blocks = {
     place: new Audio(placeBlock),
     break: new Audio(breakBlock),
     volume: 0.5,
-    texture: [
-      new worldMaterial({
+    texture: {
+      [BlockTextureType.side]: new worldMaterial({
         map: textures.lapisBlockSideTexture,
       }),
-      new worldMaterial({
-        map: textures.lapisBlockSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.lapisBlockSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.lapisBlockSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.lapisBlockSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.lapisBlockSideTexture,
-      }),
+    },
+    textureMap: [
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
     ],
   },
   blockOfEmerald: {
@@ -510,35 +421,32 @@ const blocks = {
     place: new Audio(placeBlock),
     break: new Audio(breakBlock),
     volume: 0.5,
-    texture: [
-      new worldMaterial({
+    texture: {
+      [BlockTextureType.side]: new worldMaterial({
         map: textures.emeraldBlockSideTexture,
       }),
-      new worldMaterial({
-        map: textures.emeraldBlockSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.emeraldBlockSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.emeraldBlockSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.emeraldBlockSideTexture,
-      }),
-      new worldMaterial({
-        map: textures.emeraldBlockSideTexture,
-      }),
+    },
+    textureMap: [
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
     ],
   },
 };
 export type BlockKeys = keyof typeof blocks;
-export type BlockAttributeType = (typeof blocks)[keyof typeof blocks];
+export type BlockAttributeType = (typeof blocks)[BlockKeys];
 
 Object.values(blocks).forEach((block) => {
   block.step.loop = true;
   block.step.volume = block.volume;
   block.step.playbackRate = 1.3;
+
+  // block.texture.forEach((item) => {
+  //   // item.color.setHex(0x606060); // Make the material darker
+  // });
 
   block.place.volume = 0.6;
   block.break.volume = 0.6;

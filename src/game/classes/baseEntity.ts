@@ -1,10 +1,12 @@
-import MouseControl from "@/game/action/mouseControl";
-import PhysicsEngine from "@/game/physics/physics";
-import { GUI } from "dat.gui";
-import { Camera, Scene } from "three";
-import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
-import ChunkManager from "./chunkManager";
-import { WorldsType } from "@/type";
+import { GUI } from 'dat.gui';
+import { Camera, Scene } from 'three';
+import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
+
+import MouseControl from '@/game/action/mouseControl';
+import PhysicsEngine from '@/game/physics/physics';
+import { WorldsType } from '@/type';
+
+import ChunkManager from './chunkManager';
 
 export interface BasePropsType {
   scene?: Scene;

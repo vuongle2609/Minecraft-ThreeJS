@@ -1,4 +1,5 @@
-import blocks from "./constants/blocks";
+import { InstancedMesh } from "three";
+import { BlockKeys, BlockTextureType } from "./constants/blocks";
 
 export interface PlayerInput {
   forward: boolean;
@@ -11,7 +12,7 @@ export interface PlayerInput {
   rightClick: boolean;
 }
 
-export type BlocksMappingType = Record<string, keyof typeof blocks | 0>;
+export type BlocksMappingType = Record<string, BlockKeys | 0>;
 
 export interface WorldsType {
   createdDate: Date;
@@ -22,3 +23,16 @@ export interface WorldsType {
   initPos?: number[];
   rotation?: number[];
 }
+
+export interface BlocksIntancedMapping
+  extends Record<BlockKeys, BlocksIntancedType> {}
+
+export interface BlocksIntancedType
+  extends Record<
+    BlockTextureType,
+    {
+      mesh: InstancedMesh;
+      count: number;
+      indexCanAllocate: number[];
+    }
+  > {}

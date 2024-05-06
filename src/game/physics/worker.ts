@@ -1,5 +1,13 @@
 import { Vector3 } from "three";
-import { BLOCK_WIDTH, CHUNK_SIZE, TIME_TO_INTERACT } from "../../constants";
+
+import { BlocksMappingType } from "@/type";
+
+import {
+  BLOCK_WIDTH,
+  CHUNK_SIZE,
+  FLAT_WORLD_TYPE,
+  TIME_TO_INTERACT,
+} from "../../constants";
 import {
   CHARACTER_LENGTH,
   GRAVITY,
@@ -8,12 +16,13 @@ import {
   SPEED,
 } from "../../constants/player";
 import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
+import { FlatWorld } from "../terrant/flatWorldGeneration";
+import { DefaultWorld } from "../terrant/worldGeneration";
 import Physics from "./physics";
-import { BlockKeys } from "../../constants/blocks";
 
-let blocksMapping: Record<string, string | 0> = {};
+let blocksMapping: Record<string, any> = {};
 
-let originalVy = -25;
+let originalVy = -40;
 let vy = originalVy;
 let onGround = true;
 
@@ -70,6 +79,11 @@ const calculateMovement = ({
       blocksMapping
     );
 
+  if (!collideObject && onGround) {
+    vy = -10;
+    onGround = false;
+  }
+
   if (collideObject) {
     onGround = true;
   }
@@ -108,6 +122,65 @@ const addBlock = ({ position, type }: { position: number[]; type: string }) => {
   };
 };
 
+let worldGen: FlatWorld | DefaultWorld;
+
+let chunkBlocksCustomMap: Record<string, BlocksMappingType> = {};
+
+const initSeed = ({
+  seed,
+  type,
+  chunkBlocksCustom,
+}: {
+  seed: number;
+  type: number;
+  chunkBlocksCustom: Record<string, BlocksMappingType>;
+}) => {
+  worldGen =
+    type === FLAT_WORLD_TYPE ? new FlatWorld(seed) : new DefaultWorld(seed);
+
+  chunkBlocksCustomMap = chunkBlocksCustom;
+};
+
+const chunkGenerated: Record<string, boolean> = {};
+
+const changeChunk = async ({
+  neighborChunksKeys,
+}: {
+  neighborChunksKeys: string[];
+}) => {
+  if (!worldGen)
+    await (() =>
+      new Promise((resolve, reject) => {
+        const check = setInterval(() => {
+          if (worldGen) {
+            clearInterval(check);
+            resolve(true);
+          }
+        }, 200);
+      }))();
+
+  neighborChunksKeys.forEach((key) => {
+    if (!chunkGenerated[key]) {
+      const [x, z] = key.split("_");
+
+      const { blocksInChunkTypeOnly } = worldGen.getBlocksInChunk(
+        Number(x),
+        Number(z),
+        chunkBlocksCustomMap?.[key] || {}
+      );
+
+      chunkGenerated[key] = true;
+
+      blocksMapping = {
+        ...blocksMapping,
+        ...blocksInChunkTypeOnly,
+      };
+    }
+  });
+
+  if (Object.values(chunkGenerated).length === 9) initPhysics();
+};
+
 let playerInitPos = [CHUNK_SIZE / 2, CHARACTER_LENGTH + 0.5, CHUNK_SIZE / 2];
 let shouldReturnPosY = false;
 
@@ -132,23 +205,6 @@ const requestPosY = () => {
   shouldReturnPosY = true;
 };
 
-const bulkAddBlock = ({ blocks }: { blocks: Record<string, string | 0> }) => {
-  initPhysics();
-  blocksMapping = {
-    ...blocksMapping,
-    ...blocks,
-  };
-
-  if (shouldReturnPosY) {
-    self.postMessage({
-      type: "changePosition",
-      data: {
-        position: getPlayerShouldSpawn(blocksMapping),
-      },
-    });
-  }
-};
-
 const removeBlock = ({ position }: { position: number[] }) => {
   delete blocksMapping[
     nameFromCoordinate(position[0], position[1], position[2])
@@ -159,8 +215,9 @@ let eventMapping: Record<string, Function> = {
   addBlock,
   removeBlock,
   jumpCharacter,
-  bulkAddBlock,
   requestPosY,
+  changeChunk,
+  initSeed,
 };
 
 self.onmessage = (

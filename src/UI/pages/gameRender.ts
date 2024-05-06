@@ -1,8 +1,9 @@
-import { RenderPage } from "@/game/classes/renderPage";
-import Router from "../router";
-import { $ } from "../utils/selector";
-import GameScene from "@/game/classes/gameScene";
-import { WorldsType } from "@/type";
+import GameScene from '@/game/classes/gameScene';
+import { RenderPage } from '@/game/classes/renderPage';
+import { WorldsType } from '@/type';
+
+import Router from '../router';
+import { $ } from '../utils/selector';
 
 export default class GameRender extends RenderPage {
   router: Router;

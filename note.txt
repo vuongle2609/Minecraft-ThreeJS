@@ -2,7 +2,7 @@
 convert to instanced mesh
 detect face using rotation
 each face only hold type using name
-
+cache terrant generated so if comeback visited chunk wont need to generated again
 /// 
 
 make ambient collusion
@@ -10,6 +10,40 @@ https://github.com/mrdoob/three.js/blob/350f0a021943d6fa1d039a7c14c303653daa463f
 https://threejs.org/examples/#webgl_postprocessing_ssao
 https://www.google.com/search?q=Ambient+occlusion+for+voxels+threejs&rlz=1C1ONGR_enVN1074VN1074&oq=Ambient+occlusion+for+voxels+threejs&gs_lcrp=EgZjaHJvbWUyCwgAEEUYChg5GKAB0gEIMjA5NmowajeoAgCwAgA&sourceid=chrome&ie=UTF-8
 
-// 
+//  update fog
+https://www.youtube.com/watch?v=k1zGz55EqfU
 make cloud
 https://www.google.com/search?q=Ambient+occlusion+for+voxels+threejs&rlz=1C1ONGR_enVN1074VN1074&oq=Ambient+occlusion+for+voxels+threejs&gs_lcrp=EgZjaHJvbWUyCwgAEEUYChg5GKAB0gEIMjA5NmowajeoAgCwAgA&sourceid=chrome&ie=UTF-8
+
+//
+update physics
+update run (change fov)
+when not detect bellow y => change vY (done -> can make it better)
+using points and neighbors point to detect collision
+
+// add villager
+
+// 3-5-2024
+// chunking blocks face optimization (done)
+when generate chunk
+send blocks custom in neibogh chunks
+using some function and noise to know blocks will gen and merge with custom block
+if we know neighbors then we could know what face of the block we should render
+
+before optimize
+21744 times / 16 chunk size / height 3
+2304 times / 16 chunk size / height 3
+
+seed 865375 render 20373 times
+seed 865375 render 4210 times
+
+// in physics instead of send blocks to worker we gonna cal it self (done)
+=> reduce data to send that worker and not freezing after enter worker  
+
+// 4-5-2024
+// each chunking have its own intanced manager
+avoid render too much chunk at same time (queue chunk)
+
+DEFAULT_CHUNK_VIEW = 2;
+before optimize drop to 34 fps in chunk transition
+after optimize
