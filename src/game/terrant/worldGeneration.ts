@@ -19,10 +19,10 @@ export class DefaultWorld extends BaseGeneration {
     this.noise.SetFrequency(0.026);
     this.noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
     this.noise.SetFractalType(FastNoiseLite.FractalType.FBm);
-    this.noise.SetFractalOctaves(1.7);
-    this.noise.SetFractalLacunarity(0.3);
-    this.noise.SetFractalGain(4);
-    this.noise.SetFractalWeightedStrength(3.4);
+    this.noise.SetFractalOctaves(3);
+    this.noise.SetFractalLacunarity(0.65);
+    this.noise.SetFractalGain(0.179);
+    this.noise.SetFractalWeightedStrength(12);
     this.noise.SetSeed(this.seed);
 
     this.noiseTree.SetFrequency(0.007);

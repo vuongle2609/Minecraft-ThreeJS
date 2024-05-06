@@ -1,3 +1,7 @@
+import { $ } from "@/UI/utils/selector";
+import MouseControl from "@/game/action/mouseControl";
+import Player from "@/game/player/character";
+import { WorldsType } from "@/type";
 import {
   Clock,
   Color,
@@ -8,12 +12,8 @@ import {
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 
-import MouseControl from "@/game/action/mouseControl";
-import Player from "@/game/player/character";
-import { WorldsType } from "@/type";
-import { $ } from "@/UI/utils/selector";
-
 import ChunkManager from "./chunkManager";
+import Cloud from "./cloud";
 import InventoryManager from "./inventoryManager";
 import Light from "./light";
 import { RenderPage } from "./renderPage";
@@ -26,7 +26,6 @@ export default class GameScene extends RenderPage {
 
   renderer = new WebGLRenderer({
     antialias: true,
-    // alpha: true,
     canvas: document.querySelector("#gameScene") as HTMLCanvasElement,
   });
 
@@ -40,7 +39,7 @@ export default class GameScene extends RenderPage {
     70,
     window.innerWidth / window.innerHeight,
     0.1,
-    500
+    2000
   );
 
   control = new PointerLockControls(this.camera, document.body);
@@ -61,6 +60,7 @@ export default class GameScene extends RenderPage {
   inventoryManager: InventoryManager;
 
   lastCallTime = 0;
+  cloud = new Cloud({ scene: this.scene });
 
   constructor(id: string) {
     super();
@@ -89,7 +89,7 @@ export default class GameScene extends RenderPage {
 
     this.scene.background = new Color("#6EB1FF");
     // this.scene.fog = new Fog(0xcccccc, 3, 40);
-    // this.scene.fog = new FogExp2(0xcccccc, 0.014);
+    this.scene.fog = new FogExp2(0xcccccc, 0.014);
 
     if (this.worldStorage.rotation)
       this.camera.rotation.fromArray(this.worldStorage.rotation as any);
@@ -203,6 +203,8 @@ export default class GameScene extends RenderPage {
       this.renderFps();
 
       this.player?.update(delta, t);
+
+      this.cloud?.update(this.player.player.position);
 
       this.chunkManager?.update();
 
