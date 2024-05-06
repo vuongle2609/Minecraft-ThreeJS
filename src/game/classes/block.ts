@@ -58,7 +58,6 @@ export default class Block extends BaseEntity {
   }
 
   renderWithKnownFace(facesToRender: Record<Face, boolean>) {
-    // console.count(213)
     if (facesToRender[leftZ]) this.addFace(leftZ);
     if (facesToRender[rightZ]) this.addFace(rightZ);
     if (facesToRender[leftX]) this.addFace(leftX);
@@ -135,7 +134,6 @@ export default class Block extends BaseEntity {
   }
 
   addFace(face: keyof BlockFaces) {
-    // console.count('add')
     const { rotation } = this.calFaceAttr(face);
 
     const currInstanced = this.intancedPlanes[this.atttribute.textureMap[face]];

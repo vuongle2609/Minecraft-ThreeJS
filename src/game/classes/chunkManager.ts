@@ -110,9 +110,7 @@ export default class ChunkManager extends BlockManager {
 
           this.handleRenderChunkQueue(chunkName, blocks, facesToRender);
 
-          setTimeout(() => {
-            this.startWorker(currWorker, this.chunkPendingQueueProxy.pop());
-          }, 200);
+          this.startWorker(currWorker, this.chunkPendingQueueProxy.pop());
         }
       };
     });
