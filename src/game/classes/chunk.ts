@@ -1,11 +1,11 @@
 import blocks, { BlockKeys, renderGeometry } from "@/constants/blocks";
-import { BlocksIntancedMapping } from "@/type";
+import { BlocksInstancedMapping } from "@/type";
 import { DynamicDrawUsage, InstancedMesh, Object3D } from "three";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 
 export default class Chunk extends BaseEntity {
   dummy = new Object3D();
-  blocksIntanced = Object.keys(blocks).reduce((prev, typeKey) => {
+  blocksInstanced = Object.keys(blocks).reduce((prev, typeKey) => {
     const currBlock = blocks[typeKey as BlockKeys];
 
     return {
@@ -33,7 +33,7 @@ export default class Chunk extends BaseEntity {
         };
       }, {}),
     };
-  }, {}) as BlocksIntancedMapping;
+  }, {}) as BlocksInstancedMapping;
 
   constructor(props: BasePropsType) {
     super(props);

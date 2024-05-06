@@ -1,13 +1,18 @@
 import {
   DynamicDrawUsage,
   InstancedMesh,
+  Matrix4,
   Object3D,
   Vector2,
   Vector3,
 } from "three";
 
 import { Face } from "@/constants/block";
-import blocks, { BlockKeys, renderGeometry } from "@/constants/blocks";
+import blocks, {
+  BlockKeys,
+  BlockTextureType,
+  renderGeometry,
+} from "@/constants/blocks";
 import { getChunkCoordinate } from "@/game/helpers/chunkHelpers";
 import { detailFromName } from "@/game/helpers/detailFromName";
 import {
@@ -18,7 +23,9 @@ import {
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
-import { BlocksIntancedMapping } from "@/type";
+import { BlocksInstancedMapping, BlocksInstancedType } from "@/type";
+import { getFaceFromRotation } from "../helpers/getFaceFromRotaion";
+import { BLOCK_WIDTH } from "@/constants";
 
 interface PropsType {
   inventoryManager: InventoryManager;
@@ -36,11 +43,11 @@ export default class BlockManager extends BaseEntity {
   blocksWorldChunk: Record<string, Record<string, BlockKeys | 0>> = {};
   chunksBlocks: Record<string, string[]> = {};
 
-  chunksWorkers: Record<string, Worker> = {};
   chunksActive: string[] = [];
 
   dummy = new Object3D();
-  blocksIntanced = Object.keys(blocks).reduce((prev, typeKey) => {
+
+  blocksInstanced = Object.keys(blocks).reduce((prev, typeKey) => {
     const currBlock = blocks[typeKey as keyof typeof blocks];
 
     return {
@@ -53,14 +60,12 @@ export default class BlockManager extends BaseEntity {
         );
 
         mesh.instanceMatrix.setUsage(DynamicDrawUsage);
+        mesh.count = 0;
+        mesh.frustumCulled = false;
+        mesh.name = typeKey + "_" + key;
 
         this.scene?.add(mesh);
-        mesh.count = 0;
-        mesh.instanceMatrix.needsUpdate = true;
-        mesh.computeBoundingSphere();
-        // mesh.computeBoundingBox();
 
-        mesh.frustumCulled = false;
         return {
           ...prev,
           [key]: {
@@ -71,7 +76,7 @@ export default class BlockManager extends BaseEntity {
         };
       }, {}),
     };
-  }, {}) as BlocksIntancedMapping;
+  }, {}) as BlocksInstancedMapping;
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
@@ -98,6 +103,7 @@ export default class BlockManager extends BaseEntity {
     type: BlockKeys;
     isRenderChunk?: boolean;
     facesToRender?: Record<Face, boolean>;
+    updateMatrix?: boolean;
   }) {
     const newUpdateBlockChunk = getChunkCoordinate(x, z);
     const chunkName = nameChunkFromCoordinate(
@@ -125,7 +131,7 @@ export default class BlockManager extends BaseEntity {
       blocksMapping: this.blocksMapping,
       facesToRender,
       dummy: this.dummy,
-      intancedPlanes: this.blocksIntanced[type],
+      intancedPlanes: this.blocksInstanced[type],
     });
 
     this.blocksMapping[x] = {
@@ -136,7 +142,7 @@ export default class BlockManager extends BaseEntity {
       },
     };
 
-    return this.blocksIntanced[type];
+    return this.blocksInstanced[type];
   }
 
   getIntersectObject() {
@@ -147,10 +153,6 @@ export default class BlockManager extends BaseEntity {
     raycaster.setFromCamera(new Vector2(), this.camera);
 
     const intersects = raycaster.intersectObjects(this.scene.children, false);
-    // console.log(
-    //   "🚀 ~ BlockManager ~ getIntersectObject ~ intersects:",
-    //   intersects
-    // );
 
     if (!intersects[0]) return;
 
@@ -162,10 +164,16 @@ export default class BlockManager extends BaseEntity {
     return intersectObject;
   }
 
-  removeBlock(x: number, y: number, z: number, temporary?: boolean) {
+  removeBlock(
+    x: number,
+    y: number,
+    z: number,
+    temporary?: boolean,
+    updateMatrix?: boolean
+  ) {
     const blockToRemove = this.blocksMapping[x][y][z];
 
-    blockToRemove?.destroy();
+    blockToRemove?.destroy(updateMatrix);
 
     if (!temporary) {
       this.removeBlockWorker({
@@ -190,9 +198,7 @@ export default class BlockManager extends BaseEntity {
 
     if (!intersectObj) return;
 
-    const clickedDetail = detailFromName(intersectObj.object.name);
-
-    const { type } = clickedDetail;
+    const [type] = intersectObj.object.name.split("_");
 
     this.inventoryManager.inventory[this.inventoryManager.currentFocusIndex] =
       type as BlockKeys;
@@ -208,13 +214,30 @@ export default class BlockManager extends BaseEntity {
 
     if (!intersectObj) return;
 
-    const clickedDetail = detailFromName(intersectObj.object.name);
+    const [type, intancedIndex] = intersectObj.object.name.split("_");
 
-    const { x, y, z, type } = clickedDetail;
+    const currentInstanced =
+      this.blocksInstanced[type as BlockKeys][
+        intancedIndex as unknown as BlockTextureType
+      ];
+
+    const holderMatrix = new Matrix4();
+
+    // if (!intersectObj.instanceId) return;
+
+    currentInstanced.mesh.getMatrixAt(
+      intersectObj.instanceId as number,
+      holderMatrix
+    );
+
+    const dummy = new Object3D();
+    dummy.applyMatrix4(holderMatrix);
+
+    const { x, y, z } = dummy.position;
 
     if (type === "bedrock") return;
 
-    this.removeBlock(x, y, z);
+    this.removeBlock(x, y, z, false, true);
 
     // play sound
     if (this.currentBreakSound) {
@@ -232,38 +255,51 @@ export default class BlockManager extends BaseEntity {
 
     if (!intersectObj) return;
 
-    const clickedDetail = detailFromName(intersectObj.object.name);
-    // console.log(intersects[0].object.rotation);
+    const [type, intancedIndex] = intersectObj.object.name.split("_");
 
-    const clickedFace = clickedDetail.face;
+    const currentInstanced =
+      this.blocksInstanced[type as BlockKeys][
+        intancedIndex as unknown as BlockTextureType
+      ];
 
-    const { x, y, z } = clickedDetail;
+    const holderMatrix = new Matrix4();
+
+    if (!intersectObj.instanceId) return;
+
+    currentInstanced.mesh.getMatrixAt(intersectObj.instanceId, holderMatrix);
+
+    const dummy = new Object3D();
+    dummy.applyMatrix4(holderMatrix);
+
+    const clickedFace = getFaceFromRotation(dummy.rotation);
+
+    const { x, y, z } = dummy.position;
 
     const blockPosition = new Vector3();
 
     switch (clickedFace) {
-      case "2":
-        blockPosition.set(x + 2, y, z);
+      case Face.top:
+        blockPosition.set(x, y + BLOCK_WIDTH, z);
         break;
-      case "3":
-        blockPosition.set(x - 2, y, z);
+      case Face.bottom:
+        blockPosition.set(x, y - BLOCK_WIDTH, z);
         break;
-      case "4":
-        blockPosition.set(x, y + 2, z);
+      case Face.leftX:
+        blockPosition.set(x + BLOCK_WIDTH, y, z);
         break;
-      case "5":
-        blockPosition.set(x, y - 2, z);
+      case Face.rightX:
+        blockPosition.set(x - BLOCK_WIDTH, y, z);
         break;
-      case "0":
-        blockPosition.set(x, y, z + 2);
+      case Face.leftZ:
+        blockPosition.set(x, y, z + BLOCK_WIDTH);
         break;
-      case "1":
-        blockPosition.set(x, y, z - 2);
+      case Face.rightZ:
+        blockPosition.set(x, y, z - BLOCK_WIDTH);
         break;
     }
 
     if (this.inventoryManager.currentFocus) {
-      this.updateBlock({
+      const instanced = this.updateBlock({
         x: blockPosition.x,
         y: blockPosition.y,
         z: blockPosition.z,

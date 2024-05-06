@@ -4,7 +4,7 @@ import { BLOCK_WIDTH } from "@/constants";
 import { BlockFaces, Face } from "@/constants/block";
 import blocks, { BlockAttributeType, BlockKeys } from "@/constants/blocks";
 
-import { BlocksIntancedType } from "@/type";
+import { BlocksInstancedType } from "@/type";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 
 interface PropsType {
@@ -13,7 +13,7 @@ interface PropsType {
   blocksMapping: Record<string, Record<string, Record<string, Block>>>;
   facesToRender?: Record<Face, boolean>;
   dummy: Object3D;
-  intancedPlanes: BlocksIntancedType;
+  intancedPlanes: BlocksInstancedType;
 }
 
 const { leftZ, rightZ, leftX, rightX, top, bottom } = Face;
@@ -33,7 +33,7 @@ export default class Block extends BaseEntity {
   blocksMapping: Record<string, Record<string, Record<string, Block>>>;
 
   dummy: Object3D;
-  intancedPlanes: BlocksIntancedType;
+  intancedPlanes: BlocksInstancedType;
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
@@ -74,48 +74,48 @@ export default class Block extends BaseEntity {
 
     const leftZBlock = this.blocksMapping[x]?.[y]?.[z + BLOCK_WIDTH];
     if (leftZBlock) {
-      leftZBlock.removeFace(rightZ);
+      leftZBlock.removeFace(rightZ, true);
     } else {
-      this.addFace(leftZ);
+      this.addFace(leftZ, true);
     }
 
     const rightZBlock = this.blocksMapping[x]?.[y]?.[z - BLOCK_WIDTH];
     if (rightZBlock) {
-      rightZBlock.removeFace(leftZ);
+      rightZBlock.removeFace(leftZ, true);
     } else {
-      this.addFace(rightZ);
+      this.addFace(rightZ, true);
     }
 
     const leftXBlock = this.blocksMapping[x + BLOCK_WIDTH]?.[y]?.[z];
     if (leftXBlock) {
-      leftXBlock.removeFace(rightX);
+      leftXBlock.removeFace(rightX, true);
     } else {
-      this.addFace(leftX);
+      this.addFace(leftX, true);
     }
 
     const rightXBlock = this.blocksMapping[x - BLOCK_WIDTH]?.[y]?.[z];
     if (rightXBlock) {
-      rightXBlock.removeFace(leftX);
+      rightXBlock.removeFace(leftX, true);
     } else {
-      this.addFace(rightX);
+      this.addFace(rightX, true);
     }
 
     const topBlock = this.blocksMapping[x]?.[y + BLOCK_WIDTH]?.[z];
     if (topBlock) {
-      topBlock.removeFace(bottom);
+      topBlock.removeFace(bottom, true);
     } else {
-      this.addFace(top);
+      this.addFace(top, true);
     }
 
     const bottomBlock = this.blocksMapping[x]?.[y - BLOCK_WIDTH]?.[z];
     if (bottomBlock) {
-      bottomBlock.removeFace(top);
+      bottomBlock.removeFace(top, true);
     } else {
-      this.addFace(bottom);
+      this.addFace(bottom, true);
     }
   }
 
-  removeFace(face: keyof BlockFaces) {
+  removeFace(face: keyof BlockFaces, updateMatrix?: boolean) {
     const currInstanced =
       this.intancedPlanes[this.atttribute.textureMap[face]].mesh;
 
@@ -130,10 +130,15 @@ export default class Block extends BaseEntity {
       this.intancedPlanes[
         this.atttribute.textureMap[face]
       ].indexCanAllocate.push(index);
+
+      if (updateMatrix) {
+        currInstanced.instanceMatrix.needsUpdate = true;
+        currInstanced.computeBoundingSphere();
+      }
     }
   }
 
-  addFace(face: keyof BlockFaces) {
+  addFace(face: keyof BlockFaces, updateMatrix?: boolean) {
     const { rotation } = this.calFaceAttr(face);
 
     const currInstanced = this.intancedPlanes[this.atttribute.textureMap[face]];
@@ -151,6 +156,10 @@ export default class Block extends BaseEntity {
     this.blockFaces[face] = index;
 
     currInstancedMesh.setMatrixAt(index, this.dummy.matrix);
+    if (updateMatrix) {
+      currInstancedMesh.instanceMatrix.needsUpdate = true;
+      currInstancedMesh.computeBoundingSphere();
+    }
     if (indexAllowCate === undefined) currInstancedMesh.count += 1;
   }
 
@@ -179,30 +188,30 @@ export default class Block extends BaseEntity {
     }
   }
 
-  destroy() {
+  destroy(updateMatrix?: boolean) {
     const { x, y, z } = this.position;
 
     Object.keys(this.blockFaces).forEach((face) => {
-      this.removeFace(face as unknown as keyof BlockFaces);
+      this.removeFace(face as unknown as keyof BlockFaces, updateMatrix);
     });
 
     const leftZBlock = this.blocksMapping[x]?.[y]?.[z + BLOCK_WIDTH];
-    leftZBlock?.addFace(rightZ);
+    leftZBlock?.addFace(rightZ, updateMatrix);
 
     const rightZBlock = this.blocksMapping[x]?.[y]?.[z - BLOCK_WIDTH];
-    rightZBlock?.addFace(leftZ);
+    rightZBlock?.addFace(leftZ, updateMatrix);
 
     const leftXBlock = this.blocksMapping[x + BLOCK_WIDTH]?.[y]?.[z];
-    leftXBlock?.addFace(rightX);
+    leftXBlock?.addFace(rightX, updateMatrix);
 
     const rightXBlock = this.blocksMapping[x - BLOCK_WIDTH]?.[y]?.[z];
-    rightXBlock?.addFace(leftX);
+    rightXBlock?.addFace(leftX, updateMatrix);
 
     const topBlock = this.blocksMapping[x]?.[y + BLOCK_WIDTH]?.[z];
-    topBlock?.addFace(bottom);
+    topBlock?.addFace(bottom, updateMatrix);
 
     const bottomBlock = this.blocksMapping[x]?.[y - BLOCK_WIDTH]?.[z];
-    bottomBlock?.addFace(top);
+    bottomBlock?.addFace(top, updateMatrix);
 
     delete this.blocksMapping[x][y][z];
   }

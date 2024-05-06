@@ -24,6 +24,7 @@ type ChunkPendingQueueType = {
   seed: number | undefined;
   x: number;
   z: number;
+  name: string;
 };
 
 export default class ChunkManager extends BlockManager {
@@ -31,18 +32,21 @@ export default class ChunkManager extends BlockManager {
 
   chunkPendingQueue: ChunkPendingQueueType[] = [];
 
+  createWorker = (index: number) => ({
+    worker: new Worker(new URL("../terrant/worker", import.meta.url), {
+      type: "module",
+    }),
+    isBusy: false,
+    index,
+    currentProcessChunk: null,
+  });
+
   chunkWorkers = Array(14)
     .fill(0)
     .reduce((prev, _, index) => {
       return {
         ...prev,
-        [index]: {
-          worker: new Worker(new URL("../terrant/worker", import.meta.url), {
-            type: "module",
-          }),
-          isBusy: false,
-          index,
-        },
+        [index]: this.createWorker(index),
       };
     }, {}) as Record<
     string | number,
@@ -50,15 +54,27 @@ export default class ChunkManager extends BlockManager {
       worker: Worker;
       isBusy: boolean;
       index: number;
+      currentProcessChunk: string | null;
     }
   >;
 
-  startWorker(worker: Worker, data?: ChunkPendingQueueType) {
-    if (data)
-      worker.postMessage({
+  startWorker(
+    workerChunk: {
+      worker: Worker;
+      isBusy: boolean;
+      index: number;
+      currentProcessChunk: string | null;
+    },
+    data?: ChunkPendingQueueType
+  ) {
+    if (data) {
+      workerChunk.currentProcessChunk = data.name;
+      workerChunk.isBusy = true;
+      workerChunk.worker.postMessage({
         type: "getBlocksInChunk",
         data,
       });
+    }
   }
 
   chunkPendingQueueProxy = {
@@ -83,28 +99,54 @@ export default class ChunkManager extends BlockManager {
         chunkBlocksCustom: this.blocksWorldChunk[chunkName] || {},
         neighborsChunkData,
         seed: this.worldStorage?.seed,
+        name: chunkName,
       };
 
       this.chunkPendingQueue.unshift(workerData);
 
-      const freeWorker = Object.values(this.chunkWorkers).find(
-        (chunk) => !this.chunkWorkers[chunk.index].isBusy
+      const freeOrInactiveWorker = Object.values(this.chunkWorkers).find(
+        (chunk) => {
+          const currentProcessKey =
+            this.chunkWorkers[chunk.index].currentProcessChunk;
+
+          const isProccessDeadJob =
+            currentProcessKey && !this.chunksActive.includes(currentProcessKey);
+
+          if (isProccessDeadJob) {
+            this.chunkWorkers[chunk.index].worker.terminate();
+
+            this.chunkWorkers[chunk.index] = this.createWorker(chunk.index);
+          }
+
+          return !this.chunkWorkers[chunk.index].isBusy || isProccessDeadJob;
+        }
       );
 
-      if (freeWorker) {
-        this.startWorker(freeWorker.worker, this.chunkPendingQueueProxy.pop());
+      if (freeOrInactiveWorker) {
+        this.startWorker(
+          freeOrInactiveWorker,
+          this.chunkPendingQueueProxy.pop()
+        );
       }
     },
     pop: () => {
       return this.chunkPendingQueue.pop();
     },
+    filterInactive: () => {
+      this.chunkPendingQueue = this.chunkPendingQueue.filter((item) =>
+        this.chunksActive.includes(item.name)
+      );
+    },
   };
 
   setUpWorker() {
     Object.keys(this.chunkWorkers).forEach((item) => {
-      const currWorker = this.chunkWorkers[item].worker;
+      const currWorker = this.chunkWorkers[item];
 
-      currWorker.onmessage = (e) => {
+      currWorker.worker.onmessage = (e) => {
+        currWorker.currentProcessChunk = null;
+        currWorker.isBusy = false;
+
         if (e.data.type === "renderBlocks") {
           const { chunkName, blocks, facesToRender } = e.data.data;
 
@@ -131,6 +173,14 @@ export default class ChunkManager extends BlockManager {
     const neighborOffset = calNeighborsOffset(DEFAULT_CHUNK_VIEW);
     const neighborOffsetPhysics = calNeighborsOffset(CHUNK_VIEW_WORKER_PHYSICS);
 
+    const chunkDetail: {
+      chunk: {
+        x: number;
+        z: number;
+      };
+      chunkName: string;
+    }[] = [];
+
     const neighborChunksKeys = neighborOffset.map((offset) => {
       const chunk = {
         x: currentChunk.x + offset.x,
@@ -139,9 +189,21 @@ export default class ChunkManager extends BlockManager {
 
       const chunkName = nameChunkFromCoordinate(chunk.x, chunk.z);
 
-      this.handleAssignWorkerChunk(chunkName, chunk);
+      chunkDetail.push({
+        chunk,
+        chunkName,
+      });
 
       return chunkName;
+    });
+
+    this.handleClearChunks(neighborChunksKeys);
+
+    this.chunksActive = neighborChunksKeys;
+    this.chunkPendingQueueProxy.filterInactive();
+
+    chunkDetail.forEach(({ chunkName, chunk }) => {
+      this.handleAssignWorkerChunk(chunkName, chunk);
     });
 
     const neighborChunksKeysPhysics = neighborOffsetPhysics.map((offset) => {
@@ -161,14 +223,10 @@ export default class ChunkManager extends BlockManager {
         neighborChunksKeys: neighborChunksKeysPhysics,
       },
     });
-
-    this.handleClearChunks(neighborChunksKeys);
-
-    this.chunksActive = neighborChunksKeys;
   }
 
   // can optimize worker speed
-  handleRenderChunkBlocks = (
+  handleRenderChunkBlocks(
     chunkName: string,
     blocksRenderWorker: Record<
       string,
@@ -178,7 +236,7 @@ export default class ChunkManager extends BlockManager {
       }
     > = {},
     facesToRender: Record<string, Record<Face, boolean>>
-  ) => {
+  ) {
     const blocksRender = Object.keys(blocksRenderWorker);
     const blocksInChunk: string[] = [];
 
@@ -204,25 +262,14 @@ export default class ChunkManager extends BlockManager {
     });
 
     intancedNeedToCals.forEach((key) => {
-      Object.values(this.blocksIntanced[key]).forEach((item: any) => {
+      Object.values(this.blocksInstanced[key]).forEach((item: any) => {
         item.mesh.instanceMatrix.needsUpdate = true;
-        // item.mesh.computeBoundingSphere();
+        item.mesh.computeBoundingSphere();
       });
     });
 
-    // Object.values(this.blocksIntanced).forEach((block: any) => {
-    //   Object.values(block).forEach((item: any) => {
-    //     item.mesh.instanceMatrix.needsUpdate = true;
-    //     item.mesh.computeBoundingSphere();
-    //   });
-    // });
-
     this.chunksBlocks[chunkName] = blocksInChunk;
-
-    // clear after done
-    this.chunksWorkers[chunkName]?.terminate();
-    delete this.chunksWorkers[chunkName];
-  };
+  }
 
   handleRenderChunkQueue(
     chunkName: string,
@@ -261,7 +308,7 @@ export default class ChunkManager extends BlockManager {
     }
   }
 
-  handleClearChunks = (neighborChunksKeys: string[]) => {
+  handleClearChunks(neighborChunksKeys: string[]) {
     const inactiveChunk = this.chunksActive.filter(
       (item) => !neighborChunksKeys.includes(item)
     );
@@ -271,9 +318,6 @@ export default class ChunkManager extends BlockManager {
     inactiveChunk.forEach((item) => {
       blocksDelete = [...blocksDelete, ...(this.chunksBlocks[item] || [])];
 
-      this.chunksWorkers[item]?.terminate();
-
-      delete this.chunksWorkers[item];
       delete this.chunksBlocks[item];
     });
 
@@ -282,31 +326,17 @@ export default class ChunkManager extends BlockManager {
 
       this.removeBlock(x, y, z, true);
     });
-  };
+  }
 
-  handleAssignWorkerChunk = (
-    chunkName: string,
-    chunk: { x: number; z: number }
-  ) => {
+  handleAssignWorkerChunk(chunkName: string, chunk: { x: number; z: number }) {
     if (!this.chunksBlocks[chunkName]) {
-      // this.chunksWorkers[chunkName] = new Worker(
-      //   new URL("../terrant/worker", import.meta.url),
-      //   {
-      //     type: "module",
-      //   }
-      // );
-
       this.chunkPendingQueueProxy.unshift(chunk.x, chunk.z);
-
-      // this.chunksWorkers[chunkName].postMessage(workerData);
-
-      // this.chunksWorkers[chunkName].onmessage = (e) => {
-      //   this.handleRenderChunkQueue(
-      //     chunkName,
-      //     e.data.blocks,
-      //     e.data.facesToRender
-      //   );
-      // };
     }
-  };
+  }
+
+  dispose() {
+    Object.values(this.chunkWorkers).forEach(({ worker }) => {
+      worker.terminate();
+    });
+  }
 }

@@ -1,4 +1,4 @@
-const detailFromName = (name: string) => {
+export const detailFromName = (name: string) => {
   const d = name.split("_");
 
   return {
@@ -9,5 +9,3 @@ const detailFromName = (name: string) => {
     face: d[4],
   };
 };
-
-export { detailFromName };

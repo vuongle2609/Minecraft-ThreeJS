@@ -19,7 +19,6 @@ const getBlocksInChunk = ({
   x: number;
   z: number;
 }) => {
-  console.time("chunk" + x + z);
   const world =
     type === FLAT_WORLD_TYPE ? new FlatWorld(seed) : new DefaultWorld(seed);
 
@@ -39,7 +38,6 @@ const getBlocksInChunk = ({
       chunkName,
     },
   });
-  console.timeEnd("chunk" + x + z);
 };
 
 let eventMapping: Record<string, Function> = {

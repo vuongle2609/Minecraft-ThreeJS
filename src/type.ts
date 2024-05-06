@@ -24,10 +24,10 @@ export interface WorldsType {
   rotation?: number[];
 }
 
-export interface BlocksIntancedMapping
-  extends Record<BlockKeys, BlocksIntancedType> {}
+export interface BlocksInstancedMapping
+  extends Record<BlockKeys, BlocksInstancedType> {}
 
-export interface BlocksIntancedType
+export interface BlocksInstancedType
   extends Record<
     BlockTextureType,
     {
