@@ -31,7 +31,7 @@ export default class ChunkManager extends BlockManager {
 
   chunkPendingQueue: ChunkPendingQueueType[] = [];
 
-  chunkWorkers = Array(4)
+  chunkWorkers = Array(14)
     .fill(0)
     .reduce((prev, _, index) => {
       return {
@@ -182,8 +182,16 @@ export default class ChunkManager extends BlockManager {
     const blocksRender = Object.keys(blocksRenderWorker);
     const blocksInChunk: string[] = [];
 
+    const intancedNeedToCals: BlockKeys[] = [];
+
     blocksRender.forEach((key) => {
       const { position, type } = blocksRenderWorker[key];
+
+      blocksInChunk.push(
+        nameFromCoordinate(position[0], position[1], position[2])
+      );
+
+      intancedNeedToCals.push(type);
 
       this.updateBlock({
         x: position[0],
@@ -193,18 +201,21 @@ export default class ChunkManager extends BlockManager {
         isRenderChunk: true,
         facesToRender: facesToRender[key],
       });
-
-      blocksInChunk.push(
-        nameFromCoordinate(position[0], position[1], position[2])
-      );
     });
 
-    Object.values(this.blocksIntanced).forEach((block: any) => {
-      Object.values(block).forEach((item: any) => {
+    intancedNeedToCals.forEach((key) => {
+      Object.values(this.blocksIntanced[key]).forEach((item: any) => {
         item.mesh.instanceMatrix.needsUpdate = true;
-        item.mesh.computeBoundingSphere();
+        // item.mesh.computeBoundingSphere();
       });
     });
+
+    // Object.values(this.blocksIntanced).forEach((block: any) => {
+    //   Object.values(block).forEach((item: any) => {
+    //     item.mesh.instanceMatrix.needsUpdate = true;
+    //     item.mesh.computeBoundingSphere();
+    //   });
+    // });
 
     this.chunksBlocks[chunkName] = blocksInChunk;
 

@@ -89,7 +89,7 @@ export default class GameScene extends RenderPage {
 
     this.scene.background = new Color("#6EB1FF");
     // this.scene.fog = new Fog(0xcccccc, 3, 40);
-    this.scene.fog = new FogExp2(0xcccccc, 0.014);
+    // this.scene.fog = new FogExp2(0xcccccc, 0.014);
 
     if (this.worldStorage.rotation)
       this.camera.rotation.fromArray(this.worldStorage.rotation as any);

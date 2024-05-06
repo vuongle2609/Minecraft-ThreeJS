@@ -135,6 +135,8 @@ export default class BlockManager extends BaseEntity {
         [z]: block,
       },
     };
+
+    return this.blocksIntanced[type];
   }
 
   getIntersectObject() {
