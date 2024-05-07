@@ -68,13 +68,13 @@ export class BaseGeneration {
     neighBor?: { position: number[]; type: BlockKeys } | boolean,
     type?: BlockKeys
   ) {
-    if (typeof neighBor !== "boolean" && neighBor?.type === "water") {
-      // does not handle client face process
-      if (type === "water") {
-        return false;
-      }
-      return true;
-    }
+    // if (typeof neighBor !== "boolean" && neighBor?.type === "water") {
+    //   // does not handle client face process
+    //   if (type === "water") {
+    //     return false;
+    //   }
+    //   return true;
+    // }
 
     return !neighBor;
   }

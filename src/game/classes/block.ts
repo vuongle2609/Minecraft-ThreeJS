@@ -122,60 +122,39 @@ export default class Block extends BaseEntity {
       texture[this.atttribute.textureMap[face] as keyof typeof texture];
     const plane = new Mesh(renderGeometry, material);
 
-    const { rotation, position, scale } = this.calFaceAttr(face);
-    if (scale && scale !== 1) {
-      console.log(scale);
-    }
-    plane.scale.set(1, scale && scale !== 1 ? scale - 0.1 : 1, 1);
-    plane.position.set(position[0], position[1], position[2]);
+    const { rotation } = this.calFaceAttr(face);
+
+    const { x, y, z } = this.position;
+
+    plane.position.copy(this.position);
     plane.rotation.set(rotation[0], rotation[1], rotation[2]);
-    plane.name = nameFromCoordinate(
-      position[0],
-      position[1],
-      position[2],
-      this.type,
-      face
-    );
+    plane.name = nameFromCoordinate(x, y, z, this.type, face);
 
     this.blockFaces[face] = plane;
     this.scene?.add(plane);
   }
 
   calFaceAttr(face: keyof BlockFaces) {
-    const { x, y, z } = this.position;
-
-    const scale = (this.atttribute as any).scale || 1;
-    let offset = 0;
-    if (scale !== 1) {
-      offset = BLOCK_WIDTH - BLOCK_WIDTH * scale;
-    }
-
     switch (face) {
       case leftZ:
-        return { rotation: [0, 0, 0], position: [x, y, z], scale };
+        return { rotation: [0, 0, 0] };
       case rightZ:
-        return { rotation: [0, Math.PI, 0], position: [x, y, z], scale };
+        return { rotation: [0, Math.PI, 0] };
       case leftX:
         return {
           rotation: [0, Math.PI / 2, 0],
-          position: [x, y, z],
-          scale,
         };
       case rightX:
         return {
           rotation: [0, -Math.PI / 2, 0],
-          position: [x, y, z],
-          scale,
         };
       case top:
         return {
           rotation: [-Math.PI / 2, 0, 0],
-          position: [x, y - offset, z],
         };
       case bottom:
         return {
           rotation: [Math.PI / 2, 0, 0],
-          position: [x, y, z],
         };
     }
   }
@@ -185,8 +164,8 @@ export default class Block extends BaseEntity {
 
     Object.values(this.blockFaces).forEach((item) => {
       if (item) {
-        item.geometry.dispose();
         this.scene?.remove(item);
+        item.geometry.dispose();
       }
     });
 

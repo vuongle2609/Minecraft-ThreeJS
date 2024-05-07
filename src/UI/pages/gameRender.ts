@@ -74,6 +74,7 @@ export default class GameRender extends RenderPage {
 
     const rotation: number[] = [];
     this.gameScene.camera.rotation.toArray(rotation);
+
     const newWorlds: Record<string, WorldsType> = {
       ...worlds,
       [this.id || ""]: {

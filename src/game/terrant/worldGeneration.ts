@@ -167,7 +167,7 @@ export class DefaultWorld extends BaseGeneration {
         const nY = this.noise.GetNoise(xA, zA);
         const nY2 = this.noiseWaterFlow.GetNoise(xA, zA);
 
-        let yPos = getRound(nY * 10) + getRound(nY2 * 20) + 40;
+        let yPos = getRound(nY * 10) + getRound(nY2 * 20) + 20;
 
         yPos = yPos <= 0 ? 2 : yPos;
 
@@ -229,10 +229,10 @@ export class DefaultWorld extends BaseGeneration {
         countSurface++;
       }
 
-      if (y <= 28) {
+      if (y <= 16) {
         let countSurface = 0;
 
-        for (let yA = y; yA <= 28; yA += 2) {
+        for (let yA = y; yA <= 16; yA += 2) {
           const newPos = [x, yA, z];
 
           let blockType: BlockKeys = "water";
@@ -248,7 +248,7 @@ export class DefaultWorld extends BaseGeneration {
 
     // place trees
     treePos.forEach(({ position, treeLength }) => {
-      if (position[1] > 28) createTree(position, treeLength);
+      if (position[1] > 20) createTree(position, treeLength);
     });
 
     const { mergedBlocksInChunkTypeOnly, mergedBlocksInChunk } =

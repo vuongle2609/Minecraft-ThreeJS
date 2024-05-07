@@ -106,30 +106,6 @@ export enum BlockTextureType {
 
 // back front side sideleft top bottom
 const blocks = {
-  water: {
-    name: "Water",
-    icon: grassIcon,
-    step: new Audio(stepGrass),
-    place: new Audio(placeGrass),
-    break: new Audio(breakGrass),
-    volume: 0.1,
-    // scale: 90 / 100,
-    texture: {
-      [BlockTextureType.side]: new worldMaterial({
-        map: textures.waterTexture,
-        transparent: true,
-        opacity: 0.6,
-      }),
-    },
-    textureMap: [
-      BlockTextureType.side,
-      BlockTextureType.side,
-      BlockTextureType.side,
-      BlockTextureType.side,
-      BlockTextureType.side,
-      BlockTextureType.side,
-    ],
-  },
   grass: {
     name: "Grass",
     icon: grassIcon,
@@ -450,6 +426,29 @@ const blocks = {
     texture: {
       [BlockTextureType.side]: new worldMaterial({
         map: textures.emeraldBlockSideTexture,
+      }),
+    },
+    textureMap: [
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+    ],
+  },
+  water: {
+    name: "Water",
+    icon: null,
+    step: new Audio(stepGrass),
+    place: new Audio(placeGrass),
+    break: new Audio(breakGrass),
+    volume: 0.1,
+    texture: {
+      [BlockTextureType.side]: new worldMaterial({
+        map: textures.waterTexture,
+        transparent: true,
+        opacity: 0.6,
       }),
     },
     textureMap: [

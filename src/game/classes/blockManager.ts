@@ -164,6 +164,7 @@ export default class BlockManager extends BaseEntity {
     const { x, y, z, type } = clickedDetail;
 
     if (type === "bedrock") return;
+    if (type === "water") return;
 
     this.removeBlock(x, y, z);
 

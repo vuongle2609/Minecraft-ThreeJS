@@ -114,11 +114,12 @@ export default class GameScene extends RenderPage {
     });
 
     this.worker.postMessage({
-      type: "initSeed",
+      type: "init",
       data: {
         seed: this.worldStorage?.seed,
         type: this.worldStorage?.worldType,
         chunkBlocksCustom: this.worldStorage.blocksWorldChunk,
+        initPos: this.worldStorage.initPos,
       },
     });
 
@@ -138,7 +139,6 @@ export default class GameScene extends RenderPage {
       camera: this.camera,
       chunkManager: this.chunkManager,
       worker: this.worker,
-      initPos: this.worldStorage.initPos,
     });
 
     this.inventoryManager.renderHotbar();
