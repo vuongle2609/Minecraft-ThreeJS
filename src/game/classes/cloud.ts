@@ -1,9 +1,7 @@
-import FastNoiseLite from "fastnoise-lite";
 import {
   BoxGeometry,
   InstancedMesh,
   MeshBasicMaterial,
-  MeshLambertMaterial,
   Object3D,
   Vector3,
 } from "three";
@@ -34,12 +32,12 @@ export default class Cloud extends BaseEntity {
     this.scene?.add(this.mesh);
 
     const preDefinedPos = [
-      [-400, -300],
-      [200, -200],
+      [-800, -500],
+      [400, -800],
       [200, 0],
       [300, -400],
-      [-300, 500],
-      [-600, 700],
+      [-600, 800],
+      [-800, 900],
       [-100, 200],
       [-400, 400],
       [-500, 200],
@@ -57,7 +55,7 @@ export default class Cloud extends BaseEntity {
     ];
 
     preDefinedPos.forEach((_, i) => {
-      this.dummy.position.set(preDefinedPos[i][0], 200, preDefinedPos[i][1]);
+      this.dummy.position.set(preDefinedPos[i][0], 500, preDefinedPos[i][1]);
       this.dummy.updateMatrix();
 
       this.mesh.setMatrixAt(i, this.dummy.matrix);

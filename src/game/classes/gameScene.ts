@@ -46,6 +46,7 @@ export default class GameScene extends RenderPage {
 
   coordinateElement: HTMLElement;
   fpsElement: HTMLElement;
+  chunkElement: HTMLElement;
 
   clock = new Clock();
   frames = 0;
@@ -89,7 +90,7 @@ export default class GameScene extends RenderPage {
 
     this.scene.background = new Color("#6EB1FF");
     // this.scene.fog = new Fog(0xcccccc, 3, 40);
-    this.scene.fog = new FogExp2(0xcccccc, 0.014);
+    // this.scene.fog = new FogExp2(0xcccccc, 0.014);
 
     if (this.worldStorage.rotation)
       this.camera.rotation.fromArray(this.worldStorage.rotation as any);
@@ -100,6 +101,7 @@ export default class GameScene extends RenderPage {
 
     this.coordinateElement = $("#coordinate");
     this.fpsElement = $("#fps");
+    this.chunkElement = $("#chunk");
 
     this.mouseControl = new MouseControl({
       control: this.control,
@@ -156,9 +158,16 @@ export default class GameScene extends RenderPage {
     const { x, y, z } = this.player?.player.position || {};
 
     if (this.coordinateElement)
-      this.coordinateElement.innerHTML = `X: ${x.toFixed(3)}, Y: ${y.toFixed(
+      this.coordinateElement.innerHTML = `XYZ: ${x.toFixed(3)} / ${y.toFixed(
         3
-      )}, Z: ${z.toFixed(3)}`;
+      )} / ${z.toFixed(3)}`;
+
+    if (this.chunkElement)
+      this.chunkElement.innerHTML =
+        "Chunk: " +
+        this.chunkManager.currentChunk[0] +
+        " " +
+        this.chunkManager.currentChunk[1];
   }
 
   renderFps() {

@@ -28,9 +28,10 @@ type ChunkPendingQueueType = {
 };
 
 export default class ChunkManager extends BlockManager {
-  chunkRenderQueue: Function[] = [];
-
+  //todo
+  chunkCached = [];
   chunkPendingQueue: ChunkPendingQueueType[] = [];
+  currentChunk = [0, 0];
 
   createWorker = (index: number) => ({
     worker: new Worker(new URL("../terrant/worker", import.meta.url), {
@@ -170,6 +171,9 @@ export default class ChunkManager extends BlockManager {
   }
 
   handleRequestChunks(currentChunk: { x: number; z: number }) {
+    this.currentChunk[0] = currentChunk.x;
+    this.currentChunk[1] = currentChunk.z;
+
     const neighborOffset = calNeighborsOffset(DEFAULT_CHUNK_VIEW);
     const neighborOffsetPhysics = calNeighborsOffset(CHUNK_VIEW_WORKER_PHYSICS);
 

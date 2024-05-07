@@ -1,9 +1,9 @@
-import GameScene from '@/game/classes/gameScene';
-import { RenderPage } from '@/game/classes/renderPage';
-import { WorldsType } from '@/type';
+import GameScene from "@/game/classes/gameScene";
+import { RenderPage } from "@/game/classes/renderPage";
+import { WorldsType } from "@/type";
 
-import Router from '../router';
-import { $ } from '../utils/selector';
+import Router from "../router";
+import { $ } from "../utils/selector";
 
 export default class GameRender extends RenderPage {
   router: Router;
@@ -39,6 +39,8 @@ export default class GameRender extends RenderPage {
       <div id="modal_game" class="fixed top-0 bottom-0 left-0 right-0 items-center justify-center z-10">
         <div class="text-white font-medium fixed top-2 left-2">
           <span id="coordinate"></span>
+          <br/>
+          <span id="chunk"></span>
           <br/>
           <span id="fps"></span>
         </div>
