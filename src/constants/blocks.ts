@@ -26,6 +26,7 @@ import woodTop from "@/assets/block/log_oak_top.png";
 import oakPlanksSide from "@/assets/block/planks_oak.png";
 import sand from "@/assets/block/sand.png";
 import stone from "@/assets/block/stone.png";
+import water from "@/assets/block/water.png";
 //icon
 import bedRockIcon from "@/assets/blockIcon/Bedrock_JE2_BE2.webp";
 import blockOfDiamondIcon from "@/assets/blockIcon/block_of_diamond.webp";
@@ -77,6 +78,7 @@ const textures = {
   woodSideTexture: textureLoader.load(woodSide),
   woodTopTexture: textureLoader.load(woodTop),
   bedRockTexture: textureLoader.load(bedrock),
+  waterTexture: textureLoader.load(water),
 };
 
 // is it good to set both to nearest?
@@ -424,6 +426,29 @@ const blocks = {
     texture: {
       [BlockTextureType.side]: new worldMaterial({
         map: textures.emeraldBlockSideTexture,
+      }),
+    },
+    textureMap: [
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+    ],
+  },
+  water: {
+    name: "Water",
+    icon: null,
+    step: new Audio(stepGrass),
+    place: new Audio(placeGrass),
+    break: new Audio(breakGrass),
+    volume: 0.1,
+    texture: {
+      [BlockTextureType.side]: new worldMaterial({
+        map: textures.waterTexture,
+        transparent: true,
+        opacity: 0.6,
       }),
     },
     textureMap: [

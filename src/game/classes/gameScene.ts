@@ -1,3 +1,7 @@
+import { $ } from "@/UI/utils/selector";
+import MouseControl from "@/game/action/mouseControl";
+import Player from "@/game/player/character";
+import { WorldsType } from "@/type";
 import {
   Clock,
   Color,
@@ -8,12 +12,8 @@ import {
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 
-import MouseControl from "@/game/action/mouseControl";
-import Player from "@/game/player/character";
-import { WorldsType } from "@/type";
-import { $ } from "@/UI/utils/selector";
-
 import ChunkManager from "./chunkManager";
+import Cloud from "./cloud";
 import InventoryManager from "./inventoryManager";
 import Light from "./light";
 import { RenderPage } from "./renderPage";
@@ -26,7 +26,6 @@ export default class GameScene extends RenderPage {
 
   renderer = new WebGLRenderer({
     antialias: true,
-    // alpha: true,
     canvas: document.querySelector("#gameScene") as HTMLCanvasElement,
   });
 
@@ -40,13 +39,14 @@ export default class GameScene extends RenderPage {
     70,
     window.innerWidth / window.innerHeight,
     0.1,
-    500
+    2000
   );
 
   control = new PointerLockControls(this.camera, document.body);
 
   coordinateElement: HTMLElement;
   fpsElement: HTMLElement;
+  chunkElement: HTMLElement;
 
   clock = new Clock();
   frames = 0;
@@ -61,6 +61,7 @@ export default class GameScene extends RenderPage {
   inventoryManager: InventoryManager;
 
   lastCallTime = 0;
+  cloud = new Cloud({ scene: this.scene });
 
   constructor(id: string) {
     super();
@@ -100,6 +101,7 @@ export default class GameScene extends RenderPage {
 
     this.coordinateElement = $("#coordinate");
     this.fpsElement = $("#fps");
+    this.chunkElement = $("#chunk");
 
     this.mouseControl = new MouseControl({
       control: this.control,
@@ -112,11 +114,12 @@ export default class GameScene extends RenderPage {
     });
 
     this.worker.postMessage({
-      type: "initSeed",
+      type: "init",
       data: {
         seed: this.worldStorage?.seed,
         type: this.worldStorage?.worldType,
         chunkBlocksCustom: this.worldStorage.blocksWorldChunk,
+        initPos: this.worldStorage.initPos,
       },
     });
 
@@ -136,7 +139,6 @@ export default class GameScene extends RenderPage {
       camera: this.camera,
       chunkManager: this.chunkManager,
       worker: this.worker,
-      initPos: this.worldStorage.initPos,
     });
 
     this.inventoryManager.renderHotbar();
@@ -156,9 +158,16 @@ export default class GameScene extends RenderPage {
     const { x, y, z } = this.player?.player.position || {};
 
     if (this.coordinateElement)
-      this.coordinateElement.innerHTML = `X: ${x.toFixed(3)}, Y: ${y.toFixed(
+      this.coordinateElement.innerHTML = `XYZ: ${x.toFixed(3)} / ${y.toFixed(
         3
-      )}, Z: ${z.toFixed(3)}`;
+      )} / ${z.toFixed(3)}`;
+
+    if (this.chunkElement)
+      this.chunkElement.innerHTML =
+        "Chunk: " +
+        this.chunkManager.currentChunk[0] +
+        " " +
+        this.chunkManager.currentChunk[1];
   }
 
   renderFps() {
@@ -203,6 +212,8 @@ export default class GameScene extends RenderPage {
       this.renderFps();
 
       this.player?.update(delta, t);
+
+      this.cloud?.update(this.player.player.position);
 
       this.chunkManager?.update();
 

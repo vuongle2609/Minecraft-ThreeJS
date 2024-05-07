@@ -122,9 +122,9 @@ export default class Block extends BaseEntity {
       texture[this.atttribute.textureMap[face] as keyof typeof texture];
     const plane = new Mesh(renderGeometry, material);
 
-    const { x, y, z } = this.position;
-
     const { rotation } = this.calFaceAttr(face);
+
+    const { x, y, z } = this.position;
 
     plane.position.copy(this.position);
     plane.rotation.set(rotation[0], rotation[1], rotation[2]);
@@ -164,8 +164,8 @@ export default class Block extends BaseEntity {
 
     Object.values(this.blockFaces).forEach((item) => {
       if (item) {
-        item.geometry.dispose();
         this.scene?.remove(item);
+        item.geometry.dispose();
       }
     });
 

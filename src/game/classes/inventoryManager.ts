@@ -10,7 +10,9 @@ export default class InventoryManager extends BaseEntity {
     ...Array(45 - Object.keys(blocks).length).fill(null),
   ] as (BlockKeys | null)[];
 
-  inventory: (BlockKeys | null)[] = Array(HOTBAR_LENGTH).fill(null);
+  inventory: (BlockKeys | null)[] = Array(HOTBAR_LENGTH)
+    .fill(null)
+    .map((_, index) => Object.keys(blocks)[index] as BlockKeys);
 
   tooltipElement: HTMLDivElement | undefined;
   currentDragElement: HTMLImageElement | undefined;
@@ -31,8 +33,6 @@ export default class InventoryManager extends BaseEntity {
   }
 
   initialize() {
-    this.inventory[0] = "dirt";
-
     document.addEventListener(
       "keydown",
       (e) => {
@@ -81,7 +81,7 @@ export default class InventoryManager extends BaseEntity {
     const translateY = e.clientY - 20;
 
     this.currentDragElement.style.display = "block";
-    this.currentDragElement.src = blockDragging.icon;
+    if (blockDragging.icon) this.currentDragElement.src = blockDragging.icon;
     this.currentDragElement.style.transform = `translate(${translateX}px,${translateY}px)`;
     this.currentDragElement.innerText = this.currentDragItem || "";
   }
@@ -157,7 +157,7 @@ export default class InventoryManager extends BaseEntity {
         const iconPath = currentBlock?.icon;
         const name = currentBlock?.name;
 
-        return currentBlock
+        return currentBlock && iconPath
           ? `
         <div class="w-[11.11%] aspect-square box-with-shadow bold hover:brightness-150 ${customClickClass}" block_data="${itemKey}" draggable="false">
           <img src="${iconPath}" alt="${name}" id="${itemKey}" draggable="false"/>

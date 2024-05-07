@@ -4,10 +4,12 @@ import { BLOCK_WIDTH, CHUNK_SIZE } from "../../constants";
 import { BlockKeys } from "../../constants/blocks";
 import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
 import { BaseGeneration } from "./baseUtilsGeneration";
+import { getRound } from "../helpers/getRound";
 
 export class DefaultWorld extends BaseGeneration {
   noise = new FastNoiseLite();
   noiseTree = new FastNoiseLite();
+  noiseWaterFlow = new FastNoiseLite();
 
   constructor(seed: number) {
     super(seed);
@@ -19,10 +21,10 @@ export class DefaultWorld extends BaseGeneration {
     this.noise.SetFrequency(0.026);
     this.noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
     this.noise.SetFractalType(FastNoiseLite.FractalType.FBm);
-    this.noise.SetFractalOctaves(1.7);
-    this.noise.SetFractalLacunarity(0.3);
-    this.noise.SetFractalGain(4);
-    this.noise.SetFractalWeightedStrength(3.4);
+    this.noise.SetFractalOctaves(3);
+    this.noise.SetFractalLacunarity(0.65);
+    this.noise.SetFractalGain(0.179);
+    this.noise.SetFractalWeightedStrength(12);
     this.noise.SetSeed(this.seed);
 
     this.noiseTree.SetFrequency(0.007);
@@ -33,6 +35,19 @@ export class DefaultWorld extends BaseGeneration {
     this.noiseTree.SetFractalGain(5.63);
     this.noiseTree.SetFractalWeightedStrength(5);
     this.noiseTree.SetSeed(this.seed);
+
+    this.noiseWaterFlow.SetFrequency(0.004);
+    this.noiseWaterFlow.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
+    this.noiseWaterFlow.SetFractalType(FastNoiseLite.FractalType.FBm);
+    this.noiseWaterFlow.SetFractalOctaves(15);
+    this.noiseWaterFlow.SetFractalLacunarity(1.55);
+    this.noiseWaterFlow.SetFractalGain(0.09);
+    this.noiseWaterFlow.SetFractalWeightedStrength(0.47);
+    this.noiseWaterFlow.SetDomainWarpType(
+      FastNoiseLite.DomainWarpType.BasicGrid
+    );
+    this.noiseWaterFlow.SetDomainWarpAmp(3.5);
+    this.noiseWaterFlow.SetSeed(this.seed);
   }
 
   getBlocksInChunk(
@@ -148,11 +163,11 @@ export class DefaultWorld extends BaseGeneration {
       for (let zA = z * CHUNK_SIZE; zA < (z + 1) * CHUNK_SIZE; zA++) {
         const xPos = xA * 2;
         const zPos = zA * 2;
+
         const nY = this.noise.GetNoise(xA, zA);
-        let yPos =
-          (Math.round(nY * 10) % 2
-            ? Math.round(nY * 10) + 1
-            : Math.round(nY * 10)) + 10;
+        const nY2 = this.noiseWaterFlow.GetNoise(xA, zA);
+
+        let yPos = getRound(nY * 10) + getRound(nY2 * 20) + 20;
 
         yPos = yPos <= 0 ? 2 : yPos;
 
@@ -184,8 +199,8 @@ export class DefaultWorld extends BaseGeneration {
     }
 
     // fill bellow item with stone
-    peakPos.forEach((pos) => {
-      const [x, y, z] = pos;
+    peakPos.forEach((position) => {
+      const [x, y, z] = position;
 
       let countSurface = 0;
 
@@ -213,11 +228,27 @@ export class DefaultWorld extends BaseGeneration {
 
         countSurface++;
       }
+
+      if (y <= 16) {
+        let countSurface = 0;
+
+        for (let yA = y; yA <= 16; yA += 2) {
+          const newPos = [x, yA, z];
+
+          let blockType: BlockKeys = "water";
+
+          if (countSurface == 0) blockType = "sand";
+
+          countSurface++;
+
+          createBlock(newPos, blockType);
+        }
+      }
     });
 
     // place trees
     treePos.forEach(({ position, treeLength }) => {
-      createTree(position, treeLength);
+      if (position[1] > 20) createTree(position, treeLength);
     });
 
     const { mergedBlocksInChunkTypeOnly, mergedBlocksInChunk } =

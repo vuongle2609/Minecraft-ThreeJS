@@ -1,9 +1,9 @@
-import GameScene from '@/game/classes/gameScene';
-import { RenderPage } from '@/game/classes/renderPage';
-import { WorldsType } from '@/type';
+import GameScene from "@/game/classes/gameScene";
+import { RenderPage } from "@/game/classes/renderPage";
+import { WorldsType } from "@/type";
 
-import Router from '../router';
-import { $ } from '../utils/selector';
+import Router from "../router";
+import { $ } from "../utils/selector";
 
 export default class GameRender extends RenderPage {
   router: Router;
@@ -40,6 +40,8 @@ export default class GameRender extends RenderPage {
         <div class="text-white font-medium fixed top-2 left-2">
           <span id="coordinate"></span>
           <br/>
+          <span id="chunk"></span>
+          <br/>
           <span id="fps"></span>
         </div>
 
@@ -72,6 +74,7 @@ export default class GameRender extends RenderPage {
 
     const rotation: number[] = [];
     this.gameScene.camera.rotation.toArray(rotation);
+
     const newWorlds: Record<string, WorldsType> = {
       ...worlds,
       [this.id || ""]: {

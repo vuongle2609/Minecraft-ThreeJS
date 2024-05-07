@@ -1,5 +1,6 @@
-import { Face } from '../../constants/block';
-import { nameFromCoordinate } from './nameFromCoordinate';
+import { BlockKeys } from "@/constants/blocks";
+import { Face } from "../../constants/block";
+import { nameFromCoordinate } from "./nameFromCoordinate";
 
 const { leftZ, rightZ, leftX, rightX, top, bottom } = Face;
 
@@ -34,7 +35,7 @@ export const getNeighbors = (
 };
 
 export const getNeighborsSeparate = (
-  blocks: Record<string, any>,
+  blocks: Record<string, { position: number[]; type: BlockKeys }>,
   { x, y, z }: { x: number; y: number; z: number },
   faces: Record<Face, boolean>,
   offSet: number = 0

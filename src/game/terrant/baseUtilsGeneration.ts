@@ -64,6 +64,21 @@ export class BaseGeneration {
     };
   }
 
+  shouldRenderFace(
+    neighBor?: { position: number[]; type: BlockKeys } | boolean,
+    type?: BlockKeys
+  ) {
+    // if (typeof neighBor !== "boolean" && neighBor?.type === "water") {
+    //   // does not handle client face process
+    //   if (type === "water") {
+    //     return false;
+    //   }
+    //   return true;
+    // }
+
+    return !neighBor;
+  }
+
   calFaceToRender(
     blocksInChunk: Record<
       string,
@@ -85,10 +100,12 @@ export class BaseGeneration {
       ...blocksInChunkNeighbor,
     };
 
+    Object.keys(blocksInChunk);
+
     const facesToRender = Object.keys(blocksInChunk).reduce<
       Record<string, Record<Face, boolean>>
     >((prev, key) => {
-      const { position } = blocksInChunk[key];
+      const { position, type } = blocksInChunk[key];
 
       const [x, y, z] = position;
 
@@ -109,16 +126,15 @@ export class BaseGeneration {
       return {
         ...prev,
         [key]: {
-          [leftZ]: !faceHasNeighbor?.[leftZ],
-          [rightZ]: !faceHasNeighbor?.[rightZ],
-          [leftX]: !faceHasNeighbor?.[leftX],
-          [rightX]: !faceHasNeighbor?.[rightX],
+          [leftZ]: this.shouldRenderFace(faceHasNeighbor?.[leftZ], type),
+          [rightZ]: this.shouldRenderFace(faceHasNeighbor?.[rightZ], type),
+          [leftX]: this.shouldRenderFace(faceHasNeighbor?.[leftX], type),
+          [rightX]: this.shouldRenderFace(faceHasNeighbor?.[rightX], type),
           [bottom]: this.lowestY === y ? false : !faceHasNeighbor?.[bottom],
-          [top]: !faceHasNeighbor?.[top],
+          [top]: this.shouldRenderFace(faceHasNeighbor?.[top], type),
         },
       };
     }, {});
-
     return facesToRender;
   }
 }

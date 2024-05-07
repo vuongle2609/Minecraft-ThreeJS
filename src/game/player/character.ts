@@ -6,11 +6,15 @@ import {
   CHARACTER_LENGTH,
   CHARACTER_MIDDLE_LENGTH,
   CHARACTER_RADIUS,
+  LERP_CAMERA_BREATH,
+  SIN_X_MULTIPLY_LENGTH,
+  SIN_Y_MULTIPLY_LENGTH,
 } from "@/constants/player";
 import BasicCharacterControllerInput from "@/game/action/input";
 import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
 
 import { getChunkCoordinate } from "../helpers/chunkHelpers";
+import { lerp } from "three/src/math/MathUtils";
 
 export default class Player extends BaseEntity {
   input = new BasicCharacterControllerInput();
@@ -38,12 +42,12 @@ export default class Player extends BaseEntity {
     z: number;
   };
 
-  constructor(props: BasePropsType & { initPos?: number[] }) {
+  constructor(props: BasePropsType) {
     super(props);
-    this.initialize(props.initPos);
+    this.initialize();
   }
 
-  initialize(initPos?: number[]) {
+  initialize() {
     // init player render
     this.player = new Mesh(
       new CapsuleGeometry(CHARACTER_RADIUS, CHARACTER_MIDDLE_LENGTH),
@@ -51,15 +55,6 @@ export default class Player extends BaseEntity {
     );
     this.player.visible = false;
     this.player.name = "player";
-
-    if (initPos) this.player.position.set(initPos[0], initPos[1], initPos[2]);
-    else {
-      this.player.position.set(
-        CHUNK_SIZE / 2,
-        CHARACTER_LENGTH + 40,
-        CHUNK_SIZE / 2
-      );
-    }
 
     const roundedPos = this.player.position.clone().round();
 
@@ -78,15 +73,7 @@ export default class Player extends BaseEntity {
 
         this.onGround = onGround;
 
-        this.player.position.add(
-          new Vector3(position[0], position[1], position[2])
-        );
-
-        if (this.player.position.y < -61) {
-          this.player.position.copy(
-            new Vector3(CHUNK_SIZE / 2, CHARACTER_LENGTH + 0.5, CHUNK_SIZE / 2)
-          );
-        }
+        this.player.position.set(position[0], position[1], position[2]);
 
         this.handleDetectChunkChange();
       }

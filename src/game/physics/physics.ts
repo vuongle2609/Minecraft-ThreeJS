@@ -1,9 +1,12 @@
-import { Vector3 } from 'three';
+import { Vector3 } from "three";
 
 import {
-    CHARACTER_LENGTH, CHARACTER_LENGTH_CEIL, CHARACTER_MIDDLE_LENGTH, CHARACTER_RADIUS
-} from '../../constants/player';
-import { nameFromCoordinate } from '../helpers/nameFromCoordinate';
+  CHARACTER_LENGTH,
+  CHARACTER_LENGTH_CEIL,
+  CHARACTER_MIDDLE_LENGTH,
+  CHARACTER_RADIUS,
+} from "../../constants/player";
+import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
 
 export default class Physics {
   constructor() {}
@@ -265,9 +268,21 @@ export default class Physics {
 
     const calculatedMoveVector = new Vector3();
 
-    calculatedMoveVector.x = nextObjectX || nextObjectXTop ? 0 : vectorMove.x;
-    calculatedMoveVector.y = nextObjectY || nextObjectYTop ? 0 : vectorMove.y;
-    calculatedMoveVector.z = nextObjectZ || nextObjectZTop ? 0 : vectorMove.z;
+    calculatedMoveVector.x =
+      (nextObjectX && nextObjectX !== "water") ||
+      (nextObjectXTop && nextObjectXTop !== "water")
+        ? 0
+        : vectorMove.x;
+    calculatedMoveVector.y =
+      (nextObjectY && nextObjectY !== "water") ||
+      (nextObjectYTop && nextObjectYTop !== "water")
+        ? 0
+        : vectorMove.y;
+    calculatedMoveVector.z =
+      (nextObjectZ && nextObjectZ !== "water") ||
+      (nextObjectZTop && nextObjectZTop !== "water")
+        ? 0
+        : vectorMove.z;
 
     return { calculatedMoveVector, collideObject: nextObjectY };
   }
