@@ -9,6 +9,7 @@ import {
 } from "@/constants";
 import { RenderPage } from "@/game/classes/renderPage";
 import { WorldsType } from "@/type";
+import MersenneTwister from "../utils/random";
 
 import Router from "../router";
 import { $ } from "../utils/selector";
@@ -17,7 +18,7 @@ export default class CreateWorld extends RenderPage {
   router: Router;
 
   state = {
-    seed: "842292",
+    seed: null,
     name: DEFAULT_WORLD_NAME,
     worldType: DEFAULT_WORLD_TYPE,
   };
@@ -99,6 +100,16 @@ export default class CreateWorld extends RenderPage {
     `;
 
   render() {
+    this.setState({
+      seed: (() => {
+        //@ts-ignore
+        const m = new MersenneTwister();
+        const randomNumber = m.random();
+        return Math.round(randomNumber * 1000000);
+      })(),
+      name: DEFAULT_WORLD_NAME,
+      worldType: DEFAULT_WORLD_TYPE,
+    });
     super.render();
   }
 

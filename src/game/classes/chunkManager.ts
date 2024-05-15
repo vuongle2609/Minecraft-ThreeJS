@@ -28,8 +28,9 @@ type ChunkPendingQueueType = {
 };
 
 export default class ChunkManager extends BlockManager {
-  //todo
+  // todo
   chunkCached = [];
+
   chunkPendingQueue: ChunkPendingQueueType[] = [];
   currentChunk = [0, 0];
 
@@ -230,7 +231,7 @@ export default class ChunkManager extends BlockManager {
   }
 
   // can optimize worker speed
-  handleRenderChunkBlocks = (
+  handleRenderChunkBlocks(
     chunkName: string,
     blocksRenderWorker: Record<
       string,
@@ -240,7 +241,7 @@ export default class ChunkManager extends BlockManager {
       }
     > = {},
     facesToRender: Record<string, Record<Face, boolean>>
-  ) => {
+  ) {
     const blocksRender = Object.keys(blocksRenderWorker);
     const blocksInChunk: string[] = [];
 
@@ -262,13 +263,9 @@ export default class ChunkManager extends BlockManager {
     });
 
     this.chunksBlocks[chunkName] = blocksInChunk;
+  }
 
-    // clear after done
-    this.chunksWorkers[chunkName]?.terminate();
-    delete this.chunksWorkers[chunkName];
-  };
-
-  handleClearChunks = (neighborChunksKeys: string[]) => {
+  handleClearChunks(neighborChunksKeys: string[]) {
     const inactiveChunk = this.chunksActive.filter(
       (item) => !neighborChunksKeys.includes(item)
     );
@@ -286,7 +283,7 @@ export default class ChunkManager extends BlockManager {
 
       this.removeBlock(x, y, z, true);
     });
-  };
+  }
 
   handleAssignWorkerChunk(chunkName: string, chunk: { x: number; z: number }) {
     if (!this.chunksBlocks[chunkName]) {

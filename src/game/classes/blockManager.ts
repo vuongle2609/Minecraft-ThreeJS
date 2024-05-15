@@ -29,7 +29,6 @@ export default class BlockManager extends BaseEntity {
   blocksWorldChunk: Record<string, Record<string, BlockKeys | 0>> = {};
   chunksBlocks: Record<string, string[]> = {};
 
-  chunksWorkers: Record<string, Worker> = {};
   chunksActive: string[] = [];
 
   constructor(props: BasePropsType & PropsType) {
