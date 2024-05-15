@@ -23,7 +23,7 @@ class PhysicsWorker {
   chunkBlocksCustomMap: Record<string, BlocksMappingType> = {};
   chunkGenerated: Record<string, boolean> = {};
 
-  blocksMapping: Record<string, string | 0> = {};
+  blocksMapping: Map<string, string | 0> = new Map();
 
   spawn = [CHUNK_SIZE / 2, CHARACTER_LENGTH + 60, CHUNK_SIZE / 2];
   playerPos = new Vector3();
@@ -135,10 +135,18 @@ class PhysicsWorker {
   };
 
   addBlock = ({ position, type }: { position: number[]; type: string }) => {
-    this.blocksMapping = {
-      ...this.blocksMapping,
-      [nameFromCoordinate(position[0], position[1], position[2])]: type,
-    };
+    // this.blocksMapping = {
+    //   ...this.blocksMapping,
+    //   [nameFromCoordinate(position[0], position[1], position[2])]: type,
+    // };
+
+    this.blocksMapping.set(
+      nameFromCoordinate(position[0], position[1], position[2]),
+      type
+    );
+    this.blocksMapping.get(
+      nameFromCoordinate(position[0], position[1], position[2])
+    );
   };
 
   init = ({
@@ -200,9 +208,9 @@ class PhysicsWorker {
   };
 
   removeBlock = ({ position }: { position: number[] }) => {
-    delete this.blocksMapping[
+    this.blocksMapping.delete(
       nameFromCoordinate(position[0], position[1], position[2])
-    ];
+    );
   };
 
   eventMapping: Record<string, Function> = {
