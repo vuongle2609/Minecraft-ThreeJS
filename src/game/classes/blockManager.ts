@@ -24,7 +24,7 @@ export default class BlockManager extends BaseEntity {
 
   currentBreakSound: HTMLAudioElement;
 
-  blocksMapping: Record<string, Record<string, Record<string, Block>>> = {};
+  blocksMapping: Map<string, Block> = new Map();
 
   blocksWorldChunk: Record<string, Record<string, BlockKeys | 0>> = {};
   chunksBlocks: Record<string, string[]> = {};
@@ -47,33 +47,14 @@ export default class BlockManager extends BaseEntity {
     y,
     z,
     type,
-    isRenderChunk,
     facesToRender,
   }: {
     x: number;
     y: number;
     z: number;
     type: BlockKeys;
-    isRenderChunk?: boolean;
     facesToRender?: Record<Face, boolean>;
   }) {
-    const newUpdateBlockChunk = getChunkCoordinate(x, z);
-    const chunkName = nameChunkFromCoordinate(
-      newUpdateBlockChunk.x,
-      newUpdateBlockChunk.z
-    );
-    const coorName = nameFromCoordinate(x, y, z);
-
-    // if render chunk and block marked as destroyed then return
-    if (isRenderChunk && this.blocksWorldChunk[chunkName]?.[coorName] == 0) {
-      return;
-    }
-
-    if (!isRenderChunk) {
-      this.blocksWorldChunk[chunkName] = this.blocksWorldChunk[chunkName] || {};
-      this.blocksWorldChunk[chunkName][coorName] = type;
-    }
-
     const position = new Vector3(x, y, z);
 
     const block = new Block({
@@ -84,13 +65,7 @@ export default class BlockManager extends BaseEntity {
       facesToRender,
     });
 
-    this.blocksMapping[x] = {
-      ...this.blocksMapping[x],
-      [y]: {
-        ...this.blocksMapping[x]?.[y],
-        [z]: block,
-      },
-    };
+    this.blocksMapping.set(nameFromCoordinate(x, y, z), block);
   }
 
   getIntersectObject() {
@@ -112,25 +87,10 @@ export default class BlockManager extends BaseEntity {
     return intersectObject;
   }
 
-  removeBlock(x: number, y: number, z: number, temporary?: boolean) {
-    const blockToRemove = this.blocksMapping[x][y][z];
+  removeBlock(x: number, y: number, z: number, isClearChunk?: boolean) {
+    const blockToRemove = this.blocksMapping.get(nameFromCoordinate(x, y, z));
 
-    blockToRemove?.destroy();
-
-    if (!temporary) {
-      this.removeBlockWorker({
-        position: [x, y, z],
-      });
-
-      const newUpdateBlockChunk = getChunkCoordinate(x, z);
-      const chunkName = nameChunkFromCoordinate(
-        newUpdateBlockChunk.x,
-        newUpdateBlockChunk.z
-      );
-
-      this.blocksWorldChunk[chunkName] = this.blocksWorldChunk[chunkName] || {};
-      this.blocksWorldChunk[chunkName][nameFromCoordinate(x, y, z)] = 0;
-    }
+    blockToRemove?.destroy(isClearChunk);
   }
 
   handleHoverBlock() {}
@@ -146,7 +106,9 @@ export default class BlockManager extends BaseEntity {
 
     this.inventoryManager.inventory[this.inventoryManager.currentFocusIndex] =
       type as BlockKeys;
+
     this.inventoryManager.renderHotbar();
+
     if (this.inventoryManager.currentFocus)
       this.inventoryManager.renderLabelFocusItem(
         blocks[this.inventoryManager.currentFocus].name
@@ -167,6 +129,19 @@ export default class BlockManager extends BaseEntity {
 
     this.removeBlock(x, y, z);
 
+    this.removeBlockWorker({
+      position: [x, y, z],
+    });
+
+    const newUpdateBlockChunk = getChunkCoordinate(x, z);
+    const chunkName = nameChunkFromCoordinate(
+      newUpdateBlockChunk.x,
+      newUpdateBlockChunk.z
+    );
+
+    this.blocksWorldChunk[chunkName] = this.blocksWorldChunk[chunkName] || {};
+    this.blocksWorldChunk[chunkName][nameFromCoordinate(x, y, z)] = 0;
+
     // play sound
     if (this.currentBreakSound) {
       this.currentBreakSound.pause();
@@ -184,7 +159,6 @@ export default class BlockManager extends BaseEntity {
     if (!intersectObj) return;
 
     const clickedDetail = detailFromName(intersectObj.object.name);
-    // console.log(intersects[0].object.rotation);
 
     const clickedFace = clickedDetail.face;
 
@@ -213,31 +187,35 @@ export default class BlockManager extends BaseEntity {
         break;
     }
 
-    if (this.inventoryManager.currentFocus) {
+    const placeType = this.inventoryManager.currentFocus;
+
+    if (placeType) {
       this.updateBlock({
         x: blockPosition.x,
         y: blockPosition.y,
         z: blockPosition.z,
-        type: this.inventoryManager.currentFocus,
-        isRenderChunk: false,
+        type: placeType,
       });
 
       this.worker?.postMessage({
         type: "addBlock",
         data: {
           position: [blockPosition.x, blockPosition.y, blockPosition.z],
-          type: this.inventoryManager.currentFocus,
+          type: placeType,
         },
       });
 
       const chunk = getChunkCoordinate(blockPosition.x, blockPosition.z);
       const chunkName = nameChunkFromCoordinate(chunk.x, chunk.z);
 
-      if (this.chunksBlocks[chunkName]) {
-        this.chunksBlocks[chunkName].push(
-          nameFromCoordinate(blockPosition.x, blockPosition.y, blockPosition.z)
-        );
-      }
+      this.chunksBlocks[chunkName]?.push(
+        nameFromCoordinate(blockPosition.x, blockPosition.y, blockPosition.z)
+      );
+
+      const coorName = nameFromCoordinate(x, y, z);
+
+      this.blocksWorldChunk[chunkName] = this.blocksWorldChunk[chunkName] || {};
+      this.blocksWorldChunk[chunkName][coorName] = placeType;
 
       // play sound
       if (this.currentPlaceSound) {
@@ -245,7 +223,7 @@ export default class BlockManager extends BaseEntity {
         this.currentPlaceSound.currentTime = 0;
       }
 
-      this.currentPlaceSound = blocks[this.inventoryManager.currentFocus].place;
+      this.currentPlaceSound = blocks[placeType].place;
 
       this.currentPlaceSound.play();
     }

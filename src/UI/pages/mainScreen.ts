@@ -1,8 +1,8 @@
-import { RenderPage } from '@/game/classes/renderPage';
-import { WorldsType } from '@/type';
+import { RenderPage } from "@/game/classes/renderPage";
+import { WorldsType } from "@/type";
 
-import Router from '../router';
-import { $ } from '../utils/selector';
+import Router from "../router";
+import { $ } from "../utils/selector";
 
 export default class MainScreen extends RenderPage {
   router: Router;
@@ -89,8 +89,6 @@ export default class MainScreen extends RenderPage {
     $("#github").onclick = () => {
       window.open("https://github.com/vuongle2609/Minecraft");
     };
-
-    // https://github.com/vuongle2609/Minecraft
 
     this.router.soundManager.changeActiveTheme("mainScreen");
   };

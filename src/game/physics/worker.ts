@@ -5,6 +5,7 @@ import { BlocksMappingType } from "@/type";
 import { CHUNK_SIZE, FLAT_WORLD_TYPE, TIME_TO_INTERACT } from "../../constants";
 import {
   CHARACTER_LENGTH,
+  CHARACTER_RADIUS,
   GRAVITY,
   GRAVITY_SCALE,
   JUMP_FORCE,
@@ -16,14 +17,12 @@ import { DefaultWorld } from "../terrant/worldGeneration";
 import Physics from "./physics";
 
 class PhysicsWorker {
-  constructor() {}
-
   worldGen: FlatWorld | DefaultWorld;
 
   chunkBlocksCustomMap: Record<string, BlocksMappingType> = {};
   chunkGenerated: Record<string, boolean> = {};
 
-  blocksMapping: Map<string, string | 0> = new Map();
+  blocksMapping: Record<string, string | 0> = {};
 
   spawn = [CHUNK_SIZE / 2, CHARACTER_LENGTH + 60, CHUNK_SIZE / 2];
   playerPos = new Vector3();
@@ -33,6 +32,22 @@ class PhysicsWorker {
   onGround = true;
 
   physicsEngine = new Physics();
+
+  constructor() {}
+
+  roundedPosition(position: Vector3) {
+    const positionXFloor = 2 * Math.round((position.x + CHARACTER_RADIUS) / 2);
+    const positionYFloor = 2 * Math.round(position.y / 2);
+    const positionZFloor = 2 * Math.round((position.z + CHARACTER_RADIUS) / 2);
+
+    const roundedPosition = new Vector3(
+      positionXFloor,
+      positionYFloor,
+      positionZFloor
+    );
+
+    return roundedPosition;
+  }
 
   calculateMovement = ({
     directionVectorArr,
@@ -57,7 +72,7 @@ class PhysicsWorker {
       directionVectorArr[2]
     );
 
-    const playerPostion = new Vector3(position[0], position[1], position[2]);
+    const playerPosition = new Vector3(position[0], position[1], position[2]);
 
     forwardVector.y = 0;
     forwardVector.normalize();
@@ -81,7 +96,7 @@ class PhysicsWorker {
     const { calculatedMoveVector: correctMovement, collideObject } =
       this.physicsEngine.calculateCorrectMovement(
         new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z),
-        playerPostion,
+        playerPosition,
         this.blocksMapping
       );
 
@@ -135,18 +150,10 @@ class PhysicsWorker {
   };
 
   addBlock = ({ position, type }: { position: number[]; type: string }) => {
-    // this.blocksMapping = {
-    //   ...this.blocksMapping,
-    //   [nameFromCoordinate(position[0], position[1], position[2])]: type,
-    // };
-
-    this.blocksMapping.set(
-      nameFromCoordinate(position[0], position[1], position[2]),
-      type
-    );
-    this.blocksMapping.get(
-      nameFromCoordinate(position[0], position[1], position[2])
-    );
+    this.blocksMapping = {
+      ...this.blocksMapping,
+      [nameFromCoordinate(position[0], position[1], position[2])]: type,
+    };
   };
 
   init = ({
@@ -165,7 +172,7 @@ class PhysicsWorker {
 
     this.chunkBlocksCustomMap = chunkBlocksCustom;
 
-    if (initPos) this.playerPos.set(initPos[0], initPos[1], initPos[2]);
+    if (initPos) this.playerPos.set(initPos[0], initPos[1] + 60, initPos[2]);
     else this.playerPos.set(this.spawn[0], this.spawn[1], this.spawn[2]);
   };
 
@@ -208,9 +215,9 @@ class PhysicsWorker {
   };
 
   removeBlock = ({ position }: { position: number[] }) => {
-    this.blocksMapping.delete(
+    delete this.blocksMapping[
       nameFromCoordinate(position[0], position[1], position[2])
-    );
+    ];
   };
 
   eventMapping: Record<string, Function> = {
@@ -222,11 +229,11 @@ class PhysicsWorker {
   };
 }
 
-const physicsWorker = new PhysicsWorker();
+let physicsWorker = new PhysicsWorker();
 
 self.onmessage = (
   e: MessageEvent<{
-    type: keyof typeof physicsWorker;
+    type: string;
     data: any;
   }>
 ) => {

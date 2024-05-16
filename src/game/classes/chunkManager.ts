@@ -43,7 +43,7 @@ export default class ChunkManager extends BlockManager {
     currentProcessChunk: null,
   });
 
-  chunkWorkers = Array(14)
+  chunkWorkers = Array(9)
     .fill(0)
     .reduce((prev, _, index) => {
       return {
@@ -253,7 +253,6 @@ export default class ChunkManager extends BlockManager {
         y: position[1],
         z: position[2],
         type,
-        isRenderChunk: true,
         facesToRender: facesToRender[key],
       });
 
@@ -286,7 +285,12 @@ export default class ChunkManager extends BlockManager {
   }
 
   handleAssignWorkerChunk(chunkName: string, chunk: { x: number; z: number }) {
-    if (!this.chunksBlocks[chunkName]) {
+    if (
+      !this.chunksBlocks[chunkName] &&
+      !Object.values(this.chunkWorkers).find(
+        (item) => item.currentProcessChunk === chunkName
+      )
+    ) {
       this.chunkPendingQueueProxy.unshift(chunk.x, chunk.z);
     }
   }

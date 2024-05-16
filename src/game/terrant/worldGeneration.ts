@@ -229,6 +229,7 @@ export class DefaultWorld extends BaseGeneration {
         countSurface++;
       }
 
+      // create water
       if (y <= 16) {
         let countSurface = 0;
 

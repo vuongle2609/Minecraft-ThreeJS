@@ -14,7 +14,7 @@ import BaseEntity, { BasePropsType } from "./baseEntity";
 interface PropsType {
   position: Vector3;
   type: BlockKeys;
-  blocksMapping: Record<string, Record<string, Record<string, Block>>>;
+  blocksMapping: Map<string, Block>;
   shouldNotRender?: boolean;
   facesToRender?: Record<Face, boolean>;
 }
@@ -33,7 +33,7 @@ export default class Block extends BaseEntity {
   type: BlockKeys;
   position: Vector3;
   atttribute: BlockAttributeType;
-  blocksMapping: Record<string, Record<string, Record<string, Block>>>;
+  blocksMapping: Map<string, Block>;
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
@@ -68,42 +68,54 @@ export default class Block extends BaseEntity {
 
     const { x, y, z } = this.position;
 
-    const leftZBlock = this.blocksMapping[x]?.[y]?.[z + BLOCK_WIDTH];
+    const leftZBlock = this.blocksMapping.get(
+      nameFromCoordinate(x, y, z + BLOCK_WIDTH)
+    );
     if (leftZBlock) {
       leftZBlock.removeFace(rightZ);
     } else {
       this.addFace(leftZ);
     }
 
-    const rightZBlock = this.blocksMapping[x]?.[y]?.[z - BLOCK_WIDTH];
+    const rightZBlock = this.blocksMapping.get(
+      nameFromCoordinate(x, y, z - BLOCK_WIDTH)
+    );
     if (rightZBlock) {
       rightZBlock.removeFace(leftZ);
     } else {
       this.addFace(rightZ);
     }
 
-    const leftXBlock = this.blocksMapping[x + BLOCK_WIDTH]?.[y]?.[z];
+    const leftXBlock = this.blocksMapping.get(
+      nameFromCoordinate(x + BLOCK_WIDTH, y, z)
+    );
     if (leftXBlock) {
       leftXBlock.removeFace(rightX);
     } else {
       this.addFace(leftX);
     }
 
-    const rightXBlock = this.blocksMapping[x - BLOCK_WIDTH]?.[y]?.[z];
+    const rightXBlock = this.blocksMapping.get(
+      nameFromCoordinate(x - BLOCK_WIDTH, y, z)
+    );
     if (rightXBlock) {
       rightXBlock.removeFace(leftX);
     } else {
       this.addFace(rightX);
     }
 
-    const topBlock = this.blocksMapping[x]?.[y + BLOCK_WIDTH]?.[z];
+    const topBlock = this.blocksMapping.get(
+      nameFromCoordinate(x, y + BLOCK_WIDTH, z)
+    );
     if (topBlock) {
       topBlock.removeFace(bottom);
     } else {
       this.addFace(top);
     }
 
-    const bottomBlock = this.blocksMapping[x]?.[y - BLOCK_WIDTH]?.[z];
+    const bottomBlock = this.blocksMapping.get(
+      nameFromCoordinate(x, y - BLOCK_WIDTH, z)
+    );
     if (bottomBlock) {
       bottomBlock.removeFace(top);
     } else {
@@ -159,7 +171,7 @@ export default class Block extends BaseEntity {
     }
   }
 
-  destroy() {
+  destroy(isClearChunk?: boolean) {
     const { x, y, z } = this.position;
 
     Object.values(this.blockFaces).forEach((item) => {
@@ -169,24 +181,38 @@ export default class Block extends BaseEntity {
       }
     });
 
-    const leftZBlock = this.blocksMapping[x]?.[y]?.[z + BLOCK_WIDTH];
+    if (isClearChunk) return;
+
+    const leftZBlock = this.blocksMapping.get(
+      nameFromCoordinate(x, y, z + BLOCK_WIDTH)
+    );
     leftZBlock?.addFace(rightZ);
 
-    const rightZBlock = this.blocksMapping[x]?.[y]?.[z - BLOCK_WIDTH];
+    const rightZBlock = this.blocksMapping.get(
+      nameFromCoordinate(x, y, z - BLOCK_WIDTH)
+    );
     rightZBlock?.addFace(leftZ);
 
-    const leftXBlock = this.blocksMapping[x + BLOCK_WIDTH]?.[y]?.[z];
+    const leftXBlock = this.blocksMapping.get(
+      nameFromCoordinate(x + BLOCK_WIDTH, y, z)
+    );
     leftXBlock?.addFace(rightX);
 
-    const rightXBlock = this.blocksMapping[x - BLOCK_WIDTH]?.[y]?.[z];
+    const rightXBlock = this.blocksMapping.get(
+      nameFromCoordinate(x - BLOCK_WIDTH, y, z)
+    );
     rightXBlock?.addFace(leftX);
 
-    const topBlock = this.blocksMapping[x]?.[y + BLOCK_WIDTH]?.[z];
+    const topBlock = this.blocksMapping.get(
+      nameFromCoordinate(x, y + BLOCK_WIDTH, z)
+    );
     topBlock?.addFace(bottom);
 
-    const bottomBlock = this.blocksMapping[x]?.[y - BLOCK_WIDTH]?.[z];
+    const bottomBlock = this.blocksMapping.get(
+      nameFromCoordinate(x, y - BLOCK_WIDTH, z)
+    );
     bottomBlock?.addFace(top);
 
-    delete this.blocksMapping[x][y][z];
+    this.blocksMapping.delete(nameFromCoordinate(x, y, z));
   }
 }

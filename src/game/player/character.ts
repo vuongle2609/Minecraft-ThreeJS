@@ -1,20 +1,11 @@
 import { CapsuleGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
 
-import { CHUNK_SIZE } from "@/constants";
 import blocks, { BlockKeys } from "@/constants/blocks";
-import {
-  CHARACTER_LENGTH,
-  CHARACTER_MIDDLE_LENGTH,
-  CHARACTER_RADIUS,
-  LERP_CAMERA_BREATH,
-  SIN_X_MULTIPLY_LENGTH,
-  SIN_Y_MULTIPLY_LENGTH,
-} from "@/constants/player";
+import { CHARACTER_MIDDLE_LENGTH, CHARACTER_RADIUS } from "@/constants/player";
 import BasicCharacterControllerInput from "@/game/action/input";
 import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
 
 import { getChunkCoordinate } from "../helpers/chunkHelpers";
-import { lerp } from "three/src/math/MathUtils";
 
 export default class Player extends BaseEntity {
   input = new BasicCharacterControllerInput();
@@ -53,16 +44,10 @@ export default class Player extends BaseEntity {
       new CapsuleGeometry(CHARACTER_RADIUS, CHARACTER_MIDDLE_LENGTH),
       new MeshStandardMaterial()
     );
-    this.player.visible = false;
+    this.player.visible = true;
     this.player.name = "player";
 
-    const roundedPos = this.player.position.clone().round();
-
-    this.currentChunk = getChunkCoordinate(roundedPos.x, roundedPos.z);
-
     this.scene?.add(this.player);
-
-    this.chunkManager?.handleRequestChunks(this.currentChunk);
 
     this.worker?.addEventListener("message", (e) => {
       if (e.data.type === "updatePosition") {
@@ -86,10 +71,14 @@ export default class Player extends BaseEntity {
     const newCalChunk = getChunkCoordinate(roundedPos.x, roundedPos.z);
 
     if (
-      newCalChunk.x != this.currentChunk.x ||
-      newCalChunk.z != this.currentChunk.z
+      newCalChunk.x != this.currentChunk?.x ||
+      newCalChunk.z != this.currentChunk?.z
     ) {
       this.currentChunk = newCalChunk;
+
+      this.chunkManager?.handleRequestChunks(this.currentChunk);
+    } else if (!this.currentChunk) {
+      this.currentChunk = getChunkCoordinate(roundedPos.x, roundedPos.z);
 
       this.chunkManager?.handleRequestChunks(this.currentChunk);
     }
