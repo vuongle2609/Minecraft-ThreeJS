@@ -1,20 +1,15 @@
 import { Vector3 } from "three";
 
-import {
-  CHARACTER_LENGTH,
-  CHARACTER_LENGTH_CEIL,
-  CHARACTER_MIDDLE_LENGTH,
-  CHARACTER_RADIUS,
-} from "../../constants/player";
+import { CHARACTER_LENGTH, CHARACTER_WIDTH } from "../../constants/player";
 import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
 
 export default class Physics {
   constructor() {}
 
   roundedPosition(position: Vector3) {
-    const positionXFloor = 2 * Math.round((position.x + CHARACTER_RADIUS) / 2);
+    const positionXFloor = 2 * Math.round((position.x + CHARACTER_WIDTH) / 2);
     const positionYFloor = 2 * Math.round(position.y / 2);
-    const positionZFloor = 2 * Math.round((position.z + CHARACTER_RADIUS) / 2);
+    const positionZFloor = 2 * Math.round((position.z + CHARACTER_WIDTH) / 2);
 
     const roundedPosition = new Vector3(
       positionXFloor,
@@ -26,9 +21,9 @@ export default class Physics {
   }
 
   roundedPosition1(position: Vector3) {
-    const positionXFloor = 2 * Math.round((position.x - CHARACTER_RADIUS) / 2);
+    const positionXFloor = 2 * Math.round((position.x - CHARACTER_WIDTH) / 2);
     const positionYFloor = 2 * Math.round(position.y / 2);
-    const positionZFloor = 2 * Math.round((position.z - CHARACTER_RADIUS) / 2);
+    const positionZFloor = 2 * Math.round((position.z - CHARACTER_WIDTH) / 2);
 
     const roundedPosition = new Vector3(
       positionXFloor,
@@ -40,9 +35,9 @@ export default class Physics {
   }
 
   roundedPosition2(position: Vector3) {
-    const positionXFloor = 2 * Math.round((position.x + CHARACTER_RADIUS) / 2);
+    const positionXFloor = 2 * Math.round((position.x + CHARACTER_WIDTH) / 2);
     const positionYFloor = 2 * Math.round(position.y / 2);
-    const positionZFloor = 2 * Math.round((position.z - CHARACTER_RADIUS) / 2);
+    const positionZFloor = 2 * Math.round((position.z - CHARACTER_WIDTH) / 2);
 
     const roundedPosition = new Vector3(
       positionXFloor,
@@ -54,9 +49,9 @@ export default class Physics {
   }
 
   roundedPosition3(position: Vector3) {
-    const positionXFloor = 2 * Math.round((position.x - CHARACTER_RADIUS) / 2);
+    const positionXFloor = 2 * Math.round((position.x - CHARACTER_WIDTH) / 2);
     const positionYFloor = 2 * Math.round(position.y / 2);
-    const positionZFloor = 2 * Math.round((position.z + CHARACTER_RADIUS) / 2);
+    const positionZFloor = 2 * Math.round((position.z + CHARACTER_WIDTH) / 2);
 
     const roundedPosition = new Vector3(
       positionXFloor,

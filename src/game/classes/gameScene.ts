@@ -215,9 +215,9 @@ export default class GameScene extends RenderPage {
       this.player?.update(delta, t);
 
       this.cameraDebug.position.set(
-        this.player.player.position.x + 40,
-        this.player.player.position.y + 40,
-        this.player.player.position.z + 40
+        this.player.player.position.x + 4,
+        this.player.player.position.y + 4,
+        this.player.player.position.z + 4
       );
 
       this.cameraDebug.lookAt(this.player.player.position);

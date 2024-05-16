@@ -1,7 +1,13 @@
-import { CapsuleGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
+import {
+  BoxGeometry,
+  CapsuleGeometry,
+  Mesh,
+  MeshStandardMaterial,
+  Vector3,
+} from "three";
 
 import blocks, { BlockKeys } from "@/constants/blocks";
-import { CHARACTER_MIDDLE_LENGTH, CHARACTER_RADIUS } from "@/constants/player";
+import { CHARACTER_LENGTH, CHARACTER_WIDTH } from "@/constants/player";
 import BasicCharacterControllerInput from "@/game/action/input";
 import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
 
@@ -41,7 +47,7 @@ export default class Player extends BaseEntity {
   initialize() {
     // init player render
     this.player = new Mesh(
-      new CapsuleGeometry(CHARACTER_RADIUS, CHARACTER_MIDDLE_LENGTH),
+      new BoxGeometry(CHARACTER_WIDTH, CHARACTER_LENGTH, CHARACTER_WIDTH),
       new MeshStandardMaterial()
     );
     this.player.visible = true;
@@ -180,14 +186,6 @@ export default class Player extends BaseEntity {
 
   updateCamera() {
     const { x, y, z } = this.player.position;
-
-    // for debug
-
-    //constant lerp and diff y
-
-    // this.camera?.lookAt(0, 0, 0);
-
-    // this.camera?.position.set(10, 10, 10);
 
     this.camera?.position.copy(new Vector3(x, y + 1.4 - this.cameraOffset, z));
   }

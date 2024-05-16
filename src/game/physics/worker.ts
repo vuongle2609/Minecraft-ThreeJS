@@ -5,7 +5,6 @@ import { BlocksMappingType } from "@/type";
 import { CHUNK_SIZE, FLAT_WORLD_TYPE, TIME_TO_INTERACT } from "../../constants";
 import {
   CHARACTER_LENGTH,
-  CHARACTER_RADIUS,
   GRAVITY,
   GRAVITY_SCALE,
   JUMP_FORCE,
@@ -36,9 +35,9 @@ class PhysicsWorker {
   constructor() {}
 
   roundedPosition(position: Vector3) {
-    const positionXFloor = 2 * Math.round((position.x + CHARACTER_RADIUS) / 2);
+    const positionXFloor = 2 * Math.round((position.x + 0) / 2);
     const positionYFloor = 2 * Math.round(position.y / 2);
-    const positionZFloor = 2 * Math.round((position.z + CHARACTER_RADIUS) / 2);
+    const positionZFloor = 2 * Math.round((position.z + 0) / 2);
 
     const roundedPosition = new Vector3(
       positionXFloor,
@@ -101,7 +100,7 @@ class PhysicsWorker {
       );
 
     if (!collideObject && this.onGround) {
-      this.vy = -10;
+      this.vy = -5;
       this.onGround = false;
     }
 
