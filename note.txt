@@ -47,3 +47,6 @@ avoid render too much chunk at same time (queue chunk)
 DEFAULT_CHUNK_VIEW = 2;
 before optimize drop to 34 fps in chunk transition
 after optimize
+
+/// convert to array buffer webworker process
+// except main chunk => all main should not render outside
