@@ -2,7 +2,7 @@ import { $ } from "@/UI/utils/selector";
 import MouseControl from "@/game/action/mouseControl";
 import Player from "@/game/player/character";
 import { WorldsType } from "@/type";
-import { Clock, Color, PerspectiveCamera, Scene, WebGLRenderer } from "three";
+import { Clock, Color, FogExp2, PerspectiveCamera, Scene, WebGLRenderer } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 
 import ChunkManager from "./chunkManager";
@@ -215,9 +215,9 @@ export default class GameScene extends RenderPage {
       this.player?.update(delta, t);
 
       this.cameraDebug.position.set(
-        this.player.player.position.x + 4,
-        this.player.player.position.y + 4,
-        this.player.player.position.z + 4
+        this.player.player.position.x + 100,
+        this.player.player.position.y + 100,
+        this.player.player.position.z + 100
       );
 
       this.cameraDebug.lookAt(this.player.player.position);

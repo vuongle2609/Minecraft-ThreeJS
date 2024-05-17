@@ -26,6 +26,8 @@ export class DefaultWorld extends BaseGeneration {
     this.noise.SetFractalGain(0.179);
     this.noise.SetFractalWeightedStrength(12);
     this.noise.SetSeed(this.seed);
+    this.noise.SetDomainWarpType(FastNoiseLite.DomainWarpType.OpenSimplex2);
+    this.noise.SetDomainWarpAmp(36);
 
     this.noiseTree.SetFrequency(0.007);
     this.noiseTree.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
@@ -55,15 +57,15 @@ export class DefaultWorld extends BaseGeneration {
     z: number,
     chunkBlocksCustom: Record<string, 0 | BlockKeys>
   ) {
-    const blocksInChunk: Record<
+    const blocksInChunk: Map<
       string,
       {
         position: number[];
         type: BlockKeys;
       }
-    > = {};
+    > = new Map();
 
-    const blocksInChunkTypeOnly: Record<string, BlockKeys | 0> = {};
+    const blocksInChunkTypeOnly: Map<string, BlockKeys | 0> = new Map();
 
     const createBlock = (position: number[], type: BlockKeys) => {
       const blockName = nameFromCoordinate(
@@ -76,16 +78,16 @@ export class DefaultWorld extends BaseGeneration {
 
       if (chunkBlocksCustom?.[blockName] == 0) {
         shouldAssignBlock = false;
-        blocksInChunkTypeOnly[blockName] = 0;
+        blocksInChunkTypeOnly.set(blockName, 0);
       }
 
       if (shouldAssignBlock) {
-        blocksInChunk[blockName] = {
+        blocksInChunk.set(blockName, {
           position,
           type,
-        };
+        });
 
-        blocksInChunkTypeOnly[blockName] = type;
+        blocksInChunkTypeOnly.set(blockName, type);
       }
     };
 
@@ -249,15 +251,14 @@ export class DefaultWorld extends BaseGeneration {
 
     // place trees
     treePos.forEach(({ position, treeLength }) => {
-      if (position[1] > 20) createTree(position, treeLength);
+      // if (position[1] > 20) createTree(position, treeLength);
     });
 
-    const { mergedBlocksInChunkTypeOnly, mergedBlocksInChunk } =
-      this.mergeBlocks(blocksInChunk, chunkBlocksCustom, blocksInChunkTypeOnly);
+    this.mergeBlocks(blocksInChunk, chunkBlocksCustom, blocksInChunkTypeOnly);
 
     return {
-      blocksInChunk: mergedBlocksInChunk,
-      blocksInChunkTypeOnly: mergedBlocksInChunkTypeOnly,
+      blocksInChunk,
+      blocksInChunkTypeOnly,
     };
   }
 
@@ -279,12 +280,9 @@ export class DefaultWorld extends BaseGeneration {
           (neighborsChunkData || {})[key]
         );
 
-        return {
-          ...prev,
-          ...blocksInChunkTypeOnly,
-        };
+        return new Map([...prev, ...blocksInChunkTypeOnly]);
       },
-      {}
+      new Map()
     );
 
     const facesToRender = this.calFaceToRender(
@@ -293,8 +291,8 @@ export class DefaultWorld extends BaseGeneration {
     );
 
     return {
-      facesToRender,
-      blocksInChunk,
+      facesToRender: Object.fromEntries(facesToRender),
+      blocksInChunk: Object.fromEntries(blocksInChunk),
     };
   }
 }

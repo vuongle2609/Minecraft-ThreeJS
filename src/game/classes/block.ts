@@ -44,6 +44,7 @@ export default class Block extends BaseEntity {
     this.type = type;
     this.position = position;
     this.atttribute = blocks[type];
+    if (!blocks[type]) console.log("🚀 ~ Block ~ constructor ~ type:", type);
     this.blocksMapping = blocksMapping;
 
     facesToRender ? this.renderWithKnownFace(facesToRender) : this.render();

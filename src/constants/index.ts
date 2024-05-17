@@ -16,11 +16,11 @@ export const BLOCK_WIDTH = 2;
 export const DEFAULT_CHUNK_VIEW = 1;
 
 // number of chunk should render in physics world
-export const CHUNK_VIEW_WORKER_PHYSICS = 1;
+export const CHUNK_VIEW_WORKER_PHYSICS = 2;
 
 // size of chunk in x and z (CHUNK_SIZE * CHUNK_SIZE)
 // when change world data in localstorage must be clear due to different chunksize store data
-export const CHUNK_SIZE = 10;
+export const CHUNK_SIZE = 8;
 
 export const TIME_TO_INTERACT = 2000;
 

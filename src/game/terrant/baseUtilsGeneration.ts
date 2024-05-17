@@ -17,51 +17,30 @@ export class BaseGeneration {
 
   // merge existing or deleted blocks with generated blocks
   mergeBlocks(
-    blocksInChunk: Record<
+    blocksInChunk: Map<
       string,
       {
         position: number[];
-        type: BlockKeys;
+        type: BlockKeys | 0;
       }
-    > = {},
+    > = new Map(),
     chunkBlocksCustom: Record<string, 0 | BlockKeys>,
-    blocksInChunkTypeOnlyTerrant: Record<string, BlockKeys | 0>
+    blocksInChunkTypeOnly: Map<string, BlockKeys | 0>
   ) {
-    const blocksInChunkTypeOnly: Record<string, BlockKeys | 0> = {
-      ...blocksInChunkTypeOnlyTerrant,
-    };
+    Object.keys(chunkBlocksCustom || {}).forEach((currKey) => {
+      const { x, y, z } = detailFromName(currKey);
 
-    const mergedBlocksInChunk: Record<
-      string,
-      {
-        position: number[];
-        type: BlockKeys;
+      if (chunkBlocksCustom[currKey] == 0) {
+        blocksInChunkTypeOnly.set(currKey, 0);
       }
-    > = ({} = {
-      ...blocksInChunk,
-      ...Object.keys(chunkBlocksCustom || {}).reduce((prev, currKey) => {
-        const { x, y, z } = detailFromName(currKey);
 
-        if (chunkBlocksCustom[currKey] == 0) {
-          blocksInChunkTypeOnly[currKey] = 0;
-          return prev;
-        }
+      blocksInChunkTypeOnly.set(currKey, chunkBlocksCustom[currKey]);
 
-        blocksInChunkTypeOnly[currKey] = chunkBlocksCustom[currKey];
-        return {
-          ...prev,
-          [currKey]: {
-            position: [x, y, z],
-            type: chunkBlocksCustom[currKey],
-          },
-        };
-      }, {}),
+      blocksInChunk.set(currKey, {
+        position: [x, y, z],
+        type: chunkBlocksCustom[currKey],
+      });
     });
-
-    return {
-      mergedBlocksInChunk,
-      mergedBlocksInChunkTypeOnly: blocksInChunkTypeOnly,
-    };
   }
 
   shouldRenderFace(
@@ -80,32 +59,29 @@ export class BaseGeneration {
   }
 
   calFaceToRender(
-    blocksInChunk: Record<
+    blocksInChunk: Map<
       string,
       {
         position: number[];
         type: BlockKeys;
       }
-    > = {},
-    blocksInChunkNeighbor: Record<
+    > = new Map(),
+    blocksInChunkNeighbor: Map<
       string,
       {
         position: number[];
         type: BlockKeys;
       }
-    > = {}
+    > = new Map()
   ) {
-    const blockExisting = {
-      ...blocksInChunk,
-      ...blocksInChunkNeighbor,
-    };
+    const blockExisting = new Map([...blocksInChunk, ...blocksInChunkNeighbor]);
 
     Object.keys(blocksInChunk);
 
-    const facesToRender = Object.keys(blocksInChunk).reduce<
-      Record<string, Record<Face, boolean>>
-    >((prev, key) => {
-      const { position, type } = blocksInChunk[key];
+    const facesToRender = new Map();
+
+    for (let [key, value] of blocksInChunk) {
+      const { position, type } = value;
 
       const [x, y, z] = position;
 
@@ -123,18 +99,16 @@ export class BaseGeneration {
         BLOCK_WIDTH
       );
 
-      return {
-        ...prev,
-        [key]: {
-          [leftZ]: this.shouldRenderFace(faceHasNeighbor?.[leftZ], type),
-          [rightZ]: this.shouldRenderFace(faceHasNeighbor?.[rightZ], type),
-          [leftX]: this.shouldRenderFace(faceHasNeighbor?.[leftX], type),
-          [rightX]: this.shouldRenderFace(faceHasNeighbor?.[rightX], type),
-          [bottom]: this.lowestY === y ? false : !faceHasNeighbor?.[bottom],
-          [top]: this.shouldRenderFace(faceHasNeighbor?.[top], type),
-        },
-      };
-    }, {});
+      facesToRender.set(key, {
+        [leftZ]: this.shouldRenderFace(faceHasNeighbor?.[leftZ], type),
+        [rightZ]: this.shouldRenderFace(faceHasNeighbor?.[rightZ], type),
+        [leftX]: this.shouldRenderFace(faceHasNeighbor?.[leftX], type),
+        [rightX]: this.shouldRenderFace(faceHasNeighbor?.[rightX], type),
+        [bottom]: this.lowestY === y ? false : !faceHasNeighbor?.[bottom],
+        [top]: this.shouldRenderFace(faceHasNeighbor?.[top], type),
+      });
+    }
+
     return facesToRender;
   }
 }

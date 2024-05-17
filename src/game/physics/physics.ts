@@ -2,14 +2,20 @@ import { Vector3 } from "three";
 
 import { CHARACTER_LENGTH, CHARACTER_WIDTH } from "../../constants/player";
 import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
+import { BlockKeys } from "@/constants/blocks";
+import { BLOCK_WIDTH } from "@/constants";
+
+const halfCharacterWidth = CHARACTER_WIDTH / 2;
 
 export default class Physics {
   constructor() {}
 
   roundedPosition(position: Vector3) {
-    const positionXFloor = 2 * Math.round((position.x + CHARACTER_WIDTH) / 2);
+    const positionXFloor =
+      2 * Math.round((position.x + halfCharacterWidth) / BLOCK_WIDTH);
     const positionYFloor = 2 * Math.round(position.y / 2);
-    const positionZFloor = 2 * Math.round((position.z + CHARACTER_WIDTH) / 2);
+    const positionZFloor =
+      2 * Math.round((position.z + halfCharacterWidth) / BLOCK_WIDTH);
 
     const roundedPosition = new Vector3(
       positionXFloor,
@@ -21,9 +27,11 @@ export default class Physics {
   }
 
   roundedPosition1(position: Vector3) {
-    const positionXFloor = 2 * Math.round((position.x - CHARACTER_WIDTH) / 2);
+    const positionXFloor =
+      2 * Math.round((position.x - halfCharacterWidth) / BLOCK_WIDTH);
     const positionYFloor = 2 * Math.round(position.y / 2);
-    const positionZFloor = 2 * Math.round((position.z - CHARACTER_WIDTH) / 2);
+    const positionZFloor =
+      2 * Math.round((position.z - halfCharacterWidth) / BLOCK_WIDTH);
 
     const roundedPosition = new Vector3(
       positionXFloor,
@@ -35,9 +43,11 @@ export default class Physics {
   }
 
   roundedPosition2(position: Vector3) {
-    const positionXFloor = 2 * Math.round((position.x + CHARACTER_WIDTH) / 2);
+    const positionXFloor =
+      2 * Math.round((position.x + halfCharacterWidth) / BLOCK_WIDTH);
     const positionYFloor = 2 * Math.round(position.y / 2);
-    const positionZFloor = 2 * Math.round((position.z - CHARACTER_WIDTH) / 2);
+    const positionZFloor =
+      2 * Math.round((position.z - halfCharacterWidth) / BLOCK_WIDTH);
 
     const roundedPosition = new Vector3(
       positionXFloor,
@@ -49,9 +59,11 @@ export default class Physics {
   }
 
   roundedPosition3(position: Vector3) {
-    const positionXFloor = 2 * Math.round((position.x - CHARACTER_WIDTH) / 2);
+    const positionXFloor =
+      2 * Math.round((position.x - halfCharacterWidth) / BLOCK_WIDTH);
     const positionYFloor = 2 * Math.round(position.y / 2);
-    const positionZFloor = 2 * Math.round((position.z + CHARACTER_WIDTH) / 2);
+    const positionZFloor =
+      2 * Math.round((position.z + halfCharacterWidth) / BLOCK_WIDTH);
 
     const roundedPosition = new Vector3(
       positionXFloor,
@@ -65,7 +77,7 @@ export default class Physics {
   calculateCorrectMovement(
     vectorMove: Vector3,
     playerPosition: Vector3,
-    blocksMapping: any
+    blocksMapping: Map<string, BlockKeys | 0>
   ) {
     playerPosition.y -= 2;
 
@@ -82,184 +94,184 @@ export default class Physics {
     const roundedCurrentPosition3 = this.roundedPosition3(playerPosition);
 
     const nextObjectX =
-      blocksMapping[
+      blocksMapping.get(
         nameFromCoordinate(
           roundedNextPosition.x,
           roundedCurrentPosition.y,
           roundedCurrentPosition.z
         )
-      ] ||
-      blocksMapping[
+      ) ||
+      blocksMapping.get(
         nameFromCoordinate(
           roundedNextPosition1.x,
           roundedCurrentPosition1.y,
           roundedCurrentPosition1.z
         )
-      ] ||
-      blocksMapping[
+      ) ||
+      blocksMapping.get(
         nameFromCoordinate(
           roundedNextPosition2.x,
           roundedCurrentPosition2.y,
           roundedCurrentPosition2.z
         )
-      ] ||
-      blocksMapping[
+      ) ||
+      blocksMapping.get(
         nameFromCoordinate(
           roundedNextPosition3.x,
           roundedCurrentPosition3.y,
           roundedCurrentPosition3.z
         )
-      ];
+      );
 
     const nextObjectXTop =
-      blocksMapping[
+      blocksMapping.get(
         nameFromCoordinate(
           roundedNextPosition.x,
           roundedCurrentPosition.y + CHARACTER_LENGTH,
           roundedCurrentPosition.z
         )
-      ] ||
-      blocksMapping[
+      ) ||
+      blocksMapping.get(
         nameFromCoordinate(
           roundedNextPosition1.x,
           roundedCurrentPosition1.y + CHARACTER_LENGTH,
           roundedCurrentPosition1.z
         )
-      ] ||
-      blocksMapping[
+      ) ||
+      blocksMapping.get(
         nameFromCoordinate(
           roundedNextPosition2.x,
           roundedCurrentPosition2.y + CHARACTER_LENGTH,
           roundedCurrentPosition2.z
         )
-      ] ||
-      blocksMapping[
+      ) ||
+      blocksMapping.get(
         nameFromCoordinate(
           roundedNextPosition3.x,
           roundedCurrentPosition3.y + CHARACTER_LENGTH,
           roundedCurrentPosition3.z
         )
-      ];
+      );
 
     const nextObjectY =
-      blocksMapping[
+      blocksMapping.get(
         nameFromCoordinate(
           roundedCurrentPosition.x,
           roundedNextPosition.y,
           roundedCurrentPosition.z
         )
-      ] ||
-      blocksMapping[
+      ) ||
+      blocksMapping.get(
         nameFromCoordinate(
           roundedCurrentPosition1.x,
           roundedNextPosition1.y,
           roundedCurrentPosition1.z
         )
-      ] ||
-      blocksMapping[
+      ) ||
+      blocksMapping.get(
         nameFromCoordinate(
           roundedCurrentPosition2.x,
           roundedNextPosition2.y,
           roundedCurrentPosition2.z
         )
-      ] ||
-      blocksMapping[
+      ) ||
+      blocksMapping.get(
         nameFromCoordinate(
           roundedCurrentPosition3.x,
           roundedNextPosition3.y,
           roundedCurrentPosition3.z
         )
-      ];
+      );
 
     const nextObjectYTop =
-      blocksMapping[
+      blocksMapping.get(
         nameFromCoordinate(
           roundedCurrentPosition.x,
           roundedNextPosition.y + CHARACTER_LENGTH,
           roundedCurrentPosition.z
         )
-      ] ||
-      blocksMapping[
+      ) ||
+      blocksMapping.get(
         nameFromCoordinate(
           roundedCurrentPosition1.x,
           roundedNextPosition1.y + CHARACTER_LENGTH,
           roundedCurrentPosition1.z
         )
-      ] ||
-      blocksMapping[
+      ) ||
+      blocksMapping.get(
         nameFromCoordinate(
           roundedCurrentPosition2.x,
           roundedNextPosition2.y + CHARACTER_LENGTH,
           roundedCurrentPosition2.z
         )
-      ] ||
-      blocksMapping[
+      ) ||
+      blocksMapping.get(
         nameFromCoordinate(
           roundedCurrentPosition3.x,
           roundedNextPosition3.y + CHARACTER_LENGTH,
           roundedCurrentPosition3.z
         )
-      ];
+      );
 
     const nextObjectZ =
-      blocksMapping[
+      blocksMapping.get(
         nameFromCoordinate(
           roundedCurrentPosition.x,
           roundedCurrentPosition.y,
           roundedNextPosition.z
         )
-      ] ||
-      blocksMapping[
+      ) ||
+      blocksMapping.get(
         nameFromCoordinate(
           roundedCurrentPosition1.x,
           roundedCurrentPosition1.y,
           roundedNextPosition1.z
         )
-      ] ||
-      blocksMapping[
+      ) ||
+      blocksMapping.get(
         nameFromCoordinate(
           roundedCurrentPosition2.x,
           roundedCurrentPosition2.y,
           roundedNextPosition2.z
         )
-      ] ||
-      blocksMapping[
+      ) ||
+      blocksMapping.get(
         nameFromCoordinate(
           roundedCurrentPosition3.x,
           roundedCurrentPosition3.y,
           roundedNextPosition3.z
         )
-      ];
+      );
 
     const nextObjectZTop =
-      blocksMapping[
+      blocksMapping.get(
         nameFromCoordinate(
           roundedCurrentPosition.x,
           roundedCurrentPosition.y + CHARACTER_LENGTH,
           roundedNextPosition.z
         )
-      ] ||
-      blocksMapping[
+      ) ||
+      blocksMapping.get(
         nameFromCoordinate(
           roundedCurrentPosition1.x,
           roundedCurrentPosition1.y + CHARACTER_LENGTH,
           roundedNextPosition1.z
         )
-      ] ||
-      blocksMapping[
+      ) ||
+      blocksMapping.get(
         nameFromCoordinate(
           roundedCurrentPosition2.x,
           roundedCurrentPosition2.y + CHARACTER_LENGTH,
           roundedNextPosition2.z
         )
-      ] ||
-      blocksMapping[
+      ) ||
+      blocksMapping.get(
         nameFromCoordinate(
           roundedCurrentPosition3.x,
           roundedCurrentPosition3.y + CHARACTER_LENGTH,
           roundedNextPosition3.z
         )
-      ];
+      );
 
     const calculatedMoveVector = new Vector3();
 

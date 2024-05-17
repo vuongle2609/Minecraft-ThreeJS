@@ -2,6 +2,7 @@ import { Vector3 } from "three";
 
 import { BlocksMappingType } from "@/type";
 
+import { BlockKeys } from "@/constants/blocks";
 import { CHUNK_SIZE, FLAT_WORLD_TYPE, TIME_TO_INTERACT } from "../../constants";
 import {
   CHARACTER_LENGTH,
@@ -21,7 +22,7 @@ class PhysicsWorker {
   chunkBlocksCustomMap: Record<string, BlocksMappingType> = {};
   chunkGenerated: Record<string, boolean> = {};
 
-  blocksMapping: Record<string, string | 0> = {};
+  blocksMapping: Map<string, BlockKeys | 0> = new Map();
 
   spawn = [CHUNK_SIZE / 2, CHARACTER_LENGTH + 60, CHUNK_SIZE / 2];
   playerPos = new Vector3();
@@ -33,20 +34,6 @@ class PhysicsWorker {
   physicsEngine = new Physics();
 
   constructor() {}
-
-  roundedPosition(position: Vector3) {
-    const positionXFloor = 2 * Math.round((position.x + 0) / 2);
-    const positionYFloor = 2 * Math.round(position.y / 2);
-    const positionZFloor = 2 * Math.round((position.z + 0) / 2);
-
-    const roundedPosition = new Vector3(
-      positionXFloor,
-      positionYFloor,
-      positionZFloor
-    );
-
-    return roundedPosition;
-  }
 
   calculateMovement = ({
     directionVectorArr,
@@ -149,10 +136,10 @@ class PhysicsWorker {
   };
 
   addBlock = ({ position, type }: { position: number[]; type: string }) => {
-    this.blocksMapping = {
-      ...this.blocksMapping,
-      [nameFromCoordinate(position[0], position[1], position[2])]: type,
-    };
+    this.blocksMapping.set(
+      nameFromCoordinate(position[0], position[1], position[2]),
+      type as BlockKeys
+    );
   };
 
   init = ({
@@ -203,10 +190,10 @@ class PhysicsWorker {
 
         this.chunkGenerated[key] = true;
 
-        this.blocksMapping = {
+        this.blocksMapping = new Map([
           ...this.blocksMapping,
           ...blocksInChunkTypeOnly,
-        };
+        ]);
       }
     });
 
@@ -214,9 +201,9 @@ class PhysicsWorker {
   };
 
   removeBlock = ({ position }: { position: number[] }) => {
-    delete this.blocksMapping[
+    this.blocksMapping.delete(
       nameFromCoordinate(position[0], position[1], position[2])
-    ];
+    );
   };
 
   eventMapping: Record<string, Function> = {

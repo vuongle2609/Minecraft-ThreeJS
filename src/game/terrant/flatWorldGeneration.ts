@@ -13,16 +13,16 @@ export class FlatWorld extends BaseGeneration {
     z: number,
     chunkBlocksCustom: Record<string, 0 | BlockKeys>
   ) {
-    const blocksInChunk: Record<
+    const blocksInChunk: Map<
       string,
       {
         position: number[];
         type: BlockKeys;
       }
-    > = {};
-    let isFirstLayer = true;
+    > = new Map();
+    const blocksInChunkTypeOnly: Map<string, BlockKeys | 0> = new Map();
 
-    const blocksInChunkTypeOnly: Record<string, BlockKeys | 0> = {};
+    let isFirstLayer = true;
 
     for (let yA = FLAT_WORLD_HEIGHT - 1; yA >= 0; yA--) {
       for (let xA = x * CHUNK_SIZE; xA < (x + 1) * CHUNK_SIZE; xA++) {
@@ -50,28 +50,27 @@ export class FlatWorld extends BaseGeneration {
 
           if (chunkBlocksCustom?.[blockName] == 0) {
             shouldAssignBlock = false;
-            blocksInChunkTypeOnly[blockName] = 0;
+            blocksInChunkTypeOnly.set(blockName, 0);
           }
 
           if (shouldAssignBlock) {
             const type = isFirstLayer ? "grass" : "dirt";
-            blocksInChunk[blockName] = {
+            blocksInChunk.set(blockName, {
               position,
               type,
-            };
-            blocksInChunkTypeOnly[blockName] = type;
+            });
+            blocksInChunkTypeOnly.set(blockName, type);
           }
         }
       }
       isFirstLayer = false;
     }
 
-    const { mergedBlocksInChunk, mergedBlocksInChunkTypeOnly } =
-      this.mergeBlocks(blocksInChunk, chunkBlocksCustom, blocksInChunkTypeOnly);
+    this.mergeBlocks(blocksInChunk, chunkBlocksCustom, blocksInChunkTypeOnly);
 
     return {
-      blocksInChunk: mergedBlocksInChunk,
-      blocksInChunkTypeOnly: mergedBlocksInChunkTypeOnly,
+      blocksInChunk,
+      blocksInChunkTypeOnly,
     };
   }
 
@@ -93,12 +92,9 @@ export class FlatWorld extends BaseGeneration {
           (neighborsChunkData || {})[key]
         );
 
-        return {
-          ...prev,
-          ...blocksInChunkTypeOnly,
-        };
+        return new Map([...prev, ...blocksInChunkTypeOnly]);
       },
-      {}
+      new Map()
     );
 
     const facesToRender = this.calFaceToRender(
