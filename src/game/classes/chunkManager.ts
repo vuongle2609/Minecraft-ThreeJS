@@ -245,6 +245,8 @@ export default class ChunkManager extends BlockManager {
     const blocksRender = Object.keys(blocksRenderWorker);
     const blocksInChunk: string[] = [];
 
+    const intancedNeedToCals: Map<BlockKeys, 1> = new Map();
+
     blocksRender.forEach((key) => {
       const { position, type } = blocksRenderWorker[key];
 
@@ -256,10 +258,19 @@ export default class ChunkManager extends BlockManager {
         facesToRender: facesToRender[key],
       });
 
+      intancedNeedToCals.set(type, 1);
+
       blocksInChunk.push(
         nameFromCoordinate(position[0], position[1], position[2])
       );
     });
+
+    for (const [key, value] of intancedNeedToCals) {
+      Object.values(this.blocksInstanced[key]).forEach((item: any) => {
+        item.mesh.instanceMatrix.needsUpdate = true;
+        item.mesh.computeBoundingSphere();
+      });
+    }
 
     this.chunksBlocks[chunkName] = blocksInChunk;
   }
@@ -280,7 +291,7 @@ export default class ChunkManager extends BlockManager {
     blocksDelete.forEach((blockKey) => {
       const { y, x, z } = detailFromName(blockKey);
 
-      this.removeBlock(x, y, z, true);
+      this.removeBlock(x, y, z, true, false);
     });
   }
 

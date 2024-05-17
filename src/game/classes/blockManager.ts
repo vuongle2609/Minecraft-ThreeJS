@@ -1,7 +1,13 @@
-import { Vector2, Vector3 } from "three";
+import {
+  DynamicDrawUsage,
+  InstancedMesh,
+  Object3D,
+  Vector2,
+  Vector3,
+} from "three";
 
 import { Face } from "@/constants/block";
-import blocks, { BlockKeys } from "@/constants/blocks";
+import blocks, { BlockKeys, renderGeometry } from "@/constants/blocks";
 import { getChunkCoordinate } from "@/game/helpers/chunkHelpers";
 import { detailFromName } from "@/game/helpers/detailFromName";
 import {
@@ -12,6 +18,7 @@ import {
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
+import { BlocksInstancedMapping } from "@/type";
 
 interface PropsType {
   inventoryManager: InventoryManager;
@@ -30,6 +37,39 @@ export default class BlockManager extends BaseEntity {
   chunksBlocks: Record<string, string[]> = {};
 
   chunksActive: string[] = [];
+
+  dummy = new Object3D();
+
+  blocksInstanced = Object.keys(blocks).reduce((prev, typeKey) => {
+    const currBlock = blocks[typeKey as keyof typeof blocks];
+
+    return {
+      ...prev,
+      [typeKey]: Object.keys(currBlock.texture).reduce((prev, key) => {
+        const mesh = new InstancedMesh(
+          renderGeometry,
+          currBlock.texture[key as unknown as keyof typeof currBlock.texture],
+          1000000
+        );
+
+        mesh.instanceMatrix.setUsage(DynamicDrawUsage);
+        mesh.count = 0;
+        mesh.frustumCulled = false;
+        mesh.name = typeKey + "_" + key;
+
+        this.scene?.add(mesh);
+
+        return {
+          ...prev,
+          [key]: {
+            mesh,
+            count: 0,
+            indexCanAllocate: [],
+          },
+        };
+      }, {}),
+    };
+  }, {}) as BlocksInstancedMapping;
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
@@ -68,6 +108,8 @@ export default class BlockManager extends BaseEntity {
       type: type,
       blocksMapping: this.blocksMapping,
       facesToRender,
+      instancedPlanes: this.blocksInstanced[type],
+      dummy: this.dummy,
     });
 
     this.blocksMapping.set(nameFromCoordinate(x, y, z), block);
@@ -92,10 +134,16 @@ export default class BlockManager extends BaseEntity {
     return intersectObject;
   }
 
-  removeBlock(x: number, y: number, z: number, isClearChunk?: boolean) {
+  removeBlock(
+    x: number,
+    y: number,
+    z: number,
+    isClearChunk?: boolean,
+    updateMatrix?: boolean
+  ) {
     const blockToRemove = this.blocksMapping.get(nameFromCoordinate(x, y, z));
 
-    blockToRemove?.destroy(isClearChunk);
+    blockToRemove?.destroy({ isClearChunk, updateMatrix });
   }
 
   handleHoverBlock() {}
@@ -132,7 +180,7 @@ export default class BlockManager extends BaseEntity {
     if (type === "bedrock") return;
     if (type === "water") return;
 
-    this.removeBlock(x, y, z);
+    this.removeBlock(x, y, z, false, true);
 
     this.removeBlockWorker({
       position: [x, y, z],

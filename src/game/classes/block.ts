@@ -1,4 +1,4 @@
-import { Mesh, Object3D, Vector3 } from "three";
+import { Matrix4, Mesh, Object3D, Vector3 } from "three";
 
 import { BLOCK_WIDTH } from "@/constants";
 import { BlockFaces, Face } from "@/constants/block";
@@ -10,13 +10,15 @@ import blocks, {
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
 
 import BaseEntity, { BasePropsType } from "./baseEntity";
+import { BlocksInstancedType } from "@/type";
 
 interface PropsType {
   position: Vector3;
   type: BlockKeys;
   blocksMapping: Map<string, Block>;
-  shouldNotRender?: boolean;
   facesToRender?: Record<Face, boolean>;
+  dummy: Object3D;
+  instancedPlanes: BlocksInstancedType;
 }
 
 const { leftZ, rightZ, leftX, rightX, top, bottom } = Face;
@@ -35,17 +37,27 @@ export default class Block extends BaseEntity {
   atttribute: BlockAttributeType;
   blocksMapping: Map<string, Block>;
 
+  dummy: Object3D;
+  instancedPlanes: BlocksInstancedType;
+
   constructor(props: BasePropsType & PropsType) {
     super(props);
 
-    const { type, position, blocksMapping, shouldNotRender, facesToRender } =
-      props!;
+    const {
+      type,
+      position,
+      blocksMapping,
+      facesToRender,
+      dummy,
+      instancedPlanes,
+    } = props!;
 
     this.type = type;
     this.position = position;
     this.atttribute = blocks[type];
-    if (!blocks[type]) console.log("🚀 ~ Block ~ constructor ~ type:", type);
     this.blocksMapping = blocksMapping;
+    this.dummy = dummy;
+    this.instancedPlanes = instancedPlanes;
 
     facesToRender ? this.renderWithKnownFace(facesToRender) : this.render();
   }
@@ -124,27 +136,53 @@ export default class Block extends BaseEntity {
     }
   }
 
-  removeFace(face: keyof BlockFaces) {
-    this.scene?.remove(this.blockFaces[face] as Object3D);
+  removeFace(face: keyof BlockFaces, updateMatrix?: boolean) {
+    const currInstanced =
+      this.instancedPlanes[this.atttribute.textureMap[face]].mesh;
+
+    const index = this.blockFaces[face];
+
+    if (index !== null) {
+      currInstanced.setMatrixAt(
+        index,
+        new Matrix4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+      );
+
+      this.instancedPlanes[
+        this.atttribute.textureMap[face]
+      ].indexCanAllocate.push(index);
+
+      if (updateMatrix) {
+        currInstanced.instanceMatrix.needsUpdate = true;
+        currInstanced.computeBoundingSphere();
+      }
+    }
   }
 
-  addFace(face: keyof BlockFaces) {
-    const texture = this.atttribute.texture;
-
-    const material =
-      texture[this.atttribute.textureMap[face] as keyof typeof texture];
-    const plane = new Mesh(renderGeometry, material);
-
+  addFace(face: keyof BlockFaces, updateMatrix?: boolean) {
     const { rotation } = this.calFaceAttr(face);
 
-    const { x, y, z } = this.position;
+    const currInstanced =
+      this.instancedPlanes[this.atttribute.textureMap[face]];
 
-    plane.position.copy(this.position);
-    plane.rotation.set(rotation[0], rotation[1], rotation[2]);
-    plane.name = nameFromCoordinate(x, y, z, this.type, face);
+    const currInstancedMesh = currInstanced.mesh;
+    const indexAllowCate = currInstanced.indexCanAllocate.pop();
 
-    this.blockFaces[face] = plane;
-    this.scene?.add(plane);
+    const index =
+      indexAllowCate !== undefined ? indexAllowCate : currInstancedMesh.count;
+
+    this.dummy.position.copy(this.position);
+    this.dummy.rotation.set(rotation[0], rotation[1], rotation[2]);
+    this.dummy.updateMatrix();
+
+    this.blockFaces[face] = index;
+
+    currInstancedMesh.setMatrixAt(index, this.dummy.matrix);
+    if (updateMatrix) {
+      currInstancedMesh.instanceMatrix.needsUpdate = true;
+      currInstancedMesh.computeBoundingSphere();
+    }
+    if (indexAllowCate === undefined) currInstancedMesh.count += 1;
   }
 
   calFaceAttr(face: keyof BlockFaces) {
@@ -172,14 +210,17 @@ export default class Block extends BaseEntity {
     }
   }
 
-  destroy(isClearChunk?: boolean) {
+  destroy({
+    isClearChunk,
+    updateMatrix,
+  }: {
+    isClearChunk?: boolean;
+    updateMatrix?: boolean;
+  }) {
     const { x, y, z } = this.position;
 
-    Object.values(this.blockFaces).forEach((item) => {
-      if (item) {
-        this.scene?.remove(item);
-        item.geometry.dispose();
-      }
+    Object.keys(this.blockFaces).forEach((face) => {
+      this.removeFace(face as unknown as keyof BlockFaces, updateMatrix);
     });
 
     if (isClearChunk) return;
