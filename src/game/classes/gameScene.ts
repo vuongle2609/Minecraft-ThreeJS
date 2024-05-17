@@ -2,7 +2,14 @@ import { $ } from "@/UI/utils/selector";
 import MouseControl from "@/game/action/mouseControl";
 import Player from "@/game/player/character";
 import { WorldsType } from "@/type";
-import { Clock, Color, FogExp2, PerspectiveCamera, Scene, WebGLRenderer } from "three";
+import {
+  Clock,
+  Color,
+  FogExp2,
+  PerspectiveCamera,
+  Scene,
+  WebGLRenderer,
+} from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 
 import ChunkManager from "./chunkManager";
@@ -22,10 +29,10 @@ export default class GameScene extends RenderPage {
     canvas: document.querySelector("#gameScene") as HTMLCanvasElement,
   });
 
-  rendererDebug = new WebGLRenderer({
-    antialias: true,
-    canvas: document.querySelector("#gameSceneDebug") as HTMLCanvasElement,
-  });
+  // rendererDebug = new WebGLRenderer({
+  //   antialias: true,
+  //   canvas: document.querySelector("#gameSceneDebug") as HTMLCanvasElement,
+  // });
 
   worker = new Worker(new URL("../physics/worker", import.meta.url), {
     type: "module",
@@ -39,7 +46,7 @@ export default class GameScene extends RenderPage {
     0.1,
     2000
   );
-  cameraDebug = new PerspectiveCamera(70, 200 / 200, 0.1, 2000);
+  // cameraDebug = new PerspectiveCamera(70, 200 / 200, 0.1, 2000);
 
   control = new PointerLockControls(this.camera, document.body);
 
@@ -75,7 +82,7 @@ export default class GameScene extends RenderPage {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.shadowMap.enabled = false;
 
-    this.rendererDebug.setSize(200, 200);
+    // this.rendererDebug.setSize(200, 200);
 
     window.addEventListener(
       "resize",
@@ -91,7 +98,7 @@ export default class GameScene extends RenderPage {
 
     this.scene.background = new Color("#6EB1FF");
     // this.scene.fog = new Fog(0xcccccc, 3, 40);
-    // this.scene.fog = new FogExp2(0xcccccc, 0.014);
+    this.scene.fog = new FogExp2(0xcccccc, 0.014);
 
     if (this.worldStorage.rotation)
       this.camera.rotation.fromArray(this.worldStorage.rotation as any);
@@ -214,13 +221,13 @@ export default class GameScene extends RenderPage {
 
       this.player?.update(delta, t);
 
-      this.cameraDebug.position.set(
-        this.player.player.position.x + 100,
-        this.player.player.position.y + 100,
-        this.player.player.position.z + 100
-      );
+      // this.cameraDebug.position.set(
+      //   this.player.player.position.x + 100,
+      //   this.player.player.position.y + 100,
+      //   this.player.player.position.z + 100
+      // );
 
-      this.cameraDebug.lookAt(this.player.player.position);
+      // this.cameraDebug.lookAt(this.player.player.position);
 
       this.cloud?.update(this.player.player.position);
 
