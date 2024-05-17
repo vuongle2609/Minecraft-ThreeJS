@@ -52,9 +52,14 @@ export default class BlockManager extends BaseEntity {
     x: number;
     y: number;
     z: number;
-    type: BlockKeys;
+    type: BlockKeys | 0;
     facesToRender?: Record<Face, boolean>;
   }) {
+    // if render chunk and block marked as destroyed then return
+    if (type == 0) {
+      return;
+    }
+
     const position = new Vector3(x, y, z);
 
     const block = new Block({

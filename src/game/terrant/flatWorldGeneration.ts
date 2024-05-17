@@ -1,6 +1,6 @@
-import { BLOCK_WIDTH, CHUNK_SIZE, FLAT_WORLD_HEIGHT } from "../../constants";
-import { BlockKeys } from "../../constants/blocks";
-import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
+import { BLOCK_WIDTH, CHUNK_SIZE, FLAT_WORLD_HEIGHT } from "@/constants";
+import { BlockKeys } from "@/constants/blocks";
+import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
 import { BaseGeneration } from "./baseUtilsGeneration";
 
 export class FlatWorld extends BaseGeneration {

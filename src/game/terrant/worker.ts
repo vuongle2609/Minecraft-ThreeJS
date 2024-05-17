@@ -1,6 +1,6 @@
-import { FLAT_WORLD_TYPE } from "../../constants";
-import { BlockKeys } from "../../constants/blocks";
-import { nameChunkFromCoordinate } from "../helpers/nameFromCoordinate";
+import { FLAT_WORLD_TYPE } from "@/constants";
+import { BlockKeys } from "@/constants/blocks";
+import { nameChunkFromCoordinate } from "@/game/helpers/nameFromCoordinate";
 import { FlatWorld } from "./flatWorldGeneration";
 import { DefaultWorld } from "./worldGeneration";
 

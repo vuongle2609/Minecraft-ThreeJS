@@ -1,9 +1,9 @@
 import { Vector3 } from "three";
 
-import { CHARACTER_LENGTH, CHARACTER_WIDTH } from "../../constants/player";
-import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
-import { BlockKeys } from "@/constants/blocks";
 import { BLOCK_WIDTH } from "@/constants";
+import { BlockKeys } from "@/constants/blocks";
+import { CHARACTER_LENGTH, CHARACTER_WIDTH } from "@/constants/player";
+import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
 
 const halfCharacterWidth = CHARACTER_WIDTH / 2;
 

@@ -1,8 +1,8 @@
-import { BLOCK_WIDTH } from "../../constants";
-import { Face } from "../../constants/block";
-import { BlockKeys } from "../../constants/blocks";
-import { getNeighborsSeparate } from "../helpers/blocksHelpers";
-import { detailFromName } from "../helpers/detailFromName";
+import { BLOCK_WIDTH } from "@/constants";
+import { Face } from "@/constants/block";
+import { BlockKeys } from "@/constants/blocks";
+import { getNeighborsSeparate } from "@/game/helpers/blocksHelpers";
+import { detailFromName } from "@/game/helpers/detailFromName";
 
 const { leftZ, rightZ, leftX, rightX, bottom, top } = Face;
 
@@ -44,7 +44,7 @@ export class BaseGeneration {
   }
 
   shouldRenderFace(
-    neighBor?: { position: number[]; type: BlockKeys } | boolean,
+    neighBor?: { position: number[]; type: BlockKeys | 0 } | boolean,
     type?: BlockKeys
   ) {
     if (typeof neighBor !== "boolean" && neighBor?.type === "water") {
@@ -52,6 +52,13 @@ export class BaseGeneration {
       if (type === "water") {
         return false;
       }
+      return true;
+    }
+
+    if (
+      typeof neighBor !== "boolean" &&
+      (neighBor?.type as unknown as number) === 0
+    ) {
       return true;
     }
 

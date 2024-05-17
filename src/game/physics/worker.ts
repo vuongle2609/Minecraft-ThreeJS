@@ -3,17 +3,17 @@ import { Vector3 } from "three";
 import { BlocksMappingType } from "@/type";
 
 import { BlockKeys } from "@/constants/blocks";
-import { CHUNK_SIZE, FLAT_WORLD_TYPE, TIME_TO_INTERACT } from "../../constants";
+import { CHUNK_SIZE, FLAT_WORLD_TYPE, TIME_TO_INTERACT } from "@/constants";
 import {
   CHARACTER_LENGTH,
   GRAVITY,
   GRAVITY_SCALE,
   JUMP_FORCE,
   SPEED,
-} from "../../constants/player";
-import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
-import { FlatWorld } from "../terrant/flatWorldGeneration";
-import { DefaultWorld } from "../terrant/worldGeneration";
+} from "@/constants/player";
+import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
+import { FlatWorld } from "@/game/terrant/flatWorldGeneration";
+import { DefaultWorld } from "@/game/terrant/worldGeneration";
 import Physics from "./physics";
 
 class PhysicsWorker {

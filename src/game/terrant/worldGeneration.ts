@@ -1,10 +1,10 @@
 import FastNoiseLite from "fastnoise-lite";
 
-import { BLOCK_WIDTH, CHUNK_SIZE } from "../../constants";
-import { BlockKeys } from "../../constants/blocks";
-import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
+import { BLOCK_WIDTH, CHUNK_SIZE } from "@/constants";
+import { BlockKeys } from "@/constants/blocks";
+import { getRound } from "@/game/helpers/getRound";
+import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
 import { BaseGeneration } from "./baseUtilsGeneration";
-import { getRound } from "../helpers/getRound";
 
 export class DefaultWorld extends BaseGeneration {
   noise = new FastNoiseLite();
@@ -78,7 +78,7 @@ export class DefaultWorld extends BaseGeneration {
 
       if (chunkBlocksCustom?.[blockName] == 0) {
         shouldAssignBlock = false;
-        blocksInChunkTypeOnly.set(blockName, 0);
+        // blocksInChunkTypeOnly.set(blockName, 0);
       }
 
       if (shouldAssignBlock) {
@@ -251,7 +251,7 @@ export class DefaultWorld extends BaseGeneration {
 
     // place trees
     treePos.forEach(({ position, treeLength }) => {
-      // if (position[1] > 20) createTree(position, treeLength);
+      if (position[1] > 20) createTree(position, treeLength);
     });
 
     this.mergeBlocks(blocksInChunk, chunkBlocksCustom, blocksInChunkTypeOnly);
