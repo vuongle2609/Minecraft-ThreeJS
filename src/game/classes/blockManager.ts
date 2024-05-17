@@ -1,4 +1,10 @@
-import { Vector2, Vector3 } from "three";
+import {
+  BoxGeometry,
+  Mesh,
+  MeshStandardMaterial,
+  Vector2,
+  Vector3,
+} from "three";
 
 import { Face } from "@/constants/block";
 import blocks, { BlockKeys } from "@/constants/blocks";
@@ -9,6 +15,7 @@ import {
   nameFromCoordinate,
 } from "@/game/helpers/nameFromCoordinate";
 
+import { BLOCK_WIDTH } from "@/constants";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
@@ -31,6 +38,14 @@ export default class BlockManager extends BaseEntity {
 
   chunksActive: string[] = [];
 
+  blockDisplayHover = new Mesh(
+    new BoxGeometry(BLOCK_WIDTH + 0.01, BLOCK_WIDTH + 0.01, BLOCK_WIDTH + 0.01),
+    new MeshStandardMaterial({
+      wireframe: true,
+      visible: true,
+    })
+  );
+
   constructor(props: BasePropsType & PropsType) {
     super(props);
 
@@ -39,6 +54,9 @@ export default class BlockManager extends BaseEntity {
   }
 
   async initialize() {
+    this.blockDisplayHover.name = "helper";
+    this.scene?.add(this.blockDisplayHover);
+
     document.addEventListener("mousedown", this.onMouseDown.bind(this), false);
   }
 
@@ -98,7 +116,21 @@ export default class BlockManager extends BaseEntity {
     blockToRemove?.destroy(isClearChunk);
   }
 
-  handleHoverBlock() {}
+  handleHoverBlock() {
+    const intersectObj = this.getIntersectObject();
+
+    if (!intersectObj) {
+      this.blockDisplayHover.visible = false;
+      return;
+    }
+
+    const clickedDetail = detailFromName(intersectObj.object.name);
+
+    const { x, y, z } = clickedDetail;
+
+    this.blockDisplayHover.visible = true;
+    this.blockDisplayHover.position.set(x, y, z);
+  }
 
   handleGetBlock() {
     const intersectObj = this.getIntersectObject();
