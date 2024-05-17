@@ -227,7 +227,7 @@ export default class GameScene extends RenderPage {
       this.chunkManager?.update();
 
       this.renderer.render(this.scene, this.camera);
-      this.rendererDebug.render(this.scene, this.cameraDebug);
+      // this.rendererDebug.render(this.scene, this.cameraDebug);
     }
   }
 }

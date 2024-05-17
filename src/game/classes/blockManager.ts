@@ -55,7 +55,7 @@ export default class BlockManager extends BaseEntity {
     type: BlockKeys | 0;
     facesToRender?: Record<Face, boolean>;
   }) {
-    // if render chunk and block marked as destroyed then return
+    // if block marked as destroyed then return
     if (type == 0) {
       return;
     }
