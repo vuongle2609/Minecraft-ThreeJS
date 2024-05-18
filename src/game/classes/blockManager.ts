@@ -237,13 +237,6 @@ export default class BlockManager extends BaseEntity {
         blockPosition.set(x, y, z - BLOCK_WIDTH);
         break;
     }
-    console.log(
-      "🚀 ~ BlockManager ~ handlePlaceBlock ~  x, y, z :",
-      x,
-      y,
-      z,
-      blockPosition
-    );
 
     const placeType = this.inventoryManager.currentFocus;
 
@@ -266,11 +259,13 @@ export default class BlockManager extends BaseEntity {
       const chunk = getChunkCoordinate(blockPosition.x, blockPosition.z);
       const chunkName = nameChunkFromCoordinate(chunk.x, chunk.z);
 
-      this.chunksBlocks[chunkName]?.push(
-        nameFromCoordinate(blockPosition.x, blockPosition.y, blockPosition.z)
+      const coorName = nameFromCoordinate(
+        blockPosition.x,
+        blockPosition.y,
+        blockPosition.z
       );
 
-      const coorName = nameFromCoordinate(x, y, z);
+      this.chunksBlocks[chunkName]?.push(coorName);
 
       this.blocksWorldChunk[chunkName] = this.blocksWorldChunk[chunkName] || {};
       this.blocksWorldChunk[chunkName][coorName] = placeType;
