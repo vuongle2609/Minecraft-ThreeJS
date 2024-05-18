@@ -55,6 +55,7 @@ import placeWood from "@/assets/sound/place/wood.mp3";
 // soundStep
 import stepGrass from "@/assets/sound/step/grass3.ogg";
 import stepStone from "@/assets/sound/step/stone3.ogg";
+import { BlockKeys, BlockTextureType } from "@/type";
 
 // texture load
 const textureLoader = new TextureLoader();
@@ -81,7 +82,6 @@ const textures = {
   bedRockTexture: textureLoader.load(bedrock),
   waterTexture: textureLoader.load(water),
 };
-
 // is it good to set both to nearest?
 
 Object.values(textures).forEach((item) => {
@@ -96,18 +96,9 @@ Object.values(textures).forEach((item) => {
 // const worldMaterial = MeshToonMaterial;
 const worldMaterial = MeshLambertMaterial;
 
-export enum BlockTextureType {
-  top,
-  side,
-  sideOther,
-  bottom,
-  front,
-  back,
-}
-
 // back front side sideleft top bottom
 const blocks = {
-  grass: {
+  [BlockKeys.grass]: {
     name: "Grass",
     icon: grassIcon,
     step: new Audio(stepGrass),
@@ -134,7 +125,7 @@ const blocks = {
       BlockTextureType.bottom,
     ],
   },
-  bedrock: {
+  [BlockKeys.bedrock]: {
     name: "Bedrock",
     icon: bedRockIcon,
     step: new Audio(stepStone),
@@ -155,7 +146,7 @@ const blocks = {
       BlockTextureType.side,
     ],
   },
-  stone: {
+  [BlockKeys.stone]: {
     name: "Stone",
     icon: stoneIcon,
     step: new Audio(stepStone),
@@ -176,7 +167,7 @@ const blocks = {
       BlockTextureType.side,
     ],
   },
-  sand: {
+  [BlockKeys.sand]: {
     name: "Sand",
     icon: sandIcon,
     step: new Audio(stepStone),
@@ -197,7 +188,7 @@ const blocks = {
       BlockTextureType.side,
     ],
   },
-  dirt: {
+  [BlockKeys.dirt]: {
     name: "Dirt",
     icon: dirtIcon,
     step: new Audio(stepGrass),
@@ -218,7 +209,7 @@ const blocks = {
       BlockTextureType.side,
     ],
   },
-  cobblestone: {
+  [BlockKeys.cobblestone]: {
     name: "Cobblestone",
     icon: cobblestoneIcon,
     step: new Audio(stepStone),
@@ -239,7 +230,7 @@ const blocks = {
       BlockTextureType.side,
     ],
   },
-  leaves: {
+  [BlockKeys.leaves]: {
     name: "Leaves",
     icon: leavesIcon,
     step: new Audio(stepGrass),
@@ -261,7 +252,7 @@ const blocks = {
       BlockTextureType.side,
     ],
   },
-  wood: {
+  [BlockKeys.wood]: {
     name: "Wood",
     icon: woodIcon,
     step: new Audio(stepStone),
@@ -285,7 +276,7 @@ const blocks = {
       BlockTextureType.top,
     ],
   },
-  furnace: {
+  [BlockKeys.furnace]: {
     name: "Furnace",
     icon: furnanceIcon,
     step: new Audio(stepStone),
@@ -312,7 +303,7 @@ const blocks = {
       BlockTextureType.top,
     ],
   },
-  oakPlanks: {
+  [BlockKeys.oakPlanks]: {
     name: "Oak Wood Planks",
     icon: oakPlanksIcon,
     step: new Audio(stepStone),
@@ -333,7 +324,7 @@ const blocks = {
       BlockTextureType.side,
     ],
   },
-  blockOfDiamond: {
+  [BlockKeys.blockOfDiamond]: {
     name: "Block of Diamond",
     icon: blockOfDiamondIcon,
     step: new Audio(stepStone),
@@ -354,7 +345,7 @@ const blocks = {
       BlockTextureType.side,
     ],
   },
-  blockOfIron: {
+  [BlockKeys.blockOfIron]: {
     name: "Block of Iron",
     icon: blockOfIronIcon,
     step: new Audio(stepStone),
@@ -375,7 +366,7 @@ const blocks = {
       BlockTextureType.side,
     ],
   },
-  blockOfGold: {
+  [BlockKeys.blockOfGold]: {
     name: "Block of Gold",
     icon: blockOfGoldIcon,
     step: new Audio(stepStone),
@@ -396,7 +387,7 @@ const blocks = {
       BlockTextureType.side,
     ],
   },
-  blockOfLapis: {
+  [BlockKeys.blockOfLapis]: {
     name: "Block of Lapis",
     icon: blockOfLapisIcon,
     step: new Audio(stepStone),
@@ -417,7 +408,7 @@ const blocks = {
       BlockTextureType.side,
     ],
   },
-  blockOfEmerald: {
+  [BlockKeys.blockOfEmerald]: {
     name: "Block of Emerald",
     icon: blockOfEmeraldIcon,
     step: new Audio(stepStone),
@@ -438,7 +429,7 @@ const blocks = {
       BlockTextureType.side,
     ],
   },
-  water: {
+  [BlockKeys.water]: {
     name: "Water",
     icon: null,
     step: new Audio(stepGrass),
@@ -462,7 +453,7 @@ const blocks = {
     ],
   },
 };
-export type BlockKeys = keyof typeof blocks;
+
 export type BlockAttributeType = (typeof blocks)[BlockKeys];
 
 Object.values(blocks).forEach((block) => {

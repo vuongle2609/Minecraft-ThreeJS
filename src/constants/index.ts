@@ -25,4 +25,4 @@ export const CHUNK_SIZE = 12;
 export const TIME_TO_INTERACT = 300;
 
 export const NORMAL_WORLD_HEIGHT = 10;
-export const FLAT_WORLD_HEIGHT = 1;
+export const FLAT_WORLD_HEIGHT = 3;

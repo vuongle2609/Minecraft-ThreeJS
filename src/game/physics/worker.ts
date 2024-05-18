@@ -1,9 +1,8 @@
 import { Vector3 } from "three";
 
-import { BlocksMappingType } from "@/type";
+import { BlockKeys, BlocksMappingType } from "@/type";
 
 import { CHUNK_SIZE, FLAT_WORLD_TYPE, TIME_TO_INTERACT } from "@/constants";
-import { BlockKeys } from "@/constants/blocks";
 import {
   CHARACTER_LENGTH,
   GRAVITY,
@@ -135,7 +134,7 @@ class PhysicsWorker {
     this.initFunc = undefined;
   };
 
-  addBlock = ({ position, type }: { position: number[]; type: string }) => {
+  addBlock = ({ position, type }: { position: number[]; type: BlockKeys }) => {
     this.blocksMapping.set(
       nameFromCoordinate(position[0], position[1], position[2]),
       type as BlockKeys

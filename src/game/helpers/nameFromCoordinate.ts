@@ -1,8 +1,10 @@
+import { BlockKeys } from "@/type";
+
 export const nameFromCoordinate = (
   x: number,
   y: number,
   z: number,
-  type?: string,
+  type?: BlockKeys,
   face?: number
 ) => {
   return (

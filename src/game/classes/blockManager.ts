@@ -8,7 +8,8 @@ import {
 } from "three";
 
 import { Face } from "@/constants/block";
-import blocks, { BlockKeys } from "@/constants/blocks";
+import blocks from "@/constants/blocks";
+import { BlockKeys } from "@/type";
 import { getChunkCoordinate } from "@/game/helpers/chunkHelpers";
 import { detailFromName } from "@/game/helpers/detailFromName";
 import {
@@ -85,7 +86,7 @@ export default class BlockManager extends BaseEntity {
     y: number;
     z: number;
     type: BlockKeys | 0;
-    facesToRender?: Record<Face, boolean>;
+    facesToRender?: Record<Face, boolean> | null;
   }) {
     // if block marked as destroyed then return
     if (type == 0) {
@@ -156,7 +157,7 @@ export default class BlockManager extends BaseEntity {
     const { type } = clickedDetail;
 
     this.inventoryManager.inventory[this.inventoryManager.currentFocusIndex] =
-      type as BlockKeys;
+      type;
 
     this.inventoryManager.renderHotbar();
 
@@ -175,8 +176,8 @@ export default class BlockManager extends BaseEntity {
 
     const { x, y, z, type } = clickedDetail;
 
-    if (type === "bedrock") return;
-    if (type === "water") return;
+    if (type === BlockKeys.bedrock) return;
+    if (type === BlockKeys.water) return;
 
     this.removeBlock(x, y, z);
 
@@ -199,7 +200,7 @@ export default class BlockManager extends BaseEntity {
       this.currentBreakSound.currentTime = 0;
     }
 
-    this.currentBreakSound = blocks[type as BlockKeys].break;
+    this.currentBreakSound = blocks[type].break;
 
     this.currentBreakSound.play();
   }

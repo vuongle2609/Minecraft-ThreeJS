@@ -1,8 +1,8 @@
 import { FLAT_WORLD_TYPE } from "@/constants";
-import { BlockKeys } from "@/constants/blocks";
 import { nameChunkFromCoordinate } from "@/game/helpers/nameFromCoordinate";
 import { FlatWorld } from "./flatWorldGeneration";
 import { DefaultWorld } from "./worldGeneration";
+import { BlockKeys } from "@/type";
 
 const getBlocksInChunk = ({
   x,
@@ -22,7 +22,7 @@ const getBlocksInChunk = ({
   const world =
     type === FLAT_WORLD_TYPE ? new FlatWorld(seed) : new DefaultWorld(seed);
 
-  const { blocksInChunk, facesToRender } = world.initialize(
+  const { facesToRender, arrayBlocksData } = world.initialize(
     x,
     z,
     chunkBlocksCustom,
@@ -30,14 +30,19 @@ const getBlocksInChunk = ({
   );
   const chunkName = nameChunkFromCoordinate(x, z);
 
-  self.postMessage({
-    type: "renderBlocks",
-    data: {
-      blocks: blocksInChunk,
-      facesToRender,
-      chunkName,
+  self.postMessage(
+    {
+      type: "renderBlocks",
+      data: {
+        facesToRender,
+        chunkName,
+        arrayBlocksData,
+      },
     },
-  });
+
+    // @ts-ignore
+    [arrayBlocksData.buffer]
+  );
 };
 
 let eventMapping: Record<string, Function> = {

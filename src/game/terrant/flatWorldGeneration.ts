@@ -1,6 +1,6 @@
 import { BLOCK_WIDTH, CHUNK_SIZE, FLAT_WORLD_HEIGHT } from "@/constants";
-import { BlockKeys } from "@/constants/blocks";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
+import { BlockKeys } from "@/type";
 import { BaseGeneration } from "./baseUtilsGeneration";
 
 export class FlatWorld extends BaseGeneration {
@@ -54,17 +54,17 @@ export class FlatWorld extends BaseGeneration {
           }
 
           if (shouldAssignBlock) {
-            let type = isFirstLayer ? "grass" : "dirt";
+            let type = isFirstLayer ? BlockKeys.grass : BlockKeys.dirt;
 
             if (!yA) {
-              type = "bedrock";
+              type = BlockKeys.bedrock;
             }
 
             blocksInChunk.set(blockName, {
               position,
-              type: type as BlockKeys,
+              type: type,
             });
-            blocksInChunkTypeOnly.set(blockName, type as BlockKeys);
+            blocksInChunkTypeOnly.set(blockName, type);
           }
         }
       }
@@ -107,9 +107,17 @@ export class FlatWorld extends BaseGeneration {
       blocksInChunkNeighbor
     );
 
+    const arrayBlocksDataTmp: number[] = [];
+
+    for (const [_key, { position, type }] of blocksInChunk) {
+      arrayBlocksDataTmp.push(...position, type);
+    }
+
+    const arrayBlocksData = Int32Array.from(arrayBlocksDataTmp);
+
     return {
       facesToRender: Object.fromEntries(facesToRender),
-      blocksInChunk: Object.fromEntries(blocksInChunk),
+      arrayBlocksData,
     };
   }
 }
