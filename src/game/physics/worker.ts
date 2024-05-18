@@ -2,8 +2,8 @@ import { Vector3 } from "three";
 
 import { BlocksMappingType } from "@/type";
 
-import { BlockKeys } from "@/constants/blocks";
 import { CHUNK_SIZE, FLAT_WORLD_TYPE, TIME_TO_INTERACT } from "@/constants";
+import { BlockKeys } from "@/constants/blocks";
 import {
   CHARACTER_LENGTH,
   GRAVITY,
@@ -158,8 +158,11 @@ class PhysicsWorker {
 
     this.chunkBlocksCustomMap = chunkBlocksCustom;
 
-    if (initPos) this.playerPos.set(initPos[0], initPos[1] + 60, initPos[2]);
-    else this.playerPos.set(this.spawn[0], this.spawn[1], this.spawn[2]);
+    if (initPos) {
+      this.playerPos.set(initPos[0], initPos[1] + 0.2, initPos[2]);
+    } else {
+      this.playerPos.set(this.spawn[0], this.spawn[1], this.spawn[2]);
+    }
   };
 
   changeChunk = async ({
@@ -223,7 +226,7 @@ self.onmessage = (
     data: any;
   }>
 ) => {
-  const funcWorker = physicsWorker[
+  const funcWorker = physicsWorker.eventMapping[
     e.data.type as keyof typeof physicsWorker
   ] as Function;
 

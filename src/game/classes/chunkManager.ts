@@ -296,6 +296,7 @@ export default class ChunkManager extends BlockManager {
   }
 
   dispose() {
+    this.disposeBlockManager();
     Object.values(this.chunkWorkers).forEach(({ worker }) => {
       worker.terminate();
     });

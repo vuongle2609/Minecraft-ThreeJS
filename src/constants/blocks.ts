@@ -1,6 +1,7 @@
 import {
   BufferAttribute,
   BufferGeometry,
+  MeshBasicMaterial,
   MeshLambertMaterial,
   NearestFilter,
   TextureLoader,
@@ -16,8 +17,8 @@ import furnaceFront from "@/assets/block/furnace_front_on.png";
 import furnaceSide from "@/assets/block/furnace_side.png";
 import furnaceTop from "@/assets/block/furnace_top.png";
 import goldBlockSide from "@/assets/block/gold_block.png";
-import grassSide from "@/assets/block/grass_side.png";
 import grassTop from "@/assets/block/grass.jpg";
+import grassSide from "@/assets/block/grass_side.png";
 import ironBlockSide from "@/assets/block/iron_block.png";
 import lapisBlockSide from "@/assets/block/lapis_block.png";
 import leavesOak from "@/assets/block/leaves_oak.png";
@@ -468,10 +469,6 @@ Object.values(blocks).forEach((block) => {
   block.step.loop = true;
   block.step.volume = block.volume;
   block.step.playbackRate = 1.3;
-
-  // block.texture.forEach((item) => {
-  //   // item.color.setHex(0x606060); // Make the material darker
-  // });
 
   block.place.volume = 0.6;
   block.break.volume = 0.6;

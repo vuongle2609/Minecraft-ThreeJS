@@ -1,5 +1,6 @@
 import {
   BoxGeometry,
+  Group,
   Mesh,
   MeshStandardMaterial,
   Vector2,
@@ -20,6 +21,8 @@ import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
 
+const { leftX, leftZ, bottom, rightX, rightZ, top } = Face;
+
 interface PropsType {
   inventoryManager: InventoryManager;
 }
@@ -37,6 +40,10 @@ export default class BlockManager extends BaseEntity {
   chunksBlocks: Record<string, string[]> = {};
 
   chunksActive: string[] = [];
+
+  blocksGroup = new Group();
+
+  disposeBlockManager: Function;
 
   blockDisplayHover = new Mesh(
     new BoxGeometry(BLOCK_WIDTH + 0.01, BLOCK_WIDTH + 0.01, BLOCK_WIDTH + 0.01),
@@ -56,8 +63,15 @@ export default class BlockManager extends BaseEntity {
   async initialize() {
     this.blockDisplayHover.name = "helper";
     this.scene?.add(this.blockDisplayHover);
+    this.scene?.add(this.blocksGroup);
 
-    document.addEventListener("mousedown", this.onMouseDown.bind(this), false);
+    const eventMouseDown = this.onMouseDown.bind(this);
+
+    document.addEventListener("mousedown", eventMouseDown, false);
+
+    this.disposeBlockManager = () => {
+      document.removeEventListener("mousedown", eventMouseDown, false);
+    };
   }
 
   updateBlock({
@@ -82,10 +96,10 @@ export default class BlockManager extends BaseEntity {
 
     const block = new Block({
       position: position,
-      scene: this.scene,
       type: type,
       blocksMapping: this.blocksMapping,
       facesToRender,
+      blocksGroup: this.blocksGroup,
     });
 
     this.blocksMapping.set(nameFromCoordinate(x, y, z), block);
@@ -98,14 +112,14 @@ export default class BlockManager extends BaseEntity {
 
     raycaster.setFromCamera(new Vector2(), this.camera);
 
-    const intersects = raycaster.intersectObjects(this.scene.children, false);
+    const intersectObject = raycaster.intersectObjects(
+      this.blocksGroup.children,
+      false
+    )[0];
 
-    if (!intersects[0]) return;
+    if (!intersectObject) return;
 
-    const intersectObject =
-      intersects[0]?.object.name == "player" ? intersects[1] : intersects[0];
-
-    if (intersectObject?.distance > 12) return;
+    if (intersectObject.distance > 12) return;
 
     return intersectObject;
   }
@@ -203,26 +217,33 @@ export default class BlockManager extends BaseEntity {
 
     const blockPosition = new Vector3();
 
-    switch (clickedFace) {
-      case "2":
-        blockPosition.set(x + 2, y, z);
+    switch (Number(clickedFace)) {
+      case leftX:
+        blockPosition.set(x + BLOCK_WIDTH, y, z);
         break;
-      case "3":
-        blockPosition.set(x - 2, y, z);
+      case rightX:
+        blockPosition.set(x - BLOCK_WIDTH, y, z);
         break;
-      case "4":
-        blockPosition.set(x, y + 2, z);
+      case top:
+        blockPosition.set(x, y + BLOCK_WIDTH, z);
         break;
-      case "5":
-        blockPosition.set(x, y - 2, z);
+      case bottom:
+        blockPosition.set(x, y - BLOCK_WIDTH, z);
         break;
-      case "0":
-        blockPosition.set(x, y, z + 2);
+      case leftZ:
+        blockPosition.set(x, y, z + BLOCK_WIDTH);
         break;
-      case "1":
-        blockPosition.set(x, y, z - 2);
+      case rightZ:
+        blockPosition.set(x, y, z - BLOCK_WIDTH);
         break;
     }
+    console.log(
+      "🚀 ~ BlockManager ~ handlePlaceBlock ~  x, y, z :",
+      x,
+      y,
+      z,
+      blockPosition
+    );
 
     const placeType = this.inventoryManager.currentFocus;
 
@@ -302,11 +323,6 @@ export default class BlockManager extends BaseEntity {
   }
 
   update() {
-    // :( donno
     this.handleHoverBlock();
-  }
-
-  dispose() {
-    document.removeEventListener("mousedown", this.onMouseDown.bind(this));
   }
 }

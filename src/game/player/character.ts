@@ -1,10 +1,4 @@
-import {
-  BoxGeometry,
-  CapsuleGeometry,
-  Mesh,
-  MeshStandardMaterial,
-  Vector3,
-} from "three";
+import { BoxGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
 
 import blocks, { BlockKeys } from "@/constants/blocks";
 import { CHARACTER_LENGTH, CHARACTER_WIDTH } from "@/constants/player";
@@ -54,6 +48,8 @@ export default class Player extends BaseEntity {
     this.player.name = "player";
 
     this.scene?.add(this.player);
+
+    this.handleDetectChunkChange();
 
     this.worker?.addEventListener("message", (e) => {
       if (e.data.type === "updatePosition") {

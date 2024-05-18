@@ -54,12 +54,17 @@ export class FlatWorld extends BaseGeneration {
           }
 
           if (shouldAssignBlock) {
-            const type = isFirstLayer ? "grass" : "dirt";
+            let type = isFirstLayer ? "grass" : "dirt";
+
+            if (!yA) {
+              type = "bedrock";
+            }
+
             blocksInChunk.set(blockName, {
               position,
-              type,
+              type: type as BlockKeys,
             });
-            blocksInChunkTypeOnly.set(blockName, type);
+            blocksInChunkTypeOnly.set(blockName, type as BlockKeys);
           }
         }
       }
@@ -103,8 +108,8 @@ export class FlatWorld extends BaseGeneration {
     );
 
     return {
-      facesToRender,
-      blocksInChunk,
+      facesToRender: Object.fromEntries(facesToRender),
+      blocksInChunk: Object.fromEntries(blocksInChunk),
     };
   }
 }
