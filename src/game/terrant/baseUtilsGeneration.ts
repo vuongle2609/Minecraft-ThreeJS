@@ -1,8 +1,27 @@
 import { BLOCK_WIDTH } from "@/constants";
 import { Face } from "@/constants/block";
-import { BlockKeys } from "@/constants/blocks";
+// import { BlockKeys } from "@/type";
 import { getNeighborsSeparate } from "@/game/helpers/blocksHelpers";
 import { detailFromName } from "@/game/helpers/detailFromName";
+
+export enum BlockKeys {
+  grass = 1,
+  bedrock = 2,
+  stone = 3,
+  sand = 4,
+  dirt = 5,
+  cobblestone = 6,
+  leaves = 7,
+  wood = 8,
+  furnace = 9,
+  oakPlanks = 10,
+  blockOfDiamond = 11,
+  blockOfIron = 12,
+  blockOfGold = 13,
+  blockOfLapis = 14,
+  blockOfEmerald = 15,
+  water = 16,
+}
 
 const { leftZ, rightZ, leftX, rightX, bottom, top } = Face;
 
@@ -47,9 +66,9 @@ export class BaseGeneration {
     neighBor?: { position: number[]; type: BlockKeys | 0 } | boolean,
     type?: BlockKeys
   ) {
-    if (typeof neighBor !== "boolean" && neighBor?.type === "water") {
+    if (typeof neighBor !== "boolean" && neighBor?.type === BlockKeys.water) {
       // does not handle client face process
-      if (type === "water") {
+      if (type === BlockKeys.water) {
         return false;
       }
       return true;

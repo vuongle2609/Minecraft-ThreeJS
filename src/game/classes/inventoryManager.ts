@@ -1,4 +1,5 @@
-import blocks, { BlockKeys } from "@/constants/blocks";
+import blocks from "@/constants/blocks";
+import { BlockKeys } from "@/type";
 import { HOTBAR_LENGTH } from "@/constants/player";
 import { $, $$ } from "@/UI/utils/selector";
 
@@ -12,7 +13,7 @@ export default class InventoryManager extends BaseEntity {
 
   inventory: (BlockKeys | null)[] = Array(HOTBAR_LENGTH)
     .fill(null)
-    .map((_, index) => Object.keys(blocks)[index] as BlockKeys);
+    .map((_, index) => Object.keys(blocks)[index] as unknown as BlockKeys);
 
   tooltipElement: HTMLDivElement | undefined;
   currentDragElement: HTMLImageElement | undefined;
@@ -83,13 +84,13 @@ export default class InventoryManager extends BaseEntity {
     this.currentDragElement.style.display = "block";
     if (blockDragging.icon) this.currentDragElement.src = blockDragging.icon;
     this.currentDragElement.style.transform = `translate(${translateX}px,${translateY}px)`;
-    this.currentDragElement.innerText = this.currentDragItem || "";
+    // this.currentDragElement.innerText = this.currentDragItem || "";
   }
 
   handleMouseMoveHoverBlock(e: MouseEvent) {
     if (!this.tooltipElement || !this.inventoryContainerElement) return;
 
-    const hoverId = (e.target as HTMLImageElement).id as BlockKeys;
+    const hoverId = (e.target as HTMLImageElement).id as unknown as BlockKeys;
     const blockHover = blocks[hoverId];
 
     if (!blockHover || this.currentDragItem) {
@@ -254,7 +255,7 @@ export default class InventoryManager extends BaseEntity {
     $$<HTMLDivElement>(".blockInventory").forEach((item) => {
       item.addEventListener("mousedown", (e) => {
         this.handleMouseDownInventory(
-          item.getAttribute("block_data") as BlockKeys
+          item.getAttribute("block_data") as unknown as BlockKeys
         );
       });
     });

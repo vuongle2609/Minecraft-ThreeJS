@@ -1,6 +1,6 @@
 import { CHUNK_VIEW_WORKER_PHYSICS, DEFAULT_CHUNK_VIEW } from "@/constants";
 import { Face } from "@/constants/block";
-import { BlockKeys } from "@/constants/blocks";
+import { BlockKeys } from "@/type";
 import {
   nameChunkFromCoordinate,
   nameFromCoordinate,
@@ -244,6 +244,8 @@ export default class ChunkManager extends BlockManager {
   ) {
     const blocksRender = Object.keys(blocksRenderWorker);
     const blocksInChunk: string[] = [];
+
+   
 
     blocksRender.forEach((key) => {
       const { position, type } = blocksRenderWorker[key];

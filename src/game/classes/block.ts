@@ -2,13 +2,9 @@ import { Group, Mesh, Object3D, Vector3 } from "three";
 
 import { BLOCK_WIDTH } from "@/constants";
 import { BlockFaces, Face } from "@/constants/block";
-import blocks, {
-  BlockAttributeType,
-  BlockKeys,
-  renderGeometry,
-} from "@/constants/blocks";
+import blocks, { BlockAttributeType, renderGeometry } from "@/constants/blocks";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
-
+import { BlockKeys } from "@/type";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 
 interface PropsType {

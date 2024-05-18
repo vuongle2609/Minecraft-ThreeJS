@@ -1,10 +1,29 @@
 import FastNoiseLite from "fastnoise-lite";
 
 import { BLOCK_WIDTH, CHUNK_SIZE } from "@/constants";
-import { BlockKeys } from "@/constants/blocks";
+// import { BlockKeys } from "@/type";
 import { getRound } from "@/game/helpers/getRound";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
 import { BaseGeneration } from "./baseUtilsGeneration";
+
+export enum BlockKeys {
+  grass = 1,
+  bedrock = 2,
+  stone = 3,
+  sand = 4,
+  dirt = 5,
+  cobblestone = 6,
+  leaves = 7,
+  wood = 8,
+  furnace = 9,
+  oakPlanks = 10,
+  blockOfDiamond = 11,
+  blockOfIron = 12,
+  blockOfGold = 13,
+  blockOfLapis = 14,
+  blockOfEmerald = 15,
+  water = 16,
+}
 
 export class DefaultWorld extends BaseGeneration {
   noise = new FastNoiseLite();
@@ -122,16 +141,16 @@ export class DefaultWorld extends BaseGeneration {
         { x: 2, z: 1 },
       ];
 
-      createBlock([x, y - BLOCK_WIDTH, z], "dirt");
+      createBlock([x, y - BLOCK_WIDTH, z], BlockKeys.dirt);
 
       for (let l = 0; l < length; l++) {
-        createBlock([x, y + BLOCK_WIDTH * l, z], "wood");
+        createBlock([x, y + BLOCK_WIDTH * l, z], BlockKeys.wood);
       }
 
       for (let stack = 0; stack < leavesStack; stack++) {
         const offset = stack + length;
         const currentStackY = y + BLOCK_WIDTH * offset;
-        createBlock([x, currentStackY, z], "leaves");
+        createBlock([x, currentStackY, z], BlockKeys.leaves);
 
         roundLeavesOffset.forEach((offset) => {
           createBlock(
@@ -140,7 +159,7 @@ export class DefaultWorld extends BaseGeneration {
               currentStackY,
               z + offset.z * BLOCK_WIDTH,
             ],
-            "leaves"
+            BlockKeys.leaves
           );
         });
 
@@ -152,7 +171,7 @@ export class DefaultWorld extends BaseGeneration {
                 currentStackY,
                 z + offset.z * BLOCK_WIDTH,
               ],
-              "leaves"
+              BlockKeys.leaves
             );
           });
       }
@@ -207,7 +226,7 @@ export class DefaultWorld extends BaseGeneration {
       let countSurface = 0;
 
       for (let yA = y; yA >= 0; yA -= 2) {
-        let blockType: BlockKeys = "stone";
+        let blockType: BlockKeys = BlockKeys.stone;
 
         const newPos = [x, yA, z];
 
@@ -218,13 +237,13 @@ export class DefaultWorld extends BaseGeneration {
             ? newPos[1]
             : this.lowestY;
 
-        if (countSurface == 0) blockType = "grass";
+        if (countSurface == 0) blockType = BlockKeys.grass;
 
-        if (countSurface == 1) blockType = "dirt";
+        if (countSurface == 1) blockType = BlockKeys.dirt;
 
-        if (countSurface > 3) blockType = "stone";
+        if (countSurface > 3) blockType = BlockKeys.stone;
 
-        if (yA == 0) blockType = "bedrock";
+        if (yA == 0) blockType = BlockKeys.bedrock;
 
         createBlock(newPos, blockType);
 
@@ -238,9 +257,9 @@ export class DefaultWorld extends BaseGeneration {
         for (let yA = y; yA <= 16; yA += 2) {
           const newPos = [x, yA, z];
 
-          let blockType: BlockKeys = "water";
+          let blockType: BlockKeys = BlockKeys.water;
 
-          if (countSurface == 0) blockType = "sand";
+          if (countSurface == 0) blockType = BlockKeys.sand;
 
           countSurface++;
 
@@ -289,6 +308,17 @@ export class DefaultWorld extends BaseGeneration {
       blocksInChunk,
       blocksInChunkNeighbor
     );
+
+    const arrayBlocksData: number[] = [];
+
+    for (const [key, { position, type }] of blocksInChunk) {
+      // arrayBlocksData.push[]
+    }
+
+    new Int32Array();
+
+    // console.log("🚀 ~ DefaultWorld ~ facesToRender:", facesToRender);
+    console.log("🚀 ~ DefaultWorld ~ 2:", blocksInChunk);
 
     return {
       facesToRender: Object.fromEntries(facesToRender),
