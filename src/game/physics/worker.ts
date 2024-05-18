@@ -1,9 +1,8 @@
 import { Vector3 } from "three";
 
-import { BlocksMappingType } from "@/type";
+import { BlockKeys, BlocksMappingType } from "@/type";
 
 import { CHUNK_SIZE, FLAT_WORLD_TYPE, TIME_TO_INTERACT } from "@/constants";
-// import { BlockKeys } from "@/type";
 import {
   CHARACTER_LENGTH,
   GRAVITY,
@@ -15,25 +14,6 @@ import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
 import { FlatWorld } from "@/game/terrant/flatWorldGeneration";
 import { DefaultWorld } from "@/game/terrant/worldGeneration";
 import Physics from "./physics";
-
-export enum BlockKeys {
-  grass = 1,
-  bedrock = 2,
-  stone = 3,
-  sand = 4,
-  dirt = 5,
-  cobblestone = 6,
-  leaves = 7,
-  wood = 8,
-  furnace = 9,
-  oakPlanks = 10,
-  blockOfDiamond = 11,
-  blockOfIron = 12,
-  blockOfGold = 13,
-  blockOfLapis = 14,
-  blockOfEmerald = 15,
-  water = 16,
-}
 
 class PhysicsWorker {
   worldGen: FlatWorld | DefaultWorld;

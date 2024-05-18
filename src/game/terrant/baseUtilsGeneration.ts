@@ -1,27 +1,8 @@
 import { BLOCK_WIDTH } from "@/constants";
 import { Face } from "@/constants/block";
-// import { BlockKeys } from "@/type";
 import { getNeighborsSeparate } from "@/game/helpers/blocksHelpers";
 import { detailFromName } from "@/game/helpers/detailFromName";
-
-export enum BlockKeys {
-  grass = 1,
-  bedrock = 2,
-  stone = 3,
-  sand = 4,
-  dirt = 5,
-  cobblestone = 6,
-  leaves = 7,
-  wood = 8,
-  furnace = 9,
-  oakPlanks = 10,
-  blockOfDiamond = 11,
-  blockOfIron = 12,
-  blockOfGold = 13,
-  blockOfLapis = 14,
-  blockOfEmerald = 15,
-  water = 16,
-}
+import { BlockKeys } from "@/type";
 
 const { leftZ, rightZ, leftX, rightX, bottom, top } = Face;
 
@@ -125,14 +106,18 @@ export class BaseGeneration {
         BLOCK_WIDTH
       );
 
-      facesToRender.set(key, {
+      const valueToSet = {
         [leftZ]: this.shouldRenderFace(faceHasNeighbor?.[leftZ], type),
         [rightZ]: this.shouldRenderFace(faceHasNeighbor?.[rightZ], type),
         [leftX]: this.shouldRenderFace(faceHasNeighbor?.[leftX], type),
         [rightX]: this.shouldRenderFace(faceHasNeighbor?.[rightX], type),
         [bottom]: this.lowestY === y ? false : !faceHasNeighbor?.[bottom],
         [top]: this.shouldRenderFace(faceHasNeighbor?.[top], type),
-      });
+      };
+
+      const shouldSet = Object.values(valueToSet).filter(Boolean).length;
+
+      if (shouldSet) facesToRender.set(key, valueToSet);
     }
 
     return facesToRender;

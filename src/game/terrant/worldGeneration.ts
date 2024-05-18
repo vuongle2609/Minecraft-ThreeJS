@@ -1,29 +1,11 @@
 import FastNoiseLite from "fastnoise-lite";
 
 import { BLOCK_WIDTH, CHUNK_SIZE } from "@/constants";
-// import { BlockKeys } from "@/type";
 import { getRound } from "@/game/helpers/getRound";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
 import { BaseGeneration } from "./baseUtilsGeneration";
-
-export enum BlockKeys {
-  grass = 1,
-  bedrock = 2,
-  stone = 3,
-  sand = 4,
-  dirt = 5,
-  cobblestone = 6,
-  leaves = 7,
-  wood = 8,
-  furnace = 9,
-  oakPlanks = 10,
-  blockOfDiamond = 11,
-  blockOfIron = 12,
-  blockOfGold = 13,
-  blockOfLapis = 14,
-  blockOfEmerald = 15,
-  water = 16,
-}
+import { detailFromName } from "../helpers/detailFromName";
+import { BlockKeys } from "@/type";
 
 export class DefaultWorld extends BaseGeneration {
   noise = new FastNoiseLite();
@@ -257,7 +239,7 @@ export class DefaultWorld extends BaseGeneration {
         for (let yA = y; yA <= 16; yA += 2) {
           const newPos = [x, yA, z];
 
-          let blockType: BlockKeys = BlockKeys.water;
+          let blockType = BlockKeys.water;
 
           if (countSurface == 0) blockType = BlockKeys.sand;
 
@@ -309,20 +291,17 @@ export class DefaultWorld extends BaseGeneration {
       blocksInChunkNeighbor
     );
 
-    const arrayBlocksData: number[] = [];
+    const arrayBlocksDataTmp: number[] = [];
 
-    for (const [key, { position, type }] of blocksInChunk) {
-      // arrayBlocksData.push[]
+    for (const [_key, { position, type }] of blocksInChunk) {
+      arrayBlocksDataTmp.push(...position, type);
     }
 
-    new Int32Array();
-
-    // console.log("🚀 ~ DefaultWorld ~ facesToRender:", facesToRender);
-    console.log("🚀 ~ DefaultWorld ~ 2:", blocksInChunk);
+    const arrayBlocksData = Int32Array.from(arrayBlocksDataTmp);
 
     return {
       facesToRender: Object.fromEntries(facesToRender),
-      blocksInChunk: Object.fromEntries(blocksInChunk),
+      arrayBlocksData,
     };
   }
 }

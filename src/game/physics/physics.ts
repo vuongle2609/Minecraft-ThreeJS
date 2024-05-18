@@ -1,28 +1,9 @@
 import { Vector3 } from "three";
 
 import { BLOCK_WIDTH } from "@/constants";
-// import { BlockKeys } from "@/type";
 import { CHARACTER_LENGTH, CHARACTER_WIDTH } from "@/constants/player";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
-
-export enum BlockKeys {
-  grass = 1,
-  bedrock = 2,
-  stone = 3,
-  sand = 4,
-  dirt = 5,
-  cobblestone = 6,
-  leaves = 7,
-  wood = 8,
-  furnace = 9,
-  oakPlanks = 10,
-  blockOfDiamond = 11,
-  blockOfIron = 12,
-  blockOfGold = 13,
-  blockOfLapis = 14,
-  blockOfEmerald = 15,
-  water = 16,
-}
+import { BlockKeys } from "@/type";
 
 const halfCharacterWidth = CHARACTER_WIDTH / 2;
 

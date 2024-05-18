@@ -86,7 +86,7 @@ export default class BlockManager extends BaseEntity {
     y: number;
     z: number;
     type: BlockKeys | 0;
-    facesToRender?: Record<Face, boolean>;
+    facesToRender?: Record<Face, boolean> | null;
   }) {
     // if block marked as destroyed then return
     if (type == 0) {

@@ -12,7 +12,7 @@ interface PropsType {
   type: BlockKeys;
   blocksGroup: Group;
   blocksMapping: Map<string, Block>;
-  facesToRender?: Record<Face, boolean>;
+  facesToRender?: Record<Face, boolean> | null;
   isPlace?: boolean;
 }
 
@@ -52,6 +52,8 @@ export default class Block extends BaseEntity {
     this.atttribute = blocks[type];
     this.blocksMapping = blocksMapping;
     this.isPlace = !!isPlace;
+
+    if (facesToRender === null) return;
 
     facesToRender ? this.renderWithKnownFace(facesToRender) : this.render();
   }

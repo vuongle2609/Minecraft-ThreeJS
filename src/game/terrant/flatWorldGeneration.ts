@@ -1,26 +1,7 @@
 import { BLOCK_WIDTH, CHUNK_SIZE, FLAT_WORLD_HEIGHT } from "@/constants";
-// import { BlockKeys } from "@/type";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
+import { BlockKeys } from "@/type";
 import { BaseGeneration } from "./baseUtilsGeneration";
-
-export enum BlockKeys {
-  grass = 1,
-  bedrock = 2,
-  stone = 3,
-  sand = 4,
-  dirt = 5,
-  cobblestone = 6,
-  leaves = 7,
-  wood = 8,
-  furnace = 9,
-  oakPlanks = 10,
-  blockOfDiamond = 11,
-  blockOfIron = 12,
-  blockOfGold = 13,
-  blockOfLapis = 14,
-  blockOfEmerald = 15,
-  water = 16,
-}
 
 export class FlatWorld extends BaseGeneration {
   constructor(seed: number) {
@@ -126,9 +107,17 @@ export class FlatWorld extends BaseGeneration {
       blocksInChunkNeighbor
     );
 
+    const arrayBlocksDataTmp: number[] = [];
+
+    for (const [_key, { position, type }] of blocksInChunk) {
+      arrayBlocksDataTmp.push(...position, type);
+    }
+
+    const arrayBlocksData = Int32Array.from(arrayBlocksDataTmp);
+
     return {
       facesToRender: Object.fromEntries(facesToRender),
-      blocksInChunk: Object.fromEntries(blocksInChunk),
+      arrayBlocksData,
     };
   }
 }

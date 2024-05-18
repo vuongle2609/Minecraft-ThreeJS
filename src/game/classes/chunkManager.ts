@@ -150,9 +150,13 @@ export default class ChunkManager extends BlockManager {
         currWorker.isBusy = false;
 
         if (e.data.type === "renderBlocks") {
-          const { chunkName, blocks, facesToRender } = e.data.data;
+          const { chunkName, facesToRender, arrayBlocksData } = e.data.data;
 
-          this.handleRenderChunkBlocks(chunkName, blocks, facesToRender);
+          this.handleRenderChunkBlocks(
+            chunkName,
+            arrayBlocksData,
+            facesToRender
+          );
 
           this.startWorker(currWorker, this.chunkPendingQueueProxy.pop());
         }
@@ -233,35 +237,32 @@ export default class ChunkManager extends BlockManager {
   // can optimize worker speed
   handleRenderChunkBlocks(
     chunkName: string,
-    blocksRenderWorker: Record<
-      string,
-      {
-        position: number[];
-        type: BlockKeys;
-      }
-    > = {},
+    arrayBlocksData: Int32Array,
     facesToRender: Record<string, Record<Face, boolean>>
   ) {
-    const blocksRender = Object.keys(blocksRenderWorker);
     const blocksInChunk: string[] = [];
 
-   
+    let tmpPos: number[] = [];
+    const lengthCached = arrayBlocksData.length;
+    for (let index = 0; index < lengthCached; index++) {
+      const num = arrayBlocksData[index];
 
-    blocksRender.forEach((key) => {
-      const { position, type } = blocksRenderWorker[key];
+      if (tmpPos.length === 3) {
+        const key = nameFromCoordinate(tmpPos[0], tmpPos[1], tmpPos[2]);
+        this.updateBlock({
+          x: tmpPos[0],
+          y: tmpPos[1],
+          z: tmpPos[2],
+          type: num,
+          facesToRender: facesToRender[key] || null,
+        });
+        blocksInChunk.push(key);
 
-      this.updateBlock({
-        x: position[0],
-        y: position[1],
-        z: position[2],
-        type,
-        facesToRender: facesToRender[key],
-      });
-
-      blocksInChunk.push(
-        nameFromCoordinate(position[0], position[1], position[2])
-      );
-    });
+        tmpPos = [];
+      } else {
+        tmpPos.push(num);
+      }
+    }
 
     this.chunksBlocks[chunkName] = blocksInChunk;
   }
