@@ -20,7 +20,6 @@ export class FlatWorld extends BaseGeneration {
         type: BlockKeys;
       }
     > = new Map();
-    const blocksInChunkTypeOnly: Map<string, BlockKeys | 0> = new Map();
 
     let isFirstLayer = true;
 
@@ -50,7 +49,6 @@ export class FlatWorld extends BaseGeneration {
 
           if (chunkBlocksCustom?.[blockName] === 0) {
             shouldAssignBlock = false;
-            blocksInChunkTypeOnly.set(blockName, 0);
           }
 
           if (shouldAssignBlock) {
@@ -64,18 +62,16 @@ export class FlatWorld extends BaseGeneration {
               position,
               type: type,
             });
-            blocksInChunkTypeOnly.set(blockName, type);
           }
         }
       }
       isFirstLayer = false;
     }
 
-    this.mergeBlocks(blocksInChunk, chunkBlocksCustom, blocksInChunkTypeOnly);
+    this.mergeBlocks(blocksInChunk, chunkBlocksCustom);
 
     return {
       blocksInChunk,
-      blocksInChunkTypeOnly,
     };
   }
 
@@ -91,13 +87,13 @@ export class FlatWorld extends BaseGeneration {
       (prev, key) => {
         const [x, z] = key.split("_");
 
-        const { blocksInChunkTypeOnly } = this.getBlocksInChunk(
+        const { blocksInChunk } = this.getBlocksInChunk(
           Number(x),
           Number(z),
           (neighborsChunkData || {})[key]
         );
 
-        return new Map([...prev, ...blocksInChunkTypeOnly]);
+        return new Map([...prev, ...blocksInChunk]);
       },
       new Map()
     );

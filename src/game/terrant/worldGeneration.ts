@@ -66,8 +66,6 @@ export class DefaultWorld extends BaseGeneration {
       }
     > = new Map();
 
-    const blocksInChunkTypeOnly: Map<string, BlockKeys | 0> = new Map();
-
     const createBlock = (position: number[], type: BlockKeys) => {
       const blockName = nameFromCoordinate(
         position[0],
@@ -86,8 +84,6 @@ export class DefaultWorld extends BaseGeneration {
           position,
           type,
         });
-
-        blocksInChunkTypeOnly.set(blockName, type);
       }
     };
 
@@ -254,11 +250,10 @@ export class DefaultWorld extends BaseGeneration {
       if (position[1] > 20) createTree(position, treeLength);
     });
 
-    this.mergeBlocks(blocksInChunk, chunkBlocksCustom, blocksInChunkTypeOnly);
+    this.mergeBlocks(blocksInChunk, chunkBlocksCustom);
 
     return {
       blocksInChunk,
-      blocksInChunkTypeOnly,
     };
   }
 
@@ -274,13 +269,13 @@ export class DefaultWorld extends BaseGeneration {
       (prev, key) => {
         const [x, z] = key.split("_");
 
-        const { blocksInChunkTypeOnly } = this.getBlocksInChunk(
+        const { blocksInChunk } = this.getBlocksInChunk(
           Number(x),
           Number(z),
           (neighborsChunkData || {})[key]
         );
 
-        return new Map([...prev, ...blocksInChunkTypeOnly]);
+        return new Map([...prev, ...blocksInChunk]);
       },
       new Map()
     );

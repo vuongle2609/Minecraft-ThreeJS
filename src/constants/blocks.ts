@@ -1,6 +1,7 @@
 import {
   BufferAttribute,
   BufferGeometry,
+  DoubleSide,
   MeshBasicMaterial,
   MeshLambertMaterial,
   NearestFilter,
@@ -441,6 +442,7 @@ const blocks = {
         map: textures.waterTexture,
         transparent: true,
         opacity: 0.6,
+        side: DoubleSide
       }),
     },
     textureMap: [

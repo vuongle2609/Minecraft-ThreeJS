@@ -24,17 +24,10 @@ export class BaseGeneration {
         type: BlockKeys | 0;
       }
     > = new Map(),
-    chunkBlocksCustom: Record<string, 0 | BlockKeys>,
-    blocksInChunkTypeOnly: Map<string, BlockKeys | 0>
+    chunkBlocksCustom: Record<string, 0 | BlockKeys>
   ) {
     Object.keys(chunkBlocksCustom || {}).forEach((currKey) => {
       const { x, y, z } = detailFromName(currKey);
-
-      if (chunkBlocksCustom[currKey] === 0) {
-        blocksInChunkTypeOnly.set(currKey, 0);
-      }
-
-      blocksInChunkTypeOnly.set(currKey, chunkBlocksCustom[currKey]);
 
       blocksInChunk.set(currKey, {
         position: [x, y, z],
