@@ -30,11 +30,6 @@ export default class GameScene extends RenderPage {
     canvas: document.querySelector("#gameScene") as HTMLCanvasElement,
   });
 
-  // rendererDebug = new WebGLRenderer({
-  //   antialias: true,
-  //   canvas: document.querySelector("#gameSceneDebug") as HTMLCanvasElement,
-  // });
-
   worker = new Worker(new URL("../physics/worker", import.meta.url), {
     type: "module",
   });
@@ -47,7 +42,6 @@ export default class GameScene extends RenderPage {
     0.1,
     2000
   );
-  // cameraDebug = new PerspectiveCamera(70, 200 / 200, 0.1, 2000);
 
   control = new PointerLockControls(this.camera, document.body);
 
@@ -125,9 +119,6 @@ export default class GameScene extends RenderPage {
     this.worker.postMessage({
       type: "init",
       data: {
-        seed: this.worldStorage?.seed,
-        type: this.worldStorage?.worldType,
-        chunkBlocksCustom: this.worldStorage.blocksWorldChunk,
         initPos: this.worldStorage.initPos,
       },
     });
@@ -224,20 +215,11 @@ export default class GameScene extends RenderPage {
 
       this.player?.update(delta, t);
 
-      // this.cameraDebug.position.set(
-      //   this.player.player.position.x + 100,
-      //   this.player.player.position.y + 100,
-      //   this.player.player.position.z + 100
-      // );
-
-      // this.cameraDebug.lookAt(this.player.player.position);
-
       this.cloud?.update(this.player.player.position);
 
       this.chunkManager?.update();
 
       this.renderer.render(this.scene, this.camera);
-      // this.rendererDebug.render(this.scene, this.cameraDebug);
     }
   }
 }

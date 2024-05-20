@@ -22,7 +22,7 @@ export const getChunkNeighborsCoor = (x: number, z: number) => {
   const variants: number[] = [];
 
   for (let num = 0; num <= 1; num++) {
-    if (num == 0) variants.push(num);
+    if (num === 0) variants.push(num);
     else {
       variants.push(num);
       variants.push(-num);

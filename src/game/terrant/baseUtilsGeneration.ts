@@ -30,7 +30,7 @@ export class BaseGeneration {
     Object.keys(chunkBlocksCustom || {}).forEach((currKey) => {
       const { x, y, z } = detailFromName(currKey);
 
-      if (chunkBlocksCustom[currKey] == 0) {
+      if (chunkBlocksCustom[currKey] === 0) {
         blocksInChunkTypeOnly.set(currKey, 0);
       }
 
