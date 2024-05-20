@@ -1,6 +1,33 @@
 import { InstancedMesh } from "three";
-import { BlockKeys, BlockTextureType } from "./constants/blocks";
 
+export enum BlockKeys {
+  grass = 1,
+
+  stone = 3,
+  sand = 4,
+  dirt = 5,
+  cobblestone = 6,
+  leaves = 7,
+  wood = 8,
+  furnace = 9,
+  oakPlanks = 10,
+  blockOfDiamond = 11,
+  blockOfIron = 12,
+  blockOfGold = 13,
+  blockOfLapis = 14,
+  blockOfEmerald = 15,
+  water = 16,
+  bedrock = 17,
+}
+
+export enum BlockTextureType {
+  top,
+  side,
+  sideOther,
+  bottom,
+  front,
+  back,
+}
 export interface PlayerInput {
   forward: boolean;
   backward: boolean;

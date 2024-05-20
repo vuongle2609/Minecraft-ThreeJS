@@ -1,6 +1,6 @@
 import { BLOCK_WIDTH, CHUNK_SIZE, FLAT_WORLD_HEIGHT } from "@/constants";
-import { BlockKeys } from "@/constants/blocks";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
+import { BlockKeys } from "@/type";
 import { BaseGeneration } from "./baseUtilsGeneration";
 
 export class FlatWorld extends BaseGeneration {
@@ -20,7 +20,6 @@ export class FlatWorld extends BaseGeneration {
         type: BlockKeys;
       }
     > = new Map();
-    const blocksInChunkTypeOnly: Map<string, BlockKeys | 0> = new Map();
 
     let isFirstLayer = true;
 
@@ -48,29 +47,31 @@ export class FlatWorld extends BaseGeneration {
 
           let shouldAssignBlock = true;
 
-          if (chunkBlocksCustom?.[blockName] == 0) {
+          if (chunkBlocksCustom?.[blockName] === 0) {
             shouldAssignBlock = false;
-            blocksInChunkTypeOnly.set(blockName, 0);
           }
 
           if (shouldAssignBlock) {
-            const type = isFirstLayer ? "grass" : "dirt";
+            let type = isFirstLayer ? BlockKeys.grass : BlockKeys.dirt;
+
+            if (!yA) {
+              type = BlockKeys.bedrock;
+            }
+
             blocksInChunk.set(blockName, {
               position,
-              type,
+              type: type,
             });
-            blocksInChunkTypeOnly.set(blockName, type);
           }
         }
       }
       isFirstLayer = false;
     }
 
-    this.mergeBlocks(blocksInChunk, chunkBlocksCustom, blocksInChunkTypeOnly);
+    this.mergeBlocks(blocksInChunk, chunkBlocksCustom);
 
     return {
       blocksInChunk,
-      blocksInChunkTypeOnly,
     };
   }
 
@@ -86,13 +87,13 @@ export class FlatWorld extends BaseGeneration {
       (prev, key) => {
         const [x, z] = key.split("_");
 
-        const { blocksInChunkTypeOnly } = this.getBlocksInChunk(
+        const { blocksInChunk } = this.getBlocksInChunk(
           Number(x),
           Number(z),
           (neighborsChunkData || {})[key]
         );
 
-        return new Map([...prev, ...blocksInChunkTypeOnly]);
+        return new Map([...prev, ...blocksInChunk]);
       },
       new Map()
     );
@@ -102,9 +103,17 @@ export class FlatWorld extends BaseGeneration {
       blocksInChunkNeighbor
     );
 
+    const arrayBlocksDataTmp: number[] = [];
+
+    for (const [_key, { position, type }] of blocksInChunk) {
+      arrayBlocksDataTmp.push(...position, type);
+    }
+
+    const arrayBlocksData = Int32Array.from(arrayBlocksDataTmp);
+
     return {
-      facesToRender,
-      blocksInChunk,
+      facesToRender: Object.fromEntries(facesToRender),
+      arrayBlocksData,
     };
   }
 }

@@ -1,16 +1,10 @@
-import {
-  BoxGeometry,
-  CapsuleGeometry,
-  Mesh,
-  MeshStandardMaterial,
-  Vector3,
-} from "three";
+import { BoxGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
 
-import blocks, { BlockKeys } from "@/constants/blocks";
+import blocks from "@/constants/blocks";
 import { CHARACTER_LENGTH, CHARACTER_WIDTH } from "@/constants/player";
 import BasicCharacterControllerInput from "@/game/action/input";
 import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
-
+import { BlockKeys } from "@/type";
 import { getChunkCoordinate } from "../helpers/chunkHelpers";
 
 export default class Player extends BaseEntity {
@@ -54,6 +48,8 @@ export default class Player extends BaseEntity {
     this.player.name = "player";
 
     this.scene?.add(this.player);
+
+    this.handleDetectChunkChange();
 
     this.worker?.addEventListener("message", (e) => {
       if (e.data.type === "updatePosition") {

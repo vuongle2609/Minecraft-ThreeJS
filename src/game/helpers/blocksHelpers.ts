@@ -1,4 +1,4 @@
-import { BlockKeys } from "@/constants/blocks";
+import { BlockKeys } from "@/type";
 import { Face } from "../../constants/block";
 import { nameFromCoordinate } from "./nameFromCoordinate";
 

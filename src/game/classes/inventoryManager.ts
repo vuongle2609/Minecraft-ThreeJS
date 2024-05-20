@@ -1,18 +1,22 @@
-import blocks, { BlockKeys } from "@/constants/blocks";
+import blocks from "@/constants/blocks";
 import { HOTBAR_LENGTH } from "@/constants/player";
+import { BlockKeys } from "@/type";
 import { $, $$ } from "@/UI/utils/selector";
 
 import BaseEntity, { BasePropsType } from "./baseEntity";
-
 export default class InventoryManager extends BaseEntity {
   blocksList = [
-    ...Object.keys(blocks),
-    ...Array(45 - Object.keys(blocks).length).fill(null),
+    ...Object.keys(blocks).filter((key) => {
+      return blocks[key as unknown as BlockKeys].renderInInventory;
+    }),
+    ...Array(
+      45 - Object.values(blocks).filter((item) => item.renderInInventory).length
+    ).fill(null),
   ] as (BlockKeys | null)[];
 
   inventory: (BlockKeys | null)[] = Array(HOTBAR_LENGTH)
     .fill(null)
-    .map((_, index) => Object.keys(blocks)[index] as BlockKeys);
+    .map((_, index) => Object.keys(blocks)[index] as unknown as BlockKeys);
 
   tooltipElement: HTMLDivElement | undefined;
   currentDragElement: HTMLImageElement | undefined;
@@ -27,38 +31,64 @@ export default class InventoryManager extends BaseEntity {
 
   isOpenInventory = false;
 
+  eventList: {
+    element: HTMLElement | Document;
+    event: string;
+    handle: Function;
+  }[] = [];
+
   constructor(props: BasePropsType) {
     super(props);
     this.initialize();
   }
 
   initialize() {
-    document.addEventListener(
-      "keydown",
-      (e) => {
-        if (e.key === "e") {
-          this.renderInventory();
-        }
+    const keyDownHandle = (e: KeyboardEvent) => {
+      if (e.key === "e") {
+        this.renderInventory();
+      }
 
-        if (e.key === "Escape") {
-          this.renderInventory(true);
-        }
+      if (e.key === "Escape") {
+        this.renderInventory(true);
+      }
 
-        if (!!Number(e.key)) {
-          this.handleChangeFocusItem(Number(e.key));
-        }
-      },
-      false
-    );
+      if (!!Number(e.key)) {
+        this.handleChangeFocusItem(Number(e.key));
+      }
+    };
 
-    document.addEventListener("wheel", (e) => {
+    const wheelHandle = (e: WheelEvent) => {
       this.handleChangeFocusItem(
         this.currentFocusIndex - (e.deltaY < 0 ? 0 : -2)
       );
       e.stopImmediatePropagation();
-    });
+    };
 
-    document.addEventListener("mousemove", (e) => this.handleMouseMove(e));
+    const mouseMoveHandle = this.handleMouseMove.bind(this);
+
+    document.addEventListener("keydown", keyDownHandle, false);
+
+    document.addEventListener("wheel", wheelHandle, false);
+
+    document.addEventListener("mousemove", mouseMoveHandle, false);
+
+    this.eventList.push(
+      {
+        element: document,
+        event: "keydown",
+        handle: keyDownHandle,
+      },
+      {
+        element: document,
+        event: "wheel",
+        handle: wheelHandle,
+      },
+      {
+        element: document,
+        event: "mousemove",
+        handle: mouseMoveHandle,
+      }
+    );
   }
 
   handleMouseMove(e: MouseEvent) {
@@ -83,13 +113,14 @@ export default class InventoryManager extends BaseEntity {
     this.currentDragElement.style.display = "block";
     if (blockDragging.icon) this.currentDragElement.src = blockDragging.icon;
     this.currentDragElement.style.transform = `translate(${translateX}px,${translateY}px)`;
-    this.currentDragElement.innerText = this.currentDragItem || "";
+    this.currentDragElement.innerText =
+      (this.currentDragItem as unknown as string) || "";
   }
 
   handleMouseMoveHoverBlock(e: MouseEvent) {
     if (!this.tooltipElement || !this.inventoryContainerElement) return;
 
-    const hoverId = (e.target as HTMLImageElement).id as BlockKeys;
+    const hoverId = (e.target as HTMLImageElement).id as unknown as BlockKeys;
     const blockHover = blocks[hoverId];
 
     if (!blockHover || this.currentDragItem) {
@@ -156,8 +187,9 @@ export default class InventoryManager extends BaseEntity {
 
         const iconPath = currentBlock?.icon;
         const name = currentBlock?.name;
+        const shouldRender = currentBlock?.renderInInventory;
 
-        return currentBlock && iconPath
+        return currentBlock && iconPath && shouldRender
           ? `
         <div class="w-[11.11%] aspect-square box-with-shadow bold hover:brightness-150 ${customClickClass}" block_data="${itemKey}" draggable="false">
           <img src="${iconPath}" alt="${name}" id="${itemKey}" draggable="false"/>
@@ -179,8 +211,14 @@ export default class InventoryManager extends BaseEntity {
     );
 
     $$<HTMLDivElement>(".hotbarInventory").forEach((item, index) => {
-      item.addEventListener("mousedown", (e) => {
-        this.handleMouseDownHotbar(index);
+      const handle = () => this.handleMouseDownHotbar.bind(this)(index);
+
+      item.addEventListener("mousedown", handle, false);
+
+      this.eventList.push({
+        event: "mousedown",
+        handle,
+        element: item,
       });
     });
   }
@@ -252,16 +290,31 @@ export default class InventoryManager extends BaseEntity {
     );
 
     $$<HTMLDivElement>(".blockInventory").forEach((item) => {
-      item.addEventListener("mousedown", (e) => {
-        this.handleMouseDownInventory(
-          item.getAttribute("block_data") as BlockKeys
+      const handle = () =>
+        this.handleMouseDownInventory.bind(this)(
+          item.getAttribute("block_data") as unknown as BlockKeys
         );
+
+      item.addEventListener("mousedown", handle, false);
+
+      this.eventList.push({
+        event: "mousedown",
+        handle,
+        element: item,
       });
     });
 
     $$<HTMLDivElement>(".emptyInventory").forEach((item) => {
-      item.addEventListener("mousedown", (e) => {
+      const handle = () => {
         this.currentDragItem = null;
+      };
+
+      item.addEventListener("mousedown", handle, false);
+
+      this.eventList.push({
+        event: "mousedown",
+        handle,
+        element: item,
       });
     });
 
@@ -342,5 +395,11 @@ export default class InventoryManager extends BaseEntity {
       .join("");
 
     this.currentFocus = this.inventory[this.currentFocusIndex];
+  }
+
+  dispose() {
+    this.eventList.forEach(({ handle, element, event }) =>
+      element.removeEventListener(event, handle as any, false)
+    );
   }
 }

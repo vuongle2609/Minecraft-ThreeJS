@@ -1,9 +1,9 @@
 import { Vector3 } from "three";
 
 import { BLOCK_WIDTH } from "@/constants";
-import { BlockKeys } from "@/constants/blocks";
 import { CHARACTER_LENGTH, CHARACTER_WIDTH } from "@/constants/player";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
+import { BlockKeys } from "@/type";
 
 const halfCharacterWidth = CHARACTER_WIDTH / 2;
 
@@ -276,18 +276,18 @@ export default class Physics {
     const calculatedMoveVector = new Vector3();
 
     calculatedMoveVector.x =
-      (nextObjectX && nextObjectX !== "water") ||
-      (nextObjectXTop && nextObjectXTop !== "water")
+      (nextObjectX && nextObjectX !== BlockKeys.water) ||
+      (nextObjectXTop && nextObjectXTop !== BlockKeys.water)
         ? 0
         : vectorMove.x;
     calculatedMoveVector.y =
-      (nextObjectY && nextObjectY !== "water") ||
-      (nextObjectYTop && nextObjectYTop !== "water")
+      (nextObjectY && nextObjectY !== BlockKeys.water) ||
+      (nextObjectYTop && nextObjectYTop !== BlockKeys.water)
         ? 0
         : vectorMove.y;
     calculatedMoveVector.z =
-      (nextObjectZ && nextObjectZ !== "water") ||
-      (nextObjectZTop && nextObjectZTop !== "water")
+      (nextObjectZ && nextObjectZ !== BlockKeys.water) ||
+      (nextObjectZTop && nextObjectZTop !== BlockKeys.water)
         ? 0
         : vectorMove.z;
 

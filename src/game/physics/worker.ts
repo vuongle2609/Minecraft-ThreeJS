@@ -1,9 +1,8 @@
 import { Vector3 } from "three";
 
-import { BlocksMappingType } from "@/type";
+import { BlockKeys } from "@/type";
 
-import { BlockKeys } from "@/constants/blocks";
-import { CHUNK_SIZE, FLAT_WORLD_TYPE, TIME_TO_INTERACT } from "@/constants";
+import { CHUNK_SIZE, TIME_TO_INTERACT } from "@/constants";
 import {
   CHARACTER_LENGTH,
   GRAVITY,
@@ -12,15 +11,10 @@ import {
   SPEED,
 } from "@/constants/player";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
-import { FlatWorld } from "@/game/terrant/flatWorldGeneration";
-import { DefaultWorld } from "@/game/terrant/worldGeneration";
 import Physics from "./physics";
 
 class PhysicsWorker {
-  worldGen: FlatWorld | DefaultWorld;
-
-  chunkBlocksCustomMap: Record<string, BlocksMappingType> = {};
-  chunkGenerated: Record<string, boolean> = {};
+  chunkGenerated = 0;
 
   blocksMapping: Map<string, BlockKeys | 0> = new Map();
 
@@ -128,6 +122,12 @@ class PhysicsWorker {
         ...this.eventMapping,
         calculateMovement: this.calculateMovement,
       };
+
+      self.postMessage({
+        type: "removeLoading",
+        data: {
+        },
+      });
     }, TIME_TO_INTERACT);
 
   initPhysics = () => {
@@ -135,69 +135,41 @@ class PhysicsWorker {
     this.initFunc = undefined;
   };
 
-  addBlock = ({ position, type }: { position: number[]; type: string }) => {
+  addBlock = ({ position, type }: { position: number[]; type: BlockKeys }) => {
     this.blocksMapping.set(
       nameFromCoordinate(position[0], position[1], position[2]),
       type as BlockKeys
     );
   };
 
-  init = ({
-    seed,
-    type,
-    chunkBlocksCustom,
-    initPos,
-  }: {
-    seed: number;
-    type: number;
-    chunkBlocksCustom: Record<string, BlocksMappingType>;
-    initPos: number[];
-  }) => {
-    this.worldGen =
-      type === FLAT_WORLD_TYPE ? new FlatWorld(seed) : new DefaultWorld(seed);
+  addBlocks = ({ arrayBlocksData }: { arrayBlocksData: Int32Array }) => {
+    let tmpPos: number[] = [];
+    const lengthCached = arrayBlocksData.length;
+    for (let index = 0; index < lengthCached; index++) {
+      const num = arrayBlocksData[index];
 
-    this.chunkBlocksCustomMap = chunkBlocksCustom;
+      if (tmpPos.length === 3) {
+        const key = nameFromCoordinate(tmpPos[0], tmpPos[1], tmpPos[2]);
 
-    if (initPos) this.playerPos.set(initPos[0], initPos[1] + 60, initPos[2]);
-    else this.playerPos.set(this.spawn[0], this.spawn[1], this.spawn[2]);
+        this.blocksMapping.set(key, num);
+        tmpPos = [];
+      } else {
+        tmpPos.push(num);
+      }
+    }
+    this.chunkGenerated += 1;
+
+    if (this.chunkGenerated === 9) {
+      this.initPhysics();
+    }
   };
 
-  changeChunk = async ({
-    neighborChunksKeys,
-  }: {
-    neighborChunksKeys: string[];
-  }) => {
-    if (!this.worldGen)
-      await (() =>
-        new Promise((resolve, reject) => {
-          const check = setInterval(() => {
-            if (this.worldGen) {
-              clearInterval(check);
-              resolve(true);
-            }
-          }, 200);
-        }))();
-
-    neighborChunksKeys.forEach((key) => {
-      if (!this.chunkGenerated[key]) {
-        const [x, z] = key.split("_");
-
-        const { blocksInChunkTypeOnly } = this.worldGen.getBlocksInChunk(
-          Number(x),
-          Number(z),
-          this.chunkBlocksCustomMap?.[key] || {}
-        );
-
-        this.chunkGenerated[key] = true;
-
-        this.blocksMapping = new Map([
-          ...this.blocksMapping,
-          ...blocksInChunkTypeOnly,
-        ]);
-      }
-    });
-
-    if (Object.values(this.chunkGenerated).length === 9) this.initPhysics();
+  init = ({ initPos }: { initPos: number[] }) => {
+    if (initPos) {
+      this.playerPos.set(initPos[0], initPos[1] + 0.5, initPos[2]);
+    } else {
+      this.playerPos.set(this.spawn[0], this.spawn[1], this.spawn[2]);
+    }
   };
 
   removeBlock = ({ position }: { position: number[] }) => {
@@ -210,8 +182,8 @@ class PhysicsWorker {
     addBlock: this.addBlock,
     removeBlock: this.removeBlock,
     jumpCharacter: this.jumpCharacter,
-    changeChunk: this.changeChunk,
     init: this.init,
+    addBlocks: this.addBlocks,
   };
 }
 
@@ -223,7 +195,7 @@ self.onmessage = (
     data: any;
   }>
 ) => {
-  const funcWorker = physicsWorker[
+  const funcWorker = physicsWorker.eventMapping[
     e.data.type as keyof typeof physicsWorker
   ] as Function;
 

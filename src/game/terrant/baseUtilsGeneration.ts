@@ -1,8 +1,8 @@
 import { BLOCK_WIDTH } from "@/constants";
 import { Face } from "@/constants/block";
-import { BlockKeys } from "@/constants/blocks";
 import { getNeighborsSeparate } from "@/game/helpers/blocksHelpers";
 import { detailFromName } from "@/game/helpers/detailFromName";
+import { BlockKeys } from "@/type";
 
 const { leftZ, rightZ, leftX, rightX, bottom, top } = Face;
 
@@ -24,17 +24,10 @@ export class BaseGeneration {
         type: BlockKeys | 0;
       }
     > = new Map(),
-    chunkBlocksCustom: Record<string, 0 | BlockKeys>,
-    blocksInChunkTypeOnly: Map<string, BlockKeys | 0>
+    chunkBlocksCustom: Record<string, 0 | BlockKeys>
   ) {
     Object.keys(chunkBlocksCustom || {}).forEach((currKey) => {
       const { x, y, z } = detailFromName(currKey);
-
-      if (chunkBlocksCustom[currKey] == 0) {
-        blocksInChunkTypeOnly.set(currKey, 0);
-      }
-
-      blocksInChunkTypeOnly.set(currKey, chunkBlocksCustom[currKey]);
 
       blocksInChunk.set(currKey, {
         position: [x, y, z],
@@ -47,9 +40,9 @@ export class BaseGeneration {
     neighBor?: { position: number[]; type: BlockKeys | 0 } | boolean,
     type?: BlockKeys
   ) {
-    if (typeof neighBor !== "boolean" && neighBor?.type === "water") {
+    if (typeof neighBor !== "boolean" && neighBor?.type === BlockKeys.water) {
       // does not handle client face process
-      if (type === "water") {
+      if (type === BlockKeys.water) {
         return false;
       }
       return true;
@@ -106,14 +99,18 @@ export class BaseGeneration {
         BLOCK_WIDTH
       );
 
-      facesToRender.set(key, {
+      const valueToSet = {
         [leftZ]: this.shouldRenderFace(faceHasNeighbor?.[leftZ], type),
         [rightZ]: this.shouldRenderFace(faceHasNeighbor?.[rightZ], type),
         [leftX]: this.shouldRenderFace(faceHasNeighbor?.[leftX], type),
         [rightX]: this.shouldRenderFace(faceHasNeighbor?.[rightX], type),
         [bottom]: this.lowestY === y ? false : !faceHasNeighbor?.[bottom],
         [top]: this.shouldRenderFace(faceHasNeighbor?.[top], type),
-      });
+      };
+
+      const shouldSet = Object.values(valueToSet).filter(Boolean).length;
+
+      if (shouldSet) facesToRender.set(key, valueToSet);
     }
 
     return facesToRender;

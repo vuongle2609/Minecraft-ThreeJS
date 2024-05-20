@@ -1,17 +1,28 @@
-import { Vector2, Vector3 } from "three";
+import {
+  BoxGeometry,
+  Group,
+  Mesh,
+  MeshStandardMaterial,
+  Vector2,
+  Vector3,
+} from "three";
 
 import { Face } from "@/constants/block";
-import blocks, { BlockKeys } from "@/constants/blocks";
+import blocks from "@/constants/blocks";
 import { getChunkCoordinate } from "@/game/helpers/chunkHelpers";
 import { detailFromName } from "@/game/helpers/detailFromName";
 import {
   nameChunkFromCoordinate,
   nameFromCoordinate,
 } from "@/game/helpers/nameFromCoordinate";
+import { BlockKeys } from "@/type";
 
+import { BLOCK_WIDTH } from "@/constants";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
+
+const { leftX, leftZ, bottom, rightX, rightZ, top } = Face;
 
 interface PropsType {
   inventoryManager: InventoryManager;
@@ -31,6 +42,18 @@ export default class BlockManager extends BaseEntity {
 
   chunksActive: string[] = [];
 
+  blocksGroup = new Group();
+
+  disposeBlockManager: Function;
+
+  blockDisplayHover = new Mesh(
+    new BoxGeometry(BLOCK_WIDTH + 0.01, BLOCK_WIDTH + 0.01, BLOCK_WIDTH + 0.01),
+    new MeshStandardMaterial({
+      wireframe: true,
+      visible: true,
+    })
+  );
+
   constructor(props: BasePropsType & PropsType) {
     super(props);
 
@@ -39,7 +62,17 @@ export default class BlockManager extends BaseEntity {
   }
 
   async initialize() {
-    document.addEventListener("mousedown", this.onMouseDown.bind(this), false);
+    this.blockDisplayHover.name = "helper";
+    this.scene?.add(this.blockDisplayHover);
+    this.scene?.add(this.blocksGroup);
+
+    const eventMouseDown = this.onMouseDown.bind(this);
+
+    document.addEventListener("mousedown", eventMouseDown, false);
+
+    this.disposeBlockManager = () => {
+      document.removeEventListener("mousedown", eventMouseDown, false);
+    };
   }
 
   updateBlock({
@@ -53,7 +86,7 @@ export default class BlockManager extends BaseEntity {
     y: number;
     z: number;
     type: BlockKeys | 0;
-    facesToRender?: Record<Face, boolean>;
+    facesToRender?: Record<Face, boolean> | null;
   }) {
     // if block marked as destroyed then return
     if (type == 0) {
@@ -64,10 +97,10 @@ export default class BlockManager extends BaseEntity {
 
     const block = new Block({
       position: position,
-      scene: this.scene,
       type: type,
       blocksMapping: this.blocksMapping,
       facesToRender,
+      blocksGroup: this.blocksGroup,
     });
 
     this.blocksMapping.set(nameFromCoordinate(x, y, z), block);
@@ -80,14 +113,14 @@ export default class BlockManager extends BaseEntity {
 
     raycaster.setFromCamera(new Vector2(), this.camera);
 
-    const intersects = raycaster.intersectObjects(this.scene.children, false);
+    const intersectObject = raycaster.intersectObjects(
+      this.blocksGroup.children,
+      false
+    )[0];
 
-    if (!intersects[0]) return;
+    if (!intersectObject) return;
 
-    const intersectObject =
-      intersects[0]?.object.name == "player" ? intersects[1] : intersects[0];
-
-    if (intersectObject?.distance > 12) return;
+    if (intersectObject.distance > 12) return;
 
     return intersectObject;
   }
@@ -98,7 +131,24 @@ export default class BlockManager extends BaseEntity {
     blockToRemove?.destroy(isClearChunk);
   }
 
-  handleHoverBlock() {}
+  handleHoverBlock() {
+    const intersectObj = this.getIntersectObject();
+
+    if (!intersectObj) {
+      this.blockDisplayHover.visible = false;
+      return;
+    }
+
+    const { x, y, z, type } = detailFromName(intersectObj.object.name);
+
+    if (type == BlockKeys.water) {
+      this.blockDisplayHover.visible = false;
+      return;
+    }
+
+    this.blockDisplayHover.visible = true;
+    this.blockDisplayHover.position.set(x, y, z);
+  }
 
   handleGetBlock() {
     const intersectObj = this.getIntersectObject();
@@ -109,8 +159,10 @@ export default class BlockManager extends BaseEntity {
 
     const { type } = clickedDetail;
 
+    if (!blocks[type].renderInInventory) return;
+
     this.inventoryManager.inventory[this.inventoryManager.currentFocusIndex] =
-      type as BlockKeys;
+      type;
 
     this.inventoryManager.renderHotbar();
 
@@ -129,8 +181,8 @@ export default class BlockManager extends BaseEntity {
 
     const { x, y, z, type } = clickedDetail;
 
-    if (type === "bedrock") return;
-    if (type === "water") return;
+    if (type == BlockKeys.bedrock) return;
+    if (type == BlockKeys.water) return;
 
     this.removeBlock(x, y, z);
 
@@ -153,7 +205,7 @@ export default class BlockManager extends BaseEntity {
       this.currentBreakSound.currentTime = 0;
     }
 
-    this.currentBreakSound = blocks[type as BlockKeys].break;
+    this.currentBreakSound = blocks[type].break;
 
     this.currentBreakSound.play();
   }
@@ -171,24 +223,24 @@ export default class BlockManager extends BaseEntity {
 
     const blockPosition = new Vector3();
 
-    switch (clickedFace) {
-      case "2":
-        blockPosition.set(x + 2, y, z);
+    switch (Number(clickedFace)) {
+      case leftX:
+        blockPosition.set(x + BLOCK_WIDTH, y, z);
         break;
-      case "3":
-        blockPosition.set(x - 2, y, z);
+      case rightX:
+        blockPosition.set(x - BLOCK_WIDTH, y, z);
         break;
-      case "4":
-        blockPosition.set(x, y + 2, z);
+      case top:
+        blockPosition.set(x, y + BLOCK_WIDTH, z);
         break;
-      case "5":
-        blockPosition.set(x, y - 2, z);
+      case bottom:
+        blockPosition.set(x, y - BLOCK_WIDTH, z);
         break;
-      case "0":
-        blockPosition.set(x, y, z + 2);
+      case leftZ:
+        blockPosition.set(x, y, z + BLOCK_WIDTH);
         break;
-      case "1":
-        blockPosition.set(x, y, z - 2);
+      case rightZ:
+        blockPosition.set(x, y, z - BLOCK_WIDTH);
         break;
     }
 
@@ -213,11 +265,13 @@ export default class BlockManager extends BaseEntity {
       const chunk = getChunkCoordinate(blockPosition.x, blockPosition.z);
       const chunkName = nameChunkFromCoordinate(chunk.x, chunk.z);
 
-      this.chunksBlocks[chunkName]?.push(
-        nameFromCoordinate(blockPosition.x, blockPosition.y, blockPosition.z)
+      const coorName = nameFromCoordinate(
+        blockPosition.x,
+        blockPosition.y,
+        blockPosition.z
       );
 
-      const coorName = nameFromCoordinate(x, y, z);
+      this.chunksBlocks[chunkName]?.push(coorName);
 
       this.blocksWorldChunk[chunkName] = this.blocksWorldChunk[chunkName] || {};
       this.blocksWorldChunk[chunkName][coorName] = placeType;
@@ -270,11 +324,6 @@ export default class BlockManager extends BaseEntity {
   }
 
   update() {
-    // :( donno
     this.handleHoverBlock();
-  }
-
-  dispose() {
-    document.removeEventListener("mousedown", this.onMouseDown.bind(this));
   }
 }

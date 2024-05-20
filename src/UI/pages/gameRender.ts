@@ -18,6 +18,13 @@ export default class GameRender extends RenderPage {
   }
 
   element = String.raw` 
+      <div id="loading_modal" class="fixed top-0 bottom-0 left-0 right-0 items-center justify-center bg-gray-900/70 flex flex-col z-50 gap-2 text-lg text-white"
+      style="background-image: url('/assets/home/dirt_background.webp')"
+      >
+        <span>Loading world</span>
+        <span>Building terrain</span>
+      </div>
+
       <div id="modal_focus" class="fixed top-0 bottom-0 left-0 right-0 items-center justify-center bg-gray-900/70 flex flex-col z-20">
         <div class="flex flex-col w-full h-full items-center justify-center px-[200px] gap-4">
           <h2 class="text-white text-lg">Game Menu</h2>

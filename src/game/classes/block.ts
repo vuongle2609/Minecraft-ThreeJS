@@ -1,22 +1,19 @@
-import { Mesh, Object3D, Vector3 } from "three";
+import { Group, Mesh, Object3D, Vector3 } from "three";
 
 import { BLOCK_WIDTH } from "@/constants";
 import { BlockFaces, Face } from "@/constants/block";
-import blocks, {
-  BlockAttributeType,
-  BlockKeys,
-  renderGeometry,
-} from "@/constants/blocks";
+import blocks, { BlockAttributeType, renderGeometry } from "@/constants/blocks";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
-
+import { BlockKeys } from "@/type";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 
 interface PropsType {
   position: Vector3;
   type: BlockKeys;
+  blocksGroup: Group;
   blocksMapping: Map<string, Block>;
-  shouldNotRender?: boolean;
-  facesToRender?: Record<Face, boolean>;
+  facesToRender?: Record<Face, boolean> | null;
+  isPlace?: boolean;
 }
 
 const { leftZ, rightZ, leftX, rightX, top, bottom } = Face;
@@ -34,24 +31,31 @@ export default class Block extends BaseEntity {
   position: Vector3;
   atttribute: BlockAttributeType;
   blocksMapping: Map<string, Block>;
+  blocksGroup: Group;
+  isPlace: boolean;
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
 
-    const { type, position, blocksMapping, shouldNotRender, facesToRender } =
-      props!;
+    const {
+      type,
+      position,
+      blocksMapping,
+      blocksGroup,
+      facesToRender,
+      isPlace,
+    } = props!;
 
+    this.blocksGroup = blocksGroup;
     this.type = type;
     this.position = position;
     this.atttribute = blocks[type];
-    if (!blocks[type]) console.log("🚀 ~ Block ~ constructor ~ type:", type);
     this.blocksMapping = blocksMapping;
+    this.isPlace = !!isPlace;
+
+    if (facesToRender === null) return;
 
     facesToRender ? this.renderWithKnownFace(facesToRender) : this.render();
-  }
-
-  getObject(name: string) {
-    return this.scene?.getObjectByName(name) as THREE.Object3D;
   }
 
   renderWithKnownFace(facesToRender: Record<Face, boolean>) {
@@ -125,7 +129,7 @@ export default class Block extends BaseEntity {
   }
 
   removeFace(face: keyof BlockFaces) {
-    this.scene?.remove(this.blockFaces[face] as Object3D);
+    this.blocksGroup?.remove(this.blockFaces[face] as Object3D);
   }
 
   addFace(face: keyof BlockFaces) {
@@ -139,12 +143,12 @@ export default class Block extends BaseEntity {
 
     const { x, y, z } = this.position;
 
-    plane.position.copy(this.position);
+    plane.position.set(x, y, z);
     plane.rotation.set(rotation[0], rotation[1], rotation[2]);
     plane.name = nameFromCoordinate(x, y, z, this.type, face);
 
     this.blockFaces[face] = plane;
-    this.scene?.add(plane);
+    this.blocksGroup?.add(plane);
   }
 
   calFaceAttr(face: keyof BlockFaces) {
@@ -152,7 +156,9 @@ export default class Block extends BaseEntity {
       case leftZ:
         return { rotation: [0, 0, 0] };
       case rightZ:
-        return { rotation: [0, Math.PI, 0] };
+        return {
+          rotation: [0, Math.PI, 0],
+        };
       case leftX:
         return {
           rotation: [0, Math.PI / 2, 0],
@@ -177,7 +183,7 @@ export default class Block extends BaseEntity {
 
     Object.values(this.blockFaces).forEach((item) => {
       if (item) {
-        this.scene?.remove(item);
+        this.blocksGroup?.remove(item);
         item.geometry.dispose();
       }
     });

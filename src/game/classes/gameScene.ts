@@ -1,7 +1,7 @@
-import { $ } from "@/UI/utils/selector";
 import MouseControl from "@/game/action/mouseControl";
 import Player from "@/game/player/character";
 import { WorldsType } from "@/type";
+import { $ } from "@/UI/utils/selector";
 import {
   Clock,
   Color,
@@ -12,6 +12,7 @@ import {
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 
+import { BLOCK_WIDTH } from "@/constants";
 import ChunkManager from "./chunkManager";
 import Cloud from "./cloud";
 import InventoryManager from "./inventoryManager";
@@ -29,11 +30,6 @@ export default class GameScene extends RenderPage {
     canvas: document.querySelector("#gameScene") as HTMLCanvasElement,
   });
 
-  // rendererDebug = new WebGLRenderer({
-  //   antialias: true,
-  //   canvas: document.querySelector("#gameSceneDebug") as HTMLCanvasElement,
-  // });
-
   worker = new Worker(new URL("../physics/worker", import.meta.url), {
     type: "module",
   });
@@ -46,7 +42,6 @@ export default class GameScene extends RenderPage {
     0.1,
     2000
   );
-  // cameraDebug = new PerspectiveCamera(70, 200 / 200, 0.1, 2000);
 
   control = new PointerLockControls(this.camera, document.body);
 
@@ -82,8 +77,6 @@ export default class GameScene extends RenderPage {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.shadowMap.enabled = false;
 
-    // this.rendererDebug.setSize(200, 200);
-
     window.addEventListener(
       "resize",
       () => {
@@ -97,7 +90,6 @@ export default class GameScene extends RenderPage {
     document.body.appendChild(this.element);
 
     this.scene.background = new Color("#6EB1FF");
-    // this.scene.fog = new Fog(0xcccccc, 3, 40);
     this.scene.fog = new FogExp2(0xcccccc, 0.014);
 
     if (this.worldStorage.rotation)
@@ -124,9 +116,6 @@ export default class GameScene extends RenderPage {
     this.worker.postMessage({
       type: "init",
       data: {
-        seed: this.worldStorage?.seed,
-        type: this.worldStorage?.worldType,
-        chunkBlocksCustom: this.worldStorage.blocksWorldChunk,
         initPos: this.worldStorage.initPos,
       },
     });
@@ -149,9 +138,15 @@ export default class GameScene extends RenderPage {
       worker: this.worker,
     });
 
-    this.inventoryManager.renderHotbar();
+    this.worker.addEventListener("message", (e) => {
+      if (e.data.type === "removeLoading") {
+        const loadingModal = $("#loading_modal");
+        loadingModal.style.display = "none";
+        this.control?.lock();
+      }
+    });
 
-    this.control?.lock();
+    this.inventoryManager.renderHotbar();
 
     this.RAF(0);
   }
@@ -163,7 +158,9 @@ export default class GameScene extends RenderPage {
   }
 
   renderCoordinate() {
-    const { x, y, z } = this.player?.player.position || {};
+    const { x, y, z } =
+      this.player?.player.position.clone().multiplyScalar(1 / BLOCK_WIDTH) ||
+      {};
 
     if (this.coordinateElement)
       this.coordinateElement.innerHTML = `XYZ: ${x.toFixed(3)} / ${y.toFixed(
@@ -197,8 +194,9 @@ export default class GameScene extends RenderPage {
     this.renderer.dispose();
     this.chunkManager.dispose();
     this.player.input.dispose();
-    this.removedWindow = true;
+    this.inventoryManager.dispose();
     this.worker.terminate();
+    this.removedWindow = true;
   }
 
   RAF(t: number) {
@@ -211,30 +209,17 @@ export default class GameScene extends RenderPage {
     if (!this.mouseControl?.paused) {
       const delta = this.clock.getDelta();
 
-      // prevent when user not click and delta get larger make
-      // miss calculate player init position :))
-      if (delta > 0.1) return;
-
       this.renderCoordinate();
 
       this.renderFps();
 
       this.player?.update(delta, t);
 
-      // this.cameraDebug.position.set(
-      //   this.player.player.position.x + 100,
-      //   this.player.player.position.y + 100,
-      //   this.player.player.position.z + 100
-      // );
-
-      // this.cameraDebug.lookAt(this.player.player.position);
-
       this.cloud?.update(this.player.player.position);
 
       this.chunkManager?.update();
 
       this.renderer.render(this.scene, this.camera);
-      // this.rendererDebug.render(this.scene, this.cameraDebug);
     }
   }
 }
