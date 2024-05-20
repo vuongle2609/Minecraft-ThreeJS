@@ -120,7 +120,7 @@ class PhysicsWorker {
     setTimeout(() => {
       this.eventMapping = {
         ...this.eventMapping,
-        calculateMovement: this.calculateMovement,
+        calculateMovement: this.calculateMovement.bind(this),
       };
 
       self.postMessage({
@@ -178,11 +178,11 @@ class PhysicsWorker {
   }
 
   eventMapping: Record<string, Function> = {
-    addBlock: this.addBlock,
-    removeBlock: this.removeBlock,
-    jumpCharacter: this.jumpCharacter,
-    init: this.init,
-    addBlocks: this.addBlocks,
+    addBlock: this.addBlock.bind(this),
+    removeBlock: this.removeBlock.bind(this),
+    jumpCharacter: this.jumpCharacter.bind(this),
+    init: this.init.bind(this),
+    addBlocks: this.addBlocks.bind(this),
   };
 }
 
