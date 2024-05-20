@@ -9,13 +9,13 @@ import {
 
 import { Face } from "@/constants/block";
 import blocks from "@/constants/blocks";
-import { BlockKeys } from "@/type";
 import { getChunkCoordinate } from "@/game/helpers/chunkHelpers";
 import { detailFromName } from "@/game/helpers/detailFromName";
 import {
   nameChunkFromCoordinate,
   nameFromCoordinate,
 } from "@/game/helpers/nameFromCoordinate";
+import { BlockKeys } from "@/type";
 
 import { BLOCK_WIDTH } from "@/constants";
 import BaseEntity, { BasePropsType } from "./baseEntity";
@@ -139,9 +139,12 @@ export default class BlockManager extends BaseEntity {
       return;
     }
 
-    const clickedDetail = detailFromName(intersectObj.object.name);
+    const { x, y, z, type } = detailFromName(intersectObj.object.name);
 
-    const { x, y, z } = clickedDetail;
+    if (type == BlockKeys.water) {
+      this.blockDisplayHover.visible = false;
+      return;
+    }
 
     this.blockDisplayHover.visible = true;
     this.blockDisplayHover.position.set(x, y, z);
@@ -155,6 +158,8 @@ export default class BlockManager extends BaseEntity {
     const clickedDetail = detailFromName(intersectObj.object.name);
 
     const { type } = clickedDetail;
+
+    if (!blocks[type].renderInInventory) return;
 
     this.inventoryManager.inventory[this.inventoryManager.currentFocusIndex] =
       type;

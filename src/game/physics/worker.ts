@@ -122,6 +122,12 @@ class PhysicsWorker {
         ...this.eventMapping,
         calculateMovement: this.calculateMovement,
       };
+
+      self.postMessage({
+        type: "removeLoading",
+        data: {
+        },
+      });
     }, TIME_TO_INTERACT);
 
   initPhysics = () => {

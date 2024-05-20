@@ -2,10 +2,9 @@ import {
   BufferAttribute,
   BufferGeometry,
   DoubleSide,
-  MeshBasicMaterial,
   MeshLambertMaterial,
   NearestFilter,
-  TextureLoader,
+  TextureLoader
 } from "three";
 
 // textures image
@@ -101,6 +100,7 @@ const worldMaterial = MeshLambertMaterial;
 const blocks = {
   [BlockKeys.grass]: {
     name: "Grass",
+    renderInInventory: true,
     icon: grassIcon,
     step: new Audio(stepGrass),
     place: new Audio(placeGrass),
@@ -126,29 +126,9 @@ const blocks = {
       BlockTextureType.bottom,
     ],
   },
-  [BlockKeys.bedrock]: {
-    name: "Bedrock",
-    icon: bedRockIcon,
-    step: new Audio(stepStone),
-    place: new Audio(placeBlock),
-    break: new Audio(placeBlock),
-    volume: 0.1,
-    texture: {
-      [BlockTextureType.side]: new worldMaterial({
-        map: textures.bedRockTexture,
-      }),
-    },
-    textureMap: [
-      BlockTextureType.side,
-      BlockTextureType.side,
-      BlockTextureType.side,
-      BlockTextureType.side,
-      BlockTextureType.side,
-      BlockTextureType.side,
-    ],
-  },
   [BlockKeys.stone]: {
     name: "Stone",
+    renderInInventory: true,
     icon: stoneIcon,
     step: new Audio(stepStone),
     place: new Audio(placeBlock),
@@ -170,6 +150,7 @@ const blocks = {
   },
   [BlockKeys.sand]: {
     name: "Sand",
+    renderInInventory: true,
     icon: sandIcon,
     step: new Audio(stepStone),
     place: new Audio(placeBlock),
@@ -191,6 +172,7 @@ const blocks = {
   },
   [BlockKeys.dirt]: {
     name: "Dirt",
+    renderInInventory: true,
     icon: dirtIcon,
     step: new Audio(stepGrass),
     place: new Audio(placeGrass),
@@ -212,6 +194,7 @@ const blocks = {
   },
   [BlockKeys.cobblestone]: {
     name: "Cobblestone",
+    renderInInventory: true,
     icon: cobblestoneIcon,
     step: new Audio(stepStone),
     place: new Audio(placeBlock),
@@ -233,6 +216,7 @@ const blocks = {
   },
   [BlockKeys.leaves]: {
     name: "Leaves",
+    renderInInventory: true,
     icon: leavesIcon,
     step: new Audio(stepGrass),
     place: new Audio(placeGrass),
@@ -255,6 +239,7 @@ const blocks = {
   },
   [BlockKeys.wood]: {
     name: "Wood",
+    renderInInventory: true,
     icon: woodIcon,
     step: new Audio(stepStone),
     place: new Audio(placeWood),
@@ -279,6 +264,7 @@ const blocks = {
   },
   [BlockKeys.furnace]: {
     name: "Furnace",
+    renderInInventory: true,
     icon: furnanceIcon,
     step: new Audio(stepStone),
     place: new Audio(placeBlock),
@@ -306,6 +292,7 @@ const blocks = {
   },
   [BlockKeys.oakPlanks]: {
     name: "Oak Wood Planks",
+    renderInInventory: true,
     icon: oakPlanksIcon,
     step: new Audio(stepStone),
     place: new Audio(placeWood),
@@ -327,6 +314,7 @@ const blocks = {
   },
   [BlockKeys.blockOfDiamond]: {
     name: "Block of Diamond",
+    renderInInventory: true,
     icon: blockOfDiamondIcon,
     step: new Audio(stepStone),
     place: new Audio(placeBlock),
@@ -348,6 +336,7 @@ const blocks = {
   },
   [BlockKeys.blockOfIron]: {
     name: "Block of Iron",
+    renderInInventory: true,
     icon: blockOfIronIcon,
     step: new Audio(stepStone),
     place: new Audio(placeBlock),
@@ -369,6 +358,7 @@ const blocks = {
   },
   [BlockKeys.blockOfGold]: {
     name: "Block of Gold",
+    renderInInventory: true,
     icon: blockOfGoldIcon,
     step: new Audio(stepStone),
     place: new Audio(placeBlock),
@@ -390,6 +380,7 @@ const blocks = {
   },
   [BlockKeys.blockOfLapis]: {
     name: "Block of Lapis",
+    renderInInventory: true,
     icon: blockOfLapisIcon,
     step: new Audio(stepStone),
     place: new Audio(placeBlock),
@@ -411,6 +402,7 @@ const blocks = {
   },
   [BlockKeys.blockOfEmerald]: {
     name: "Block of Emerald",
+    renderInInventory: true,
     icon: blockOfEmeraldIcon,
     step: new Audio(stepStone),
     place: new Audio(placeBlock),
@@ -432,7 +424,8 @@ const blocks = {
   },
   [BlockKeys.water]: {
     name: "Water",
-    icon: null,
+    renderInInventory: false,
+    icon: bedRockIcon,
     step: new Audio(stepGrass),
     place: new Audio(placeGrass),
     break: new Audio(breakGrass),
@@ -443,6 +436,28 @@ const blocks = {
         transparent: true,
         opacity: 0.6,
         side: DoubleSide,
+      }),
+    },
+    textureMap: [
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+      BlockTextureType.side,
+    ],
+  },
+  [BlockKeys.bedrock]: {
+    name: "Bedrock",
+    renderInInventory: false,
+    icon: bedRockIcon,
+    step: new Audio(stepStone),
+    place: new Audio(placeBlock),
+    break: new Audio(placeBlock),
+    volume: 0.1,
+    texture: {
+      [BlockTextureType.side]: new worldMaterial({
+        map: textures.bedRockTexture,
       }),
     },
     textureMap: [

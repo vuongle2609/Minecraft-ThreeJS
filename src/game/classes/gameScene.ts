@@ -1,7 +1,7 @@
-import { $ } from "@/UI/utils/selector";
 import MouseControl from "@/game/action/mouseControl";
 import Player from "@/game/player/character";
 import { WorldsType } from "@/type";
+import { $ } from "@/UI/utils/selector";
 import {
   Clock,
   Color,
@@ -12,12 +12,12 @@ import {
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 
+import { BLOCK_WIDTH } from "@/constants";
 import ChunkManager from "./chunkManager";
 import Cloud from "./cloud";
 import InventoryManager from "./inventoryManager";
 import Light from "./light";
 import { RenderPage } from "./renderPage";
-import { BLOCK_WIDTH } from "@/constants";
 
 export default class GameScene extends RenderPage {
   id: string;
@@ -77,8 +77,6 @@ export default class GameScene extends RenderPage {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.shadowMap.enabled = false;
 
-    // this.rendererDebug.setSize(200, 200);
-
     window.addEventListener(
       "resize",
       () => {
@@ -92,7 +90,6 @@ export default class GameScene extends RenderPage {
     document.body.appendChild(this.element);
 
     this.scene.background = new Color("#6EB1FF");
-    // this.scene.fog = new Fog(0xcccccc, 3, 40);
     this.scene.fog = new FogExp2(0xcccccc, 0.014);
 
     if (this.worldStorage.rotation)
@@ -141,9 +138,15 @@ export default class GameScene extends RenderPage {
       worker: this.worker,
     });
 
-    this.inventoryManager.renderHotbar();
+    this.worker.addEventListener("message", (e) => {
+      if (e.data.type === "removeLoading") {
+        const loadingModal = $("#loading_modal");
+        loadingModal.style.display = "none";
+        this.control?.lock();
+      }
+    });
 
-    this.control?.lock();
+    this.inventoryManager.renderHotbar();
 
     this.RAF(0);
   }
@@ -191,8 +194,9 @@ export default class GameScene extends RenderPage {
     this.renderer.dispose();
     this.chunkManager.dispose();
     this.player.input.dispose();
-    this.removedWindow = true;
+    this.inventoryManager.dispose();
     this.worker.terminate();
+    this.removedWindow = true;
   }
 
   RAF(t: number) {
@@ -204,10 +208,6 @@ export default class GameScene extends RenderPage {
 
     if (!this.mouseControl?.paused) {
       const delta = this.clock.getDelta();
-
-      // prevent when user not click and delta get larger make
-      // miss calculate player init position :))
-      if (delta > 0.1) return;
 
       this.renderCoordinate();
 
