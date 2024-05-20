@@ -1,9 +1,8 @@
 import { InstancedMesh } from "three";
 
-
 export enum BlockKeys {
   grass = 1,
-  bedrock = 2,
+
   stone = 3,
   sand = 4,
   dirt = 5,
@@ -18,6 +17,7 @@ export enum BlockKeys {
   blockOfLapis = 14,
   blockOfEmerald = 15,
   water = 16,
+  bedrock = 17,
 }
 
 export enum BlockTextureType {
