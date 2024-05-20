@@ -138,9 +138,15 @@ export default class GameScene extends RenderPage {
       worker: this.worker,
     });
 
-    this.inventoryManager.renderHotbar();
+    this.worker.addEventListener("message", (e) => {
+      if (e.data.type === "removeLoading") {
+        const loadingModal = $("#loading_modal");
+        loadingModal.style.display = "none";
+        this.control?.lock();
+      }
+    });
 
-    this.control?.lock();
+    this.inventoryManager.renderHotbar();
 
     this.RAF(0);
   }
