@@ -29,7 +29,7 @@ class PhysicsWorker {
 
   constructor() {}
 
-  calculateMovement = ({
+  calculateMovement({
     directionVectorArr,
     forwardVectorArr,
     position,
@@ -39,7 +39,7 @@ class PhysicsWorker {
     directionVectorArr: number[];
     position: number[];
     delta: number;
-  }) => {
+  }) {
     const forwardVector = new Vector3(
       forwardVectorArr[0],
       forwardVectorArr[1],
@@ -107,14 +107,14 @@ class PhysicsWorker {
         collideObject,
       },
     });
-  };
+  }
 
-  jumpCharacter = () => {
+  jumpCharacter() {
     if (this.onGround) {
       this.vy = JUMP_FORCE;
       this.onGround = false;
     }
-  };
+  }
 
   initFunc: undefined | Function = () =>
     setTimeout(() => {
@@ -125,24 +125,23 @@ class PhysicsWorker {
 
       self.postMessage({
         type: "removeLoading",
-        data: {
-        },
+        data: {},
       });
     }, TIME_TO_INTERACT);
 
-  initPhysics = () => {
+  initPhysics() {
     this.initFunc?.();
     this.initFunc = undefined;
-  };
+  }
 
-  addBlock = ({ position, type }: { position: number[]; type: BlockKeys }) => {
+  addBlock({ position, type }: { position: number[]; type: BlockKeys }) {
     this.blocksMapping.set(
       nameFromCoordinate(position[0], position[1], position[2]),
       type as BlockKeys
     );
-  };
+  }
 
-  addBlocks = ({ arrayBlocksData }: { arrayBlocksData: Int32Array }) => {
+  addBlocks({ arrayBlocksData }: { arrayBlocksData: Int32Array }) {
     let tmpPos: number[] = [];
     const lengthCached = arrayBlocksData.length;
     for (let index = 0; index < lengthCached; index++) {
@@ -162,21 +161,21 @@ class PhysicsWorker {
     if (this.chunkGenerated === 9) {
       this.initPhysics();
     }
-  };
+  }
 
-  init = ({ initPos }: { initPos: number[] }) => {
+  init({ initPos }: { initPos: number[] }) {
     if (initPos) {
       this.playerPos.set(initPos[0], initPos[1] + 0.5, initPos[2]);
     } else {
       this.playerPos.set(this.spawn[0], this.spawn[1], this.spawn[2]);
     }
-  };
+  }
 
-  removeBlock = ({ position }: { position: number[] }) => {
+  removeBlock({ position }: { position: number[] }) {
     this.blocksMapping.delete(
       nameFromCoordinate(position[0], position[1], position[2])
     );
-  };
+  }
 
   eventMapping: Record<string, Function> = {
     addBlock: this.addBlock,

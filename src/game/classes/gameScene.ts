@@ -140,9 +140,11 @@ export default class GameScene extends RenderPage {
 
     this.worker.addEventListener("message", (e) => {
       if (e.data.type === "removeLoading") {
-        const loadingModal = $("#loading_modal");
-        loadingModal.style.display = "none";
-        this.control?.lock();
+        setTimeout(() => {
+          const loadingModal = $("#loading_modal");
+          loadingModal.style.display = "none";
+          this.control?.lock();
+        }, 1000);
       }
     });
 
