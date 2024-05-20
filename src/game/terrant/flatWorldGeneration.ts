@@ -48,7 +48,7 @@ export class FlatWorld extends BaseGeneration {
 
           let shouldAssignBlock = true;
 
-          if (chunkBlocksCustom?.[blockName] == 0) {
+          if (chunkBlocksCustom?.[blockName] === 0) {
             shouldAssignBlock = false;
             blocksInChunkTypeOnly.set(blockName, 0);
           }

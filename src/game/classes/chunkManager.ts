@@ -1,10 +1,10 @@
-import { CHUNK_VIEW_WORKER_PHYSICS, DEFAULT_CHUNK_VIEW } from "@/constants";
+import { DEFAULT_CHUNK_VIEW } from "@/constants";
 import { Face } from "@/constants/block";
-import { BlockKeys } from "@/type";
 import {
   nameChunkFromCoordinate,
   nameFromCoordinate,
 } from "@/game/helpers/nameFromCoordinate";
+import { BlockKeys } from "@/type";
 
 import { calNeighborsOffset } from "../helpers/calNeighborsOffset";
 import { getChunkNeighborsCoor } from "../helpers/chunkHelpers";
@@ -158,6 +158,16 @@ export default class ChunkManager extends BlockManager {
             facesToRender
           );
 
+          this.worker?.postMessage(
+            {
+              type: "addBlocks",
+              data: {
+                arrayBlocksData,
+              },
+            },
+            [arrayBlocksData.buffer]
+          );
+
           this.startWorker(currWorker, this.chunkPendingQueueProxy.pop());
         }
       };
@@ -180,7 +190,6 @@ export default class ChunkManager extends BlockManager {
     this.currentChunk[1] = currentChunk.z;
 
     const neighborOffset = calNeighborsOffset(DEFAULT_CHUNK_VIEW);
-    const neighborOffsetPhysics = calNeighborsOffset(CHUNK_VIEW_WORKER_PHYSICS);
 
     const chunkDetail: {
       chunk: {
@@ -213,24 +222,6 @@ export default class ChunkManager extends BlockManager {
 
     chunkDetail.forEach(({ chunkName, chunk }) => {
       this.handleAssignWorkerChunk(chunkName, chunk);
-    });
-
-    const neighborChunksKeysPhysics = neighborOffsetPhysics.map((offset) => {
-      const chunk = {
-        x: currentChunk.x + offset.x,
-        z: currentChunk.z + offset.z,
-      };
-
-      const chunkName = nameChunkFromCoordinate(chunk.x, chunk.z);
-
-      return chunkName;
-    });
-
-    this.worker?.postMessage({
-      type: "changeChunk",
-      data: {
-        neighborChunksKeys: neighborChunksKeysPhysics,
-      },
     });
   }
 
