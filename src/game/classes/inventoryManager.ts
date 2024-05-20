@@ -43,8 +43,6 @@ export default class InventoryManager extends BaseEntity {
   }
 
   initialize() {
-    console.log(Object.keys(blocks));
-
     const keyDownHandle = (e: KeyboardEvent) => {
       if (e.key === "e") {
         this.renderInventory();
