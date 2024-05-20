@@ -3,9 +3,8 @@ import FastNoiseLite from "fastnoise-lite";
 import { BLOCK_WIDTH, CHUNK_SIZE } from "@/constants";
 import { getRound } from "@/game/helpers/getRound";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
-import { BaseGeneration } from "./baseUtilsGeneration";
-import { detailFromName } from "../helpers/detailFromName";
 import { BlockKeys } from "@/type";
+import { BaseGeneration } from "./baseUtilsGeneration";
 
 export class DefaultWorld extends BaseGeneration {
   noise = new FastNoiseLite();

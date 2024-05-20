@@ -442,7 +442,7 @@ const blocks = {
         map: textures.waterTexture,
         transparent: true,
         opacity: 0.6,
-        side: DoubleSide
+        side: DoubleSide,
       }),
     },
     textureMap: [
