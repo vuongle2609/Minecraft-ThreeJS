@@ -1,21 +1,24 @@
 import {
   BoxGeometry,
+  DynamicDrawUsage,
   Group,
+  InstancedMesh,
   Mesh,
   MeshStandardMaterial,
+  Object3D,
   Vector2,
   Vector3,
 } from "three";
 
 import { Face } from "@/constants/block";
-import blocks from "@/constants/blocks";
+import blocks, { renderGeometry } from "@/constants/blocks";
 import { getChunkCoordinate } from "@/game/helpers/chunkHelpers";
 import { detailFromName } from "@/game/helpers/detailFromName";
 import {
   nameChunkFromCoordinate,
   nameFromCoordinate,
 } from "@/game/helpers/nameFromCoordinate";
-import { BlockKeys } from "@/type";
+import { BlockKeys, BlocksIntancedMapping } from "@/type";
 
 import { BLOCK_WIDTH } from "@/constants";
 import BaseEntity, { BasePropsType } from "./baseEntity";
@@ -45,6 +48,37 @@ export default class BlockManager extends BaseEntity {
   blocksGroup = new Group();
 
   disposeBlockManager: Function;
+
+  dummy = new Object3D();
+  blocksIntanced = Object.keys(blocks).reduce((prev, typeKey) => {
+    const currBlock = blocks[typeKey as unknown as BlockKeys];
+
+    return {
+      ...prev,
+      [typeKey]: Object.keys(currBlock.texture).reduce((prev, key) => {
+        const mesh = new InstancedMesh(
+          renderGeometry,
+          currBlock.texture[key as unknown as keyof typeof currBlock.texture],
+          1000000
+        );
+
+        mesh.instanceMatrix.setUsage(DynamicDrawUsage);
+
+        this.scene?.add(mesh);
+        mesh.count = 0;
+        mesh.instanceMatrix.needsUpdate = true;
+        mesh.frustumCulled = false;
+        return {
+          ...prev,
+          [key]: {
+            mesh,
+            count: 0,
+            indexCanAllocate: [],
+          },
+        };
+      }, {}),
+    };
+  }, {}) as BlocksIntancedMapping;
 
   blockDisplayHover = new Mesh(
     new BoxGeometry(BLOCK_WIDTH + 0.01, BLOCK_WIDTH + 0.01, BLOCK_WIDTH + 0.01),
@@ -101,6 +135,8 @@ export default class BlockManager extends BaseEntity {
       blocksMapping: this.blocksMapping,
       facesToRender,
       blocksGroup: this.blocksGroup,
+      dummy: this.dummy,
+      intancedPlanes: this.blocksIntanced[type],
     });
 
     this.blocksMapping.set(nameFromCoordinate(x, y, z), block);
@@ -324,6 +360,6 @@ export default class BlockManager extends BaseEntity {
   }
 
   update() {
-    this.handleHoverBlock();
+    // this.handleHoverBlock();
   }
 }

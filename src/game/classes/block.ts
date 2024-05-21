@@ -1,10 +1,10 @@
-import { Group, Mesh, Object3D, Vector3 } from "three";
+import { Group, Matrix4, Object3D, Vector3 } from "three";
 
 import { BLOCK_WIDTH } from "@/constants";
 import { BlockFaces, Face } from "@/constants/block";
-import blocks, { BlockAttributeType, renderGeometry } from "@/constants/blocks";
+import blocks, { BlockAttributeType } from "@/constants/blocks";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
-import { BlockKeys } from "@/type";
+import { BlockKeys, BlocksIntancedType } from "@/type";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 
 interface PropsType {
@@ -14,6 +14,8 @@ interface PropsType {
   blocksMapping: Map<string, Block>;
   facesToRender?: Record<Face, boolean> | null;
   isPlace?: boolean;
+  dummy: Object3D;
+  intancedPlanes: BlocksIntancedType;
 }
 
 const { leftZ, rightZ, leftX, rightX, top, bottom } = Face;
@@ -34,6 +36,10 @@ export default class Block extends BaseEntity {
   blocksGroup: Group;
   isPlace: boolean;
 
+  dummy: Object3D;
+  index: number;
+  intancedPlanes: BlocksIntancedType;
+
   constructor(props: BasePropsType & PropsType) {
     super(props);
 
@@ -44,6 +50,8 @@ export default class Block extends BaseEntity {
       blocksGroup,
       facesToRender,
       isPlace,
+      dummy,
+      intancedPlanes,
     } = props!;
 
     this.blocksGroup = blocksGroup;
@@ -52,6 +60,9 @@ export default class Block extends BaseEntity {
     this.atttribute = blocks[type];
     this.blocksMapping = blocksMapping;
     this.isPlace = !!isPlace;
+    this.intancedPlanes = intancedPlanes;
+    this.blocksMapping = blocksMapping;
+    this.dummy = dummy;
 
     if (facesToRender === null) return;
 
@@ -129,26 +140,43 @@ export default class Block extends BaseEntity {
   }
 
   removeFace(face: keyof BlockFaces) {
-    this.blocksGroup?.remove(this.blockFaces[face] as Object3D);
+    const currInstanced =
+      this.intancedPlanes[this.atttribute.textureMap[face]].mesh;
+
+    const index = this.blockFaces[face];
+
+    if (index !== null) {
+      currInstanced.setMatrixAt(
+        index,
+        new Matrix4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+      );
+
+      this.intancedPlanes[
+        this.atttribute.textureMap[face]
+      ].indexCanAllocate.push(index);
+    }
   }
 
   addFace(face: keyof BlockFaces) {
-    const texture = this.atttribute.texture;
-
-    const material =
-      texture[this.atttribute.textureMap[face] as keyof typeof texture];
-    const plane = new Mesh(renderGeometry, material);
-
     const { rotation } = this.calFaceAttr(face);
 
-    const { x, y, z } = this.position;
+    const currInstanced = this.intancedPlanes[this.atttribute.textureMap[face]];
 
-    plane.position.set(x, y, z);
-    plane.rotation.set(rotation[0], rotation[1], rotation[2]);
-    plane.name = nameFromCoordinate(x, y, z, this.type, face);
+    const currInstancedMesh = currInstanced.mesh;
+    const indexAllowCate = currInstanced.indexCanAllocate.pop();
 
-    this.blockFaces[face] = plane;
-    this.blocksGroup?.add(plane);
+    const index =
+      indexAllowCate !== undefined ? indexAllowCate : currInstancedMesh.count;
+
+    this.dummy.position.copy(this.position);
+    this.dummy.rotation.set(rotation[0], rotation[1], rotation[2]);
+    this.dummy.updateMatrix();
+
+    this.blockFaces[face] = index;
+
+    currInstancedMesh.setMatrixAt(index, this.dummy.matrix);
+    if (indexAllowCate === undefined) currInstancedMesh.count += 1;
+    currInstancedMesh.instanceMatrix.needsUpdate = true;
   }
 
   calFaceAttr(face: keyof BlockFaces) {
@@ -181,11 +209,8 @@ export default class Block extends BaseEntity {
   destroy(isClearChunk?: boolean) {
     const { x, y, z } = this.position;
 
-    Object.values(this.blockFaces).forEach((item) => {
-      if (item) {
-        this.blocksGroup?.remove(item);
-        item.geometry.dispose();
-      }
+    Object.keys(this.blockFaces).forEach((face) => {
+      this.removeFace(face as unknown as keyof BlockFaces);
     });
 
     if (isClearChunk) return;

@@ -105,6 +105,7 @@ export default class ChunkManager extends BlockManager {
       this.chunkRenderQueue.unshift(data);
 
       if (!this.isRenderingChunk) {
+        console.log('chay o')
         this.renderChunk(this.chunkRenderQueueProxy.pop());
       }
     },
@@ -191,7 +192,11 @@ export default class ChunkManager extends BlockManager {
         currWorker.currentProcessChunk = null;
         currWorker.isBusy = false;
 
-        this.handleRenderChunkBlocks(chunkName, arrayBlocksData, facesToRender);
+        this.chunkRenderQueueProxy.unshift({
+          chunkName,
+          arrayBlocksData,
+          facesToRender,
+        });
 
         this.worker?.postMessage(
           {
@@ -330,10 +335,12 @@ export default class ChunkManager extends BlockManager {
 
     this.chunksBlocks[chunkName] = blocksInChunk;
 
+    console.log("rendered 1 chunk");
     setTimeout(() => {
+      console.log("count render");
       this.isRenderingChunk = false;
       this.renderChunk(this.chunkRenderQueueProxy.pop());
-    }, 100);
+    }, 500);
   }
 
   handleClearChunks(neighborChunksKeys: string[]) {
