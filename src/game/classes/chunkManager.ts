@@ -6,6 +6,7 @@ import {
 } from "@/game/helpers/nameFromCoordinate";
 import { BlockKeys } from "@/type";
 
+import { throttle } from "@/UI/utils/throttle";
 import { calNeighborsOffset } from "../helpers/calNeighborsOffset";
 import { getChunkNeighborsCoor } from "../helpers/chunkHelpers";
 import { detailFromName } from "../helpers/detailFromName";
@@ -31,8 +32,12 @@ export default class ChunkManager extends BlockManager {
   // todo
   chunkCached = [];
 
+  chunkRendered = new Map();
+
   chunkPendingQueue: ChunkPendingQueueType[] = [];
   currentChunk = [0, 0];
+
+  neighborOffset = calNeighborsOffset(DEFAULT_CHUNK_VIEW);
 
   createWorker = (index: number) => ({
     worker: new Worker(new URL("../terrant/worker", import.meta.url), {
@@ -118,6 +123,8 @@ export default class ChunkManager extends BlockManager {
             this.chunkWorkers[chunk.index].worker.terminate();
 
             this.chunkWorkers[chunk.index] = this.createWorker(chunk.index);
+
+            this.setUpWorker(chunk.index);
           }
 
           return !this.chunkWorkers[chunk.index].isBusy || isProccessDeadJob;
@@ -141,37 +148,41 @@ export default class ChunkManager extends BlockManager {
     },
   };
 
-  setUpWorker() {
-    Object.keys(this.chunkWorkers).forEach((item) => {
-      const currWorker = this.chunkWorkers[item];
+  setUpWorker(index?: number) {
+    const setupWithIndex = (index: number | string) => {
+      const currWorker = this.chunkWorkers[index];
 
       currWorker.worker.onmessage = (e) => {
+        const { chunkName, facesToRender, arrayBlocksData } = e.data;
+
+        this.chunkRendered.set(chunkName, true);
+
         currWorker.currentProcessChunk = null;
         currWorker.isBusy = false;
 
-        if (e.data.type === "renderBlocks") {
-          const { chunkName, facesToRender, arrayBlocksData } = e.data.data;
+        this.handleRenderChunkBlocks(chunkName, arrayBlocksData, facesToRender);
 
-          this.handleRenderChunkBlocks(
-            chunkName,
-            arrayBlocksData,
-            facesToRender
-          );
-
-          this.worker?.postMessage(
-            {
-              type: "addBlocks",
-              data: {
-                arrayBlocksData,
-              },
+        this.worker?.postMessage(
+          {
+            type: "addBlocks",
+            data: {
+              arrayBlocksData,
             },
-            [arrayBlocksData.buffer]
-          );
+          },
+          [arrayBlocksData.buffer]
+        );
 
-          this.startWorker(currWorker, this.chunkPendingQueueProxy.pop());
-        }
+        this.startWorker(currWorker, this.chunkPendingQueueProxy.pop());
       };
-    });
+    };
+
+    if (index !== undefined) {
+      setupWithIndex(index);
+
+      return;
+    }
+
+    Object.keys(this.chunkWorkers).forEach(setupWithIndex);
   }
 
   constructor(props: BasePropsType & PropsType) {
@@ -189,8 +200,6 @@ export default class ChunkManager extends BlockManager {
     this.currentChunk[0] = currentChunk.x;
     this.currentChunk[1] = currentChunk.z;
 
-    const neighborOffset = calNeighborsOffset(DEFAULT_CHUNK_VIEW);
-
     const chunkDetail: {
       chunk: {
         x: number;
@@ -199,7 +208,7 @@ export default class ChunkManager extends BlockManager {
       chunkName: string;
     }[] = [];
 
-    const neighborChunksKeys = neighborOffset.map((offset) => {
+    const neighborChunksKeys = this.neighborOffset.map((offset) => {
       const chunk = {
         x: currentChunk.x + offset.x,
         z: currentChunk.z + offset.z,
@@ -222,6 +231,39 @@ export default class ChunkManager extends BlockManager {
 
     chunkDetail.forEach(({ chunkName, chunk }) => {
       this.handleAssignWorkerChunk(chunkName, chunk);
+    });
+  }
+
+  validateChunk = throttle(this.handleValidateChunkRendered.bind(this), 1000);
+
+  handleValidateChunkRendered(currentChunk: { x: number; z: number }) {
+    const isIncludeInWorker = (chunkname: string) => {
+      return Object.values(this.chunkWorkers).find(
+        (item) => item.currentProcessChunk === chunkname
+      );
+    };
+
+    const isPendingProcess = (currentChunk: { x: number; z: number }) => {
+      return this.chunkPendingQueue.find(
+        (item) => item.x === currentChunk.x && item.z === currentChunk.z
+      );
+    };
+
+    this.neighborOffset.forEach((offset) => {
+      const chunk = {
+        x: currentChunk.x + offset.x,
+        z: currentChunk.z + offset.z,
+      };
+
+      const chunkName = nameChunkFromCoordinate(chunk.x, chunk.z);
+
+      if (
+        !this.chunkRendered.get(chunkName) &&
+        !isIncludeInWorker(chunkName) &&
+        !isPendingProcess(chunk)
+      ) {
+        this.handleAssignWorkerChunk(chunkName, chunk);
+      }
     });
   }
 
@@ -266,6 +308,8 @@ export default class ChunkManager extends BlockManager {
     let blocksDelete: string[] = [];
 
     inactiveChunk.forEach((item) => {
+      this.chunkRendered.set(item, false);
+
       blocksDelete = [...blocksDelete, ...(this.chunksBlocks[item] || [])];
 
       delete this.chunksBlocks[item];

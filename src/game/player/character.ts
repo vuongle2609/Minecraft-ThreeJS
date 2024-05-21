@@ -83,6 +83,8 @@ export default class Player extends BaseEntity {
       this.currentChunk = getChunkCoordinate(roundedPos.x, roundedPos.z);
 
       this.chunkManager?.handleRequestChunks(this.currentChunk);
+    } else {
+      this.chunkManager?.validateChunk(this.currentChunk);
     }
   };
 
