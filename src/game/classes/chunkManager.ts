@@ -28,11 +28,20 @@ type ChunkPendingQueueType = {
   name: string;
 };
 
+type ChunkWorkerDataType = {
+  chunkName: string;
+  arrayBlocksData: Int32Array;
+  facesToRender: Record<string, Record<Face, boolean>>;
+};
+
 export default class ChunkManager extends BlockManager {
   // todo
   chunkCached = [];
 
   chunkRendered = new Map();
+
+  isRenderingChunk = false;
+  chunkRenderQueue: ChunkWorkerDataType[] = [];
 
   chunkPendingQueue: ChunkPendingQueueType[] = [];
   currentChunk = [0, 0];
@@ -83,6 +92,28 @@ export default class ChunkManager extends BlockManager {
       });
     }
   }
+
+  renderChunk(data?: ChunkWorkerDataType) {
+    if (!data) return;
+
+    const { chunkName, arrayBlocksData, facesToRender } = data;
+    this.handleRenderChunkBlocks(chunkName, arrayBlocksData, facesToRender);
+  }
+
+  chunkRenderQueueProxy = {
+    unshift: (data: ChunkWorkerDataType) => {
+      this.chunkRenderQueue.unshift(data);
+
+      if (!this.isRenderingChunk) {
+        this.renderChunk(this.chunkRenderQueueProxy.pop());
+      }
+    },
+    pop: () => {
+      this.isRenderingChunk = true;
+
+      return this.chunkRenderQueue.pop();
+    },
+  };
 
   chunkPendingQueueProxy = {
     unshift: (x: number, z: number) => {
@@ -298,6 +329,11 @@ export default class ChunkManager extends BlockManager {
     }
 
     this.chunksBlocks[chunkName] = blocksInChunk;
+
+    setTimeout(() => {
+      this.isRenderingChunk = false;
+      this.renderChunk(this.chunkRenderQueueProxy.pop());
+    }, 100);
   }
 
   handleClearChunks(neighborChunksKeys: string[]) {
