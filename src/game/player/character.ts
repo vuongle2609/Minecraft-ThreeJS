@@ -85,6 +85,7 @@ export default class Player extends BaseEntity {
       this.chunkManager?.handleRequestChunks(this.currentChunk);
     } else {
       this.chunkManager?.validateChunk(this.currentChunk);
+      this.chunkManager?.renderChunk();
     }
   };
 
