@@ -211,6 +211,10 @@ export default class GameScene extends RenderPage {
     if (!this.mouseControl?.paused) {
       const delta = this.clock.getDelta();
 
+      // prevent when user not click and delta get larger make
+      // miss calculate player init position :))
+      if (delta > 0.1) return;
+
       this.renderCoordinate();
 
       this.renderFps();

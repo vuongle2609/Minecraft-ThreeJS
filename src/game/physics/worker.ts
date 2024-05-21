@@ -18,7 +18,7 @@ class PhysicsWorker {
 
   blocksMapping: Map<string, BlockKeys | 0> = new Map();
 
-  spawn = [CHUNK_SIZE / 2, CHARACTER_LENGTH + 60, CHUNK_SIZE / 2];
+  spawn = [CHUNK_SIZE / 2, CHARACTER_LENGTH + 40, CHUNK_SIZE / 2];
   playerPos = new Vector3();
 
   originalVy = -40;
