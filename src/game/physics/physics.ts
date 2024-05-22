@@ -8,7 +8,11 @@ import { BlockKeys } from "@/type";
 const halfCharacterWidth = CHARACTER_WIDTH / 2;
 
 export default class Physics {
-  constructor() {}
+  blocksMapping: Map<string, 0 | BlockKeys>;
+
+  constructor(blocksMapping: Map<string, 0 | BlockKeys>) {
+    this.blocksMapping = blocksMapping;
+  }
 
   roundedPosition(position: Vector3) {
     const positionXFloor =
@@ -292,5 +296,85 @@ export default class Physics {
         : vectorMove.z;
 
     return { calculatedMoveVector, collideObject: nextObjectY };
+  }
+
+  doBoundingBoxesCollide(
+    box1Min: Vector3,
+    box1Max: Vector3,
+    box2Min: Vector3,
+    box2Max: Vector3
+  ) {
+    return (
+      box1Max.x >= box2Min.x &&
+      box1Min.x <= box2Max.x &&
+      box1Max.y >= box2Min.y &&
+      box1Min.y <= box2Max.y &&
+      box1Max.z >= box2Min.z &&
+      box1Min.z <= box2Max.z
+    );
+  }
+
+  getBlocksCandidate(pos: Vector3) {
+    pos.y -= CHARACTER_LENGTH / 2;
+
+    const xFloor = Math.floor(pos.x);
+    const yFloor = Math.floor(pos.y);
+    const zFloor = Math.floor(pos.z);
+
+    const roundedX = xFloor % 2 ? xFloor + 1 : xFloor;
+    const roundedY = yFloor % 2 ? yFloor - 1 : yFloor;
+    const roundedZ = zFloor % 2 ? zFloor + 1 : zFloor;
+
+    return;
+  }
+
+  calculateCorrectMovement1(vectorMove: Vector3, playerPosition: Vector3) {
+    const nextPosition = playerPosition.add(vectorMove);
+
+    // const { x, y, z } = nextPosition;
+
+    // const playerBoundingBox = {
+    //   max: new Vector3(
+    //     x + CHARACTER_WIDTH / 2,
+    //     y + CHARACTER_LENGTH / 2,
+    //     z + CHARACTER_WIDTH / 2
+    //   ),
+    //   min: new Vector3(
+    //     x - CHARACTER_WIDTH / 2,
+    //     y - CHARACTER_LENGTH / 2,
+    //     z - CHARACTER_WIDTH / 2
+    //   ),
+    // };
+
+    // this.getBlocksCandidate(nextPosition);
+
+    // playerPosition.y -= CHARACTER_LENGTH / 2;
+
+    // console.log(playerPosition);
+    // playerPosition.y -= 2;
+
+    nextPosition.y -= CHARACTER_LENGTH / 2;
+
+    const xFloor = Math.floor(nextPosition.x);
+    const yFloor = Math.floor(nextPosition.y);
+    const zFloor = Math.floor(nextPosition.z);
+
+    const roundedX = xFloor % 2 ? xFloor + 1 : xFloor;
+    const roundedY = yFloor % 2 ? yFloor + 1 : yFloor;
+    const roundedZ = zFloor % 2 ? zFloor + 1 : zFloor;
+
+    const roundedNextPosition = new Vector3(roundedX, roundedY, roundedZ);
+
+    const bellowObjectY = this.blocksMapping.get(
+      nameFromCoordinate(roundedX, roundedY, roundedZ)
+    );
+
+    const calculatedMoveVector = new Vector3();
+
+    calculatedMoveVector.x = false ? 0 : vectorMove.x;
+    calculatedMoveVector.y = bellowObjectY ? 0 : vectorMove.y;
+    calculatedMoveVector.z = false ? 0 : vectorMove.z;
+
+    return { calculatedMoveVector, collideObject: bellowObjectY };
   }
 }
