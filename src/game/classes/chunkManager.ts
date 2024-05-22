@@ -275,6 +275,14 @@ export default class ChunkManager extends BlockManager {
       );
     };
 
+    const isPendingRender = (currentChunk: { x: number; z: number }) => {
+      return this.chunkRenderQueue.find(
+        (item) =>
+          item.chunkName ===
+          nameChunkFromCoordinate(currentChunk.x, currentChunk.z)
+      );
+    };
+
     this.neighborOffset.forEach((offset) => {
       const chunk = {
         x: currentChunk.x + offset.x,
@@ -286,7 +294,8 @@ export default class ChunkManager extends BlockManager {
       if (
         !this.chunkRendered.get(chunkName) &&
         !isIncludeInWorker(chunkName) &&
-        !isPendingProcess(chunk)
+        !isPendingProcess(chunk) &&
+        !isPendingRender(chunk)
       ) {
         this.handleAssignWorkerChunk(chunkName, chunk);
       }

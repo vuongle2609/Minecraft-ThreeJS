@@ -1,10 +1,9 @@
 import {
   BufferAttribute,
   BufferGeometry,
-  DoubleSide,
   MeshLambertMaterial,
   NearestFilter,
-  TextureLoader
+  TextureLoader,
 } from "three";
 
 // textures image
@@ -434,8 +433,7 @@ const blocks = {
       [BlockTextureType.side]: new worldMaterial({
         map: textures.waterTexture,
         transparent: true,
-        opacity: 0.6,
-        side: DoubleSide,
+        opacity: 0.7,
       }),
     },
     textureMap: [
