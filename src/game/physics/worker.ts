@@ -91,6 +91,7 @@ class PhysicsWorker {
 
     if (collideObject) {
       this.onGround = true;
+      this.playerPos.y = Math.round(this.playerPos.y) + 0.12;
     }
 
     this.playerPos.add(
