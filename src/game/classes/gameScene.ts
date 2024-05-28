@@ -117,6 +117,9 @@ export default class GameScene extends RenderPage {
       type: "init",
       data: {
         initPos: this.worldStorage.initPos,
+        seed: this.worldStorage?.seed,
+        type: this.worldStorage?.worldType,
+        chunkBlocksCustom: this.worldStorage.blocksWorldChunk,
       },
     });
 
