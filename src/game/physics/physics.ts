@@ -1,11 +1,11 @@
-import { Face } from "./../../constants/block";
-import { Box3, Vector3 } from "three";
+import { Face } from "@/constants/block";
+import { Vector3 } from "three";
 
 import { BLOCK_WIDTH } from "@/constants";
 import { CHARACTER_LENGTH, CHARACTER_WIDTH } from "@/constants/player";
+import { calNeighborsOffset } from "@/game/helpers/calNeighborsOffset";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
 import { BlockKeys } from "@/type";
-import { calNeighborsOffset } from "../helpers/calNeighborsOffset";
 
 export default class Physics {
   blocksMapping: Map<string, 0 | BlockKeys>;
@@ -46,7 +46,7 @@ export default class Physics {
       [Face.top]: false,
       [Face.bottom]: false,
     };
- 
+
     const isTop = y - yC > BLOCK_WIDTH;
     const isBot = yC - y === BLOCK_WIDTH;
 
