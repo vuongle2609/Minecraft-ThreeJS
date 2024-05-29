@@ -1,4 +1,11 @@
-import { BoxGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
+import {
+  Box3,
+  Box3Helper,
+  BoxGeometry,
+  Mesh,
+  MeshStandardMaterial,
+  Vector3,
+} from "three";
 
 import blocks from "@/constants/blocks";
 import { CHARACTER_LENGTH, CHARACTER_WIDTH } from "@/constants/player";
@@ -6,6 +13,7 @@ import BasicCharacterControllerInput from "@/game/action/input";
 import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
 import { BlockKeys } from "@/type";
 import { getChunkCoordinate } from "../helpers/chunkHelpers";
+import { BLOCK_WIDTH } from "@/constants";
 
 export default class Player extends BaseEntity {
   input = new BasicCharacterControllerInput();
@@ -38,6 +46,15 @@ export default class Player extends BaseEntity {
     this.initialize();
   }
 
+  blockDebug = new Mesh(
+    new BoxGeometry(BLOCK_WIDTH, BLOCK_WIDTH, BLOCK_WIDTH),
+    new MeshStandardMaterial({
+      wireframe: true,
+      visible: true,
+    })
+  );
+  debugCollider: any[] = [];
+
   initialize() {
     // init player render
     this.player = new Mesh(
@@ -53,7 +70,37 @@ export default class Player extends BaseEntity {
 
     this.worker?.addEventListener("message", (e) => {
       if (e.data.type === "updatePosition") {
-        const { position, onGround, collideObject } = e.data.data;
+        const { position, onGround, collideObject, a, playerBoundingBox } =
+          e.data.data;
+
+        this.debugCollider.forEach((item) => this.scene?.remove(item));
+        this.debugCollider = [];
+        a.forEach(({ max, min }: { max: any; min: any }) => {
+          const box = new Box3(
+            new Vector3(min.x, min.y, min.z),
+            new Vector3(max.x, max.y, max.z)
+          );
+
+          const helper = new Box3Helper(box, 0xffff00);
+          this.scene?.add(helper);
+          this.debugCollider.push(helper);
+        });
+        const box = new Box3(
+          new Vector3(
+            playerBoundingBox.min.x,
+            playerBoundingBox.min.y,
+            playerBoundingBox.min.z
+          ),
+          new Vector3(
+            playerBoundingBox.max.x,
+            playerBoundingBox.max.y,
+            playerBoundingBox.max.z
+          )
+        );
+
+        const helper = new Box3Helper(box, 0xffff00);
+        this.scene?.add(helper);
+        this.debugCollider.push(helper);
 
         this.prevStepKey = this.currentStepKey;
         this.currentStepKey = collideObject;

@@ -74,11 +74,15 @@ class PhysicsWorker {
     }
 
     // round final result y if odd then make it even
-    const { calculatedMoveVector: correctMovement, collideObject } =
-      this.physicsEngine.calculateCorrectMovement(
-        new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z),
-        playerPosition
-      );
+    const {
+      calculatedMoveVector: correctMovement,
+      collideObject,
+      a,
+      playerBoundingBox,
+    } = this.physicsEngine.calculateCorrectMovement(
+      new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z),
+      playerPosition
+    );
 
     if (!collideObject && this.onGround) {
       this.vy = -5;
@@ -106,6 +110,8 @@ class PhysicsWorker {
         position: [this.playerPos.x, this.playerPos.y, this.playerPos.z],
         onGround: this.onGround,
         collideObject,
+        a,
+        playerBoundingBox,
       },
     });
   }

@@ -133,13 +133,14 @@ export default class Physics {
         );
 
         if (block) {
-          const blockBoundingBox = this.getBoundingBox(
+          const blockBoundingBox = this.getBoundingBoxBox(
             blockPos[0],
             blockPos[1],
             blockPos[2],
             BLOCK_WIDTH,
             BLOCK_WIDTH
           );
+          a.push(blockBoundingBox);
 
           const isCollided = this.isBoundingBoxCollide(
             blockBoundingBox.min,
@@ -148,7 +149,7 @@ export default class Physics {
             playerBoundingBox.max
           );
 
-          // if (block === 9) {
+          // if (block === 8) {
           //   console.log(
           //     isCollided,
           //     blockBoundingBox.min,
@@ -187,9 +188,7 @@ export default class Physics {
       });
     }
 
-    // console.log(a);
-
-    return facesCollide;
+    return { facesCollide, a, playerBoundingBox };
   }
 
   getBoundingBox(
@@ -200,18 +199,32 @@ export default class Physics {
     height: number
   ) {
     return {
+      max: new Vector3(x + width / 2, y + height, z + width / 2),
+      min: new Vector3(x - width / 2, y, z - width / 2),
+    };
+  }
+
+  getBoundingBoxBox(
+    x: number,
+    y: number,
+    z: number,
+    width: number,
+    height: number
+  ) {
+    return {
       max: new Vector3(x + width / 2, y + height / 2, z + width / 2),
-      min: new Vector3(x - width / 2, y - height / 2, z - width / 2),
+      min: new Vector3(x - width / 2, y - width / 2, z - width / 2),
     };
   }
 
   calculateCorrectMovement(vectorMove: Vector3, playerPosition: Vector3) {
     const nextPosition = playerPosition.clone().add(vectorMove);
 
-    const collisionFaces = this.getBlocksCandidate(
-      nextPosition.clone(),
-      playerPosition.clone()
-    );
+    const {
+      facesCollide: collisionFaces,
+      a,
+      playerBoundingBox,
+    } = this.getBlocksCandidate(nextPosition.clone(), playerPosition.clone());
 
     const calculatedMoveVector = new Vector3();
 
@@ -234,6 +247,8 @@ export default class Physics {
       calculatedMoveVector,
       collideObject:
         collisionFaces[Face.bottom] && Number(collisionFaces[Face.bottom]),
+      a,
+      playerBoundingBox,
     };
   }
 }
