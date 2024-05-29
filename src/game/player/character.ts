@@ -14,6 +14,7 @@ import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
 import { BlockKeys } from "@/type";
 import { getChunkCoordinate } from "../helpers/chunkHelpers";
 import { BLOCK_WIDTH } from "@/constants";
+import { throttle } from "@/UI/utils/throttle";
 
 export default class Player extends BaseEntity {
   input = new BasicCharacterControllerInput();
@@ -236,10 +237,12 @@ export default class Player extends BaseEntity {
     this.camera?.position.copy(new Vector3(x, y + 1.4 - this.cameraOffset, z));
   }
 
+  updateMovementThrootle = throttle(this.handleMovement.bind(this), 100);
+
   update(delta: number, t: number) {
-    this.handleMovement(delta);
-    this.breathingEffect(delta);
-    this.updateMovementSound();
+    this.updateMovementThrootle(delta);
+    // this.breathingEffect(delta);
+    // this.updateMovementSound();
     this.updateCamera();
   }
 }

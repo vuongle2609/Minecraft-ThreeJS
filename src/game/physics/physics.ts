@@ -93,7 +93,7 @@ export default class Physics {
     nextPos.y -= CHARACTER_LENGTH / 2;
     playerPos.y -= CHARACTER_LENGTH / 2;
 
-    const playerBoundingBox = this.getBoundingBox(
+    const playerBoundingBox = this.getBoundingBoxPlayer(
       nextPos.x,
       nextPos.y,
       nextPos.z,
@@ -118,10 +118,6 @@ export default class Physics {
     for (let i = 0; i < 4; i++) {
       const neighborsOffset = calNeighborsOffset(1, 2);
       neighborsOffset.forEach(({ x, z }) => {
-        if ((i === 1 || i === 2) && x === 0 && z === 0) {
-          return;
-        }
-
         const blockPos = [
           roundedNextPos[0] + x,
           roundedNextPos[1] + i * 2,
@@ -133,7 +129,7 @@ export default class Physics {
         );
 
         if (block) {
-          const blockBoundingBox = this.getBoundingBoxBox(
+          const blockBoundingBox = this.getBoundingBoxBlock(
             blockPos[0],
             blockPos[1],
             blockPos[2],
@@ -191,7 +187,7 @@ export default class Physics {
     return { facesCollide, a, playerBoundingBox };
   }
 
-  getBoundingBox(
+  getBoundingBoxPlayer(
     x: number,
     y: number,
     z: number,
@@ -204,7 +200,7 @@ export default class Physics {
     };
   }
 
-  getBoundingBoxBox(
+  getBoundingBoxBlock(
     x: number,
     y: number,
     z: number,
@@ -247,6 +243,8 @@ export default class Physics {
       calculatedMoveVector,
       collideObject:
         collisionFaces[Face.bottom] && Number(collisionFaces[Face.bottom]),
+      collideObjectTop:
+        collisionFaces[Face.top] && Number(collisionFaces[Face.top]),
       a,
       playerBoundingBox,
     };

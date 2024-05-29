@@ -77,6 +77,7 @@ class PhysicsWorker {
     const {
       calculatedMoveVector: correctMovement,
       collideObject,
+      collideObjectTop,
       a,
       playerBoundingBox,
     } = this.physicsEngine.calculateCorrectMovement(
@@ -85,8 +86,12 @@ class PhysicsWorker {
     );
 
     if (!collideObject && this.onGround) {
-      this.vy = -5;
+      this.vy = -10;
       this.onGround = false;
+    }
+
+    if (collideObjectTop) {
+      this.vy = -3;
     }
 
     if (collideObject) {

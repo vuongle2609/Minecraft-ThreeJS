@@ -146,8 +146,8 @@ export default class BlockManager extends BaseEntity {
       return;
     }
 
-    this.blockDisplayHover.visible = true;
-    this.blockDisplayHover.position.set(x, y, z);
+    // this.blockDisplayHover.visible = true;
+    // this.blockDisplayHover.position.set(x, y, z);
   }
 
   handleGetBlock() {
