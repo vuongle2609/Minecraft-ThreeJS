@@ -1,8 +1,8 @@
 import { Vector3 } from "three";
 
-import { BlockKeys } from "@/type";
+import { BlockKeys, BlocksMappingType } from "@/type";
 
-import { CHUNK_SIZE, TIME_TO_INTERACT } from "@/constants";
+import { CHUNK_SIZE, FLAT_WORLD_TYPE, TIME_TO_INTERACT } from "@/constants";
 import {
   CHARACTER_LENGTH,
   GRAVITY,
@@ -10,15 +10,22 @@ import {
   JUMP_FORCE,
   SPEED,
 } from "@/constants/player";
-import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
+import {
+  nameChunkFromCoordinate,
+  nameFromCoordinate,
+} from "@/game/helpers/nameFromCoordinate";
 import Physics from "./physics";
+import { FlatWorld } from "../terrant/flatWorldGeneration";
+import { DefaultWorld } from "../terrant/worldGeneration";
+import { getChunkCoordinate } from "../helpers/chunkHelpers";
 
 class PhysicsWorker {
-  chunkGenerated = 0;
+  worldGen: FlatWorld | DefaultWorld;
+  chunkBlocksCustomMap: Record<string, BlocksMappingType> = {};
 
   blocksMapping: Map<string, BlockKeys | 0> = new Map();
 
-  spawn = [CHUNK_SIZE / 2, CHARACTER_LENGTH + 40, CHUNK_SIZE / 2];
+  spawn = [CHUNK_SIZE / 2, CHARACTER_LENGTH + 60, CHUNK_SIZE / 2];
   playerPos = new Vector3();
 
   originalVy = -40;
@@ -102,9 +109,8 @@ class PhysicsWorker {
     );
 
     if (this.playerPos.y < -61) {
-      this.playerPos.copy(
-        new Vector3(CHUNK_SIZE / 2, CHARACTER_LENGTH + 60, CHUNK_SIZE / 2)
-      );
+      const [x, y, z] = this.spawn;
+      this.playerPos.set(x, y, z);
     }
 
     self.postMessage({
@@ -152,6 +158,7 @@ class PhysicsWorker {
   addBlocks({ arrayBlocksData }: { arrayBlocksData: Int32Array }) {
     let tmpPos: number[] = [];
     const lengthCached = arrayBlocksData.length;
+
     for (let index = 0; index < lengthCached; index++) {
       const num = arrayBlocksData[index];
 
@@ -164,19 +171,48 @@ class PhysicsWorker {
         tmpPos.push(num);
       }
     }
-    this.chunkGenerated += 1;
-
-    if (this.chunkGenerated === 9) {
-      this.initPhysics();
-    }
   }
 
-  init({ initPos }: { initPos: number[] }) {
-    if (initPos) {
-      this.playerPos.set(initPos[0], initPos[1] + 0.5, initPos[2]);
-    } else {
-      this.playerPos.set(this.spawn[0], this.spawn[1], this.spawn[2]);
+  genFirstChunk(initPos: number[]) {
+    const { x, z } = getChunkCoordinate(initPos[0], initPos[1], initPos[2]);
+
+    const { blocksInChunk } = this.worldGen.getBlocksInChunk(
+      x,
+      z,
+      this.chunkBlocksCustomMap[nameChunkFromCoordinate(x, z)]
+    );
+
+    for (const [_, { position, type }] of blocksInChunk) {
+      this.addBlock({
+        position,
+        type,
+      });
     }
+
+    this.initPhysics();
+  }
+
+  init({
+    seed,
+    type,
+    chunkBlocksCustom,
+    initPos,
+  }: {
+    seed: number;
+    type: number;
+    chunkBlocksCustom: Record<string, BlocksMappingType>;
+    initPos: number[];
+  }) {
+    this.worldGen =
+      type === FLAT_WORLD_TYPE ? new FlatWorld(seed) : new DefaultWorld(seed);
+
+    this.chunkBlocksCustomMap = chunkBlocksCustom;
+
+    const newInitPos = initPos || this.spawn;
+
+    this.playerPos.set(newInitPos[0], newInitPos[1], newInitPos[2]);
+
+    this.genFirstChunk(newInitPos);
   }
 
   removeBlock({ position }: { position: number[] }) {

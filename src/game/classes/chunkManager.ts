@@ -163,16 +163,17 @@ export default class ChunkManager extends BlockManager {
       currWorker.worker.onmessage = (e) => {
         const { chunkName, facesToRender, arrayBlocksData } = e.data;
 
-        this.chunkRendered.set(chunkName, true);
-
         currWorker.currentProcessChunk = null;
         currWorker.isBusy = false;
 
-        this.chunkRenderQueue.unshift({
-          chunkName,
-          arrayBlocksData: Array.from(arrayBlocksData) as any,
-          facesToRender,
-        });
+        if (!this.chunkRendered.get(chunkName)) {
+          this.chunkRendered.set(chunkName, true);
+          this.chunkRenderQueue.unshift({
+            chunkName,
+            arrayBlocksData: Array.from(arrayBlocksData) as any,
+            facesToRender,
+          });
+        }
 
         this.worker?.postMessage(
           {
