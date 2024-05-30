@@ -47,15 +47,6 @@ export default class Player extends BaseEntity {
     this.initialize();
   }
 
-  blockDebug = new Mesh(
-    new BoxGeometry(BLOCK_WIDTH, BLOCK_WIDTH, BLOCK_WIDTH),
-    new MeshStandardMaterial({
-      wireframe: true,
-      visible: true,
-    })
-  );
-  debugCollider: any[] = [];
-
   initialize() {
     // init player render
     this.player = new Mesh(
@@ -71,58 +62,8 @@ export default class Player extends BaseEntity {
 
     this.worker?.addEventListener("message", (e) => {
       if (e.data.type === "updatePosition") {
-        const {
-          position,
-          onGround,
-          collideObject,
-          a,
-          playerBoundingBox,
-          roundedFuturePos,
-        } = e.data.data;
+        const { position, onGround, collideObject } = e.data.data;
 
-        this.debugCollider.forEach((item) => this.scene?.remove(item));
-        this.debugCollider = [];
-        a.forEach(({ max, min }: { max: any; min: any }) => {
-          const box = new Box3(
-            new Vector3(min.x, min.y, min.z),
-            new Vector3(max.x, max.y, max.z)
-          );
-
-          const helper = new Box3Helper(box, 0xffff00);
-          this.scene?.add(helper);
-          this.debugCollider.push(helper);
-        });
-        const box = new Box3(
-          new Vector3(
-            playerBoundingBox.min.x,
-            playerBoundingBox.min.y,
-            playerBoundingBox.min.z
-          ),
-          new Vector3(
-            playerBoundingBox.max.x,
-            playerBoundingBox.max.y,
-            playerBoundingBox.max.z
-          )
-        );
-
-        const helper = new Box3Helper(box, 0xffff00);
-        this.scene?.add(helper);
-        this.debugCollider.push(helper);
-        if (roundedFuturePos) {
-          //123
-          const box1 = new Box3().setFromCenterAndSize(
-            new Vector3(
-              roundedFuturePos[0],
-              roundedFuturePos[1],
-              roundedFuturePos[2]
-            ),
-            new Vector3(BLOCK_WIDTH, BLOCK_WIDTH, BLOCK_WIDTH)
-          );
-
-          const helper1 = new Box3Helper(box1, 0x00ffff);
-          this.scene?.add(helper1);
-          this.debugCollider.push(helper1);
-        }
         this.prevStepKey = this.currentStepKey;
         this.currentStepKey = collideObject;
 

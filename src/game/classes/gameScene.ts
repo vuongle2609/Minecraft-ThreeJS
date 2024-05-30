@@ -236,11 +236,11 @@ export default class GameScene extends RenderPage {
       this.chunkManager?.update();
 
       const { x, y, z } = this.player.player.position;
-      this.cameraDebug.position.set(x + 5, y, z);
+      this.cameraDebug.position.set(x, y, z + 5);
       this.cameraDebug.lookAt(this.player.player.position);
 
       this.renderer.render(this.scene, this.camera);
-      // this.rendererDebug.render(this.scene, this.cameraDebug);
+      this.rendererDebug.render(this.scene, this.cameraDebug);
     }
   }
 }

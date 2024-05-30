@@ -30,16 +30,6 @@ export default class Physics {
     );
   }
 
-  fakeFutureRoundedPos(vectorMove: Vector3, playerPosition: Vector3) {
-    vectorMove.y = 0;
-    vectorMove.multiplyScalar(10)
-    const futurePos = playerPosition.add(vectorMove);
-
-    const roundedFuturePos = this.getRoundedCoordirnate(futurePos);
-
-    return roundedFuturePos;
-  }
-
   getBlockDirection(
     x: number,
     y: number,
@@ -101,19 +91,23 @@ export default class Physics {
       calZ = true;
     }
 
-    if (calX && calZ) {
-      facesCollide = {
-        ...facesCollide,
-        ...facesCollideTempX,
-      };
-    } else {
-      facesCollide = {
-        ...facesCollide,
-        ...facesCollideTempZ,
-        ...facesCollideTempX,
-      };
-    }
-
+    // if (calX && calZ) {
+    //   // facesCollide = {
+    //   //   ...facesCollide,
+    //   //   ...facesCollideTempX,
+    //   // };
+    // } else {
+    //   facesCollide = {
+    //     ...facesCollide,
+    //     ...facesCollideTempZ,
+    //     ...facesCollideTempX,
+    //   };
+    // }
+    facesCollide = {
+      ...facesCollide,
+      ...facesCollideTempZ,
+      ...facesCollideTempX,
+    };
     return facesCollide;
   }
 
@@ -129,31 +123,97 @@ export default class Physics {
     return [roundedX, roundedY, roundedZ];
   }
 
-  getBlocksCandidate(nextPos: Vector3, playerPos: Vector3) {
-    nextPos.y -= CHARACTER_LENGTH / 2;
-    playerPos.y -= CHARACTER_LENGTH / 2;
+  getBlocksCandidateX(vectorMove: Vector3, playerPosition: Vector3) {
+    vectorMove.z = 0;
+    vectorMove.y = 0;
+
+    const nextPosition = playerPosition.add(vectorMove);
+
+    nextPosition.y -= CHARACTER_LENGTH / 2;
 
     const playerBoundingBox = this.getBoundingBoxPlayer(
-      nextPos.x,
-      nextPos.y,
-      nextPos.z,
+      nextPosition.x,
+      nextPosition.y,
+      nextPosition.z,
       CHARACTER_WIDTH,
       CHARACTER_LENGTH
     );
 
-    const roundedNextPos = this.getRoundedCoordirnate(nextPos);
-    const roundedCurrPos = this.getRoundedCoordirnate(playerPos);
+    const roundedNextPos = this.getRoundedCoordirnate(nextPosition);
 
     let facesCollide: Record<string, BlockKeys | 0 | boolean> = {
-      [Face.rightZ]: false,
-      [Face.leftZ]: false,
       [Face.rightX]: false,
       [Face.leftX]: false,
+    };
+
+    for (let i = 0; i < 4; i++) {
+      const neighborsOffset = calNeighborsOffset(1, 2);
+      neighborsOffset.forEach(({ x, z }) => {
+        if (!x) {
+          return;
+        }
+
+        const blockPos = [
+          roundedNextPos[0] + x,
+          roundedNextPos[1] + i * BLOCK_WIDTH,
+          roundedNextPos[2] + z,
+        ];
+
+        const block = this.blocksMapping.get(
+          nameFromCoordinate(blockPos[0], blockPos[1], blockPos[2])
+        );
+
+        if (block && block !== BlockKeys.water) {
+          const blockBoundingBox = this.getBoundingBoxBlock(
+            blockPos[0],
+            blockPos[1],
+            blockPos[2],
+            BLOCK_WIDTH,
+            BLOCK_WIDTH
+          );
+
+          const isCollided = this.isBoundingBoxCollide(
+            blockBoundingBox.min,
+            blockBoundingBox.max,
+            playerBoundingBox.min,
+            playerBoundingBox.max
+          );
+
+          if (isCollided) {
+            facesCollide = {
+              [Face.rightX]: true,
+              [Face.leftX]: true,
+            };
+          }
+        }
+      });
+    }
+
+    return facesCollide;
+  }
+
+  getBlocksCandidateY(vectorMove: Vector3, playerPosition: Vector3) {
+    vectorMove.z = 0;
+    vectorMove.x = 0;
+
+    const nextPosition = playerPosition.add(vectorMove);
+
+    nextPosition.y -= CHARACTER_LENGTH / 2;
+
+    const playerBoundingBox = this.getBoundingBoxPlayer(
+      nextPosition.x,
+      nextPosition.y,
+      nextPosition.z,
+      CHARACTER_WIDTH,
+      CHARACTER_LENGTH
+    );
+
+    const roundedNextPos = this.getRoundedCoordirnate(nextPosition);
+
+    let facesCollide: Record<string, BlockKeys | 0 | boolean> = {
       [Face.top]: false,
       [Face.bottom]: false,
     };
-
-    const a = [];
 
     for (let i = 0; i < 4; i++) {
       const neighborsOffset = calNeighborsOffset(1, 2);
@@ -185,37 +245,85 @@ export default class Physics {
           );
 
           if (isCollided) {
-            a.push(blockBoundingBox);
-
-            const newFacesCollide = this.getBlockDirection(
-              blockPos[0],
-              blockPos[1],
-              blockPos[2],
-              roundedCurrPos[0],
-              roundedCurrPos[1],
-              roundedCurrPos[2]
-            );
-
             facesCollide = {
-              ...facesCollide,
-              [Face.rightZ]:
-                newFacesCollide[Face.rightZ] || facesCollide[Face.rightZ],
-              [Face.leftZ]:
-                newFacesCollide[Face.leftZ] || facesCollide[Face.leftZ],
-              [Face.rightX]:
-                newFacesCollide[Face.rightX] || facesCollide[Face.rightX],
-              [Face.leftX]:
-                newFacesCollide[Face.leftX] || facesCollide[Face.leftX],
-              [Face.top]: newFacesCollide[Face.top] || facesCollide[Face.top],
-              [Face.bottom]:
-                newFacesCollide[Face.bottom] || facesCollide[Face.bottom],
+              [Face.top]: true,
+              [Face.bottom]: true,
             };
           }
         }
       });
     }
 
-    return { facesCollide, a, playerBoundingBox };
+    return facesCollide;
+  }
+
+  getBlocksCandidateZ(vectorMove: Vector3, playerPosition: Vector3) {
+    vectorMove.x = 0;
+    vectorMove.y = 0;
+
+    const nextPosition = playerPosition.add(vectorMove);
+
+    nextPosition.y -= CHARACTER_LENGTH / 2;
+
+    const playerBoundingBox = this.getBoundingBoxPlayer(
+      nextPosition.x,
+      nextPosition.y,
+      nextPosition.z,
+      CHARACTER_WIDTH,
+      CHARACTER_LENGTH
+    );
+
+    const roundedNextPos = this.getRoundedCoordirnate(nextPosition);
+
+    let facesCollide: Record<string, BlockKeys | 0 | boolean> = {
+      [Face.rightZ]: false,
+      [Face.leftZ]: false,
+    };
+
+    for (let i = 0; i < 4; i++) {
+      const neighborsOffset = calNeighborsOffset(1, 2);
+      neighborsOffset.forEach(({ x, z }) => {
+        if (!z) {
+          return;
+        }
+
+        const blockPos = [
+          roundedNextPos[0] + x,
+          roundedNextPos[1] + i * BLOCK_WIDTH,
+          roundedNextPos[2] + z,
+        ];
+
+        const block = this.blocksMapping.get(
+          nameFromCoordinate(blockPos[0], blockPos[1], blockPos[2])
+        );
+
+        if (block && block !== BlockKeys.water) {
+          const blockBoundingBox = this.getBoundingBoxBlock(
+            blockPos[0],
+            blockPos[1],
+            blockPos[2],
+            BLOCK_WIDTH,
+            BLOCK_WIDTH
+          );
+
+          const isCollided = this.isBoundingBoxCollide(
+            blockBoundingBox.min,
+            blockBoundingBox.max,
+            playerBoundingBox.min,
+            playerBoundingBox.max
+          );
+
+          if (isCollided) {
+            facesCollide = {
+              [Face.rightZ]: true,
+              [Face.leftZ]: true,
+            };
+          }
+        }
+      });
+    }
+
+    return facesCollide;
   }
 
   getBoundingBoxPlayer(
@@ -245,43 +353,42 @@ export default class Physics {
   }
 
   calculateCorrectMovement(vectorMove: Vector3, playerPosition: Vector3) {
-    const roundedFuturePos = this.fakeFutureRoundedPos(
+    const collisionFacesX = this.getBlocksCandidateX(
       vectorMove.clone(),
       playerPosition.clone()
     );
-    const nextPosition = playerPosition.clone().add(vectorMove);
-    const {
-      facesCollide: collisionFaces,
-      a,
-      playerBoundingBox,
-    } = this.getBlocksCandidate(nextPosition.clone(), playerPosition.clone());
+    const collisionFacesZ = this.getBlocksCandidateZ(
+      vectorMove.clone(),
+      playerPosition.clone()
+    );
+    const collisionFacesY = this.getBlocksCandidateY(
+      vectorMove.clone(),
+      playerPosition.clone()
+    );
 
     const calculatedMoveVector = new Vector3();
 
     calculatedMoveVector.x =
-      collisionFaces[Face.leftX] || collisionFaces[Face.rightX]
+      collisionFacesX[Face.leftX] || collisionFacesX[Face.rightX]
         ? 0
         : vectorMove.x;
 
     calculatedMoveVector.y =
-      collisionFaces[Face.bottom] || collisionFaces[Face.top]
+      collisionFacesY[Face.bottom] || collisionFacesY[Face.top]
         ? 0
         : vectorMove.y;
 
     calculatedMoveVector.z =
-      collisionFaces[Face.leftZ] || collisionFaces[Face.rightZ]
+      collisionFacesZ[Face.leftZ] || collisionFacesZ[Face.rightZ]
         ? 0
         : vectorMove.z;
 
     return {
       calculatedMoveVector,
       collideObject:
-        collisionFaces[Face.bottom] && Number(collisionFaces[Face.bottom]),
+        collisionFacesY[Face.bottom] && Number(collisionFacesY[Face.bottom]),
       collideObjectTop:
-        collisionFaces[Face.top] && Number(collisionFaces[Face.top]),
-      a,
-      playerBoundingBox,
-      roundedFuturePos,
+        collisionFacesY[Face.top] && Number(collisionFacesY[Face.top]),
     };
   }
 }
