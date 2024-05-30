@@ -80,6 +80,7 @@ class PhysicsWorker {
       collideObjectTop,
       a,
       playerBoundingBox,
+      roundedFuturePos,
     } = this.physicsEngine.calculateCorrectMovement(
       new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z),
       playerPosition
@@ -96,7 +97,7 @@ class PhysicsWorker {
 
     if (collideObject) {
       this.onGround = true;
-      // this.playerPos.y = Math.round(this.playerPos.y) + 0.12;
+      // this.playerPos.y = Math.round(this.playerPos.y);
     }
 
     this.playerPos.add(
@@ -117,6 +118,7 @@ class PhysicsWorker {
         collideObject,
         a,
         playerBoundingBox,
+        roundedFuturePos,
       },
     });
   }

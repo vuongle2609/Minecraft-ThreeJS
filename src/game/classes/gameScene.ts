@@ -240,7 +240,7 @@ export default class GameScene extends RenderPage {
       this.cameraDebug.lookAt(this.player.player.position);
 
       this.renderer.render(this.scene, this.camera);
-      this.rendererDebug.render(this.scene, this.cameraDebug);
+      // this.rendererDebug.render(this.scene, this.cameraDebug);
     }
   }
 }

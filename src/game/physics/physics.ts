@@ -30,6 +30,16 @@ export default class Physics {
     );
   }
 
+  fakeFutureRoundedPos(vectorMove: Vector3, playerPosition: Vector3) {
+    vectorMove.y = 0;
+    vectorMove.multiplyScalar(10)
+    const futurePos = playerPosition.add(vectorMove);
+
+    const roundedFuturePos = this.getRoundedCoordirnate(futurePos);
+
+    return roundedFuturePos;
+  }
+
   getBlockDirection(
     x: number,
     y: number,
@@ -38,13 +48,23 @@ export default class Physics {
     yC: number,
     zC: number
   ) {
-    const facesCollide: Record<string, BlockKeys | 0 | boolean> = {
+    let facesCollide: Record<string, BlockKeys | 0 | boolean> = {
       [Face.rightZ]: false,
       [Face.leftZ]: false,
       [Face.rightX]: false,
       [Face.leftX]: false,
       [Face.top]: false,
       [Face.bottom]: false,
+    };
+
+    const facesCollideTempX: Record<string, BlockKeys | 0 | boolean> = {
+      [Face.rightX]: false,
+      [Face.leftX]: false,
+    };
+
+    const facesCollideTempZ: Record<string, BlockKeys | 0 | boolean> = {
+      [Face.rightZ]: false,
+      [Face.leftZ]: false,
     };
 
     const isTop = y - yC > BLOCK_WIDTH;
@@ -58,20 +78,40 @@ export default class Physics {
       facesCollide[Face.top] = true;
     }
 
+    let calX = false;
+    let calZ = false;
+
     if (x < xC && !isTop && !isBot) {
-      facesCollide[Face.rightX] = true;
+      facesCollideTempX[Face.rightX] = true;
+      calX = true;
     }
 
     if (x > xC && !isTop && !isBot) {
-      facesCollide[Face.leftX] = true;
+      facesCollideTempX[Face.leftX] = true;
+      calX = true;
     }
 
     if (z < zC && !isTop && !isBot) {
-      facesCollide[Face.rightZ] = true;
+      facesCollideTempZ[Face.rightZ] = true;
+      calZ = true;
     }
 
     if (z > zC && !isTop && !isBot) {
-      facesCollide[Face.leftZ] = true;
+      facesCollideTempZ[Face.leftZ] = true;
+      calZ = true;
+    }
+
+    if (calX && calZ) {
+      facesCollide = {
+        ...facesCollide,
+        ...facesCollideTempX,
+      };
+    } else {
+      facesCollide = {
+        ...facesCollide,
+        ...facesCollideTempZ,
+        ...facesCollideTempX,
+      };
     }
 
     return facesCollide;
@@ -120,7 +160,7 @@ export default class Physics {
       neighborsOffset.forEach(({ x, z }) => {
         const blockPos = [
           roundedNextPos[0] + x,
-          roundedNextPos[1] + i * 2,
+          roundedNextPos[1] + i * BLOCK_WIDTH,
           roundedNextPos[2] + z,
         ];
 
@@ -128,7 +168,7 @@ export default class Physics {
           nameFromCoordinate(blockPos[0], blockPos[1], blockPos[2])
         );
 
-        if (block) {
+        if (block && block !== BlockKeys.water) {
           const blockBoundingBox = this.getBoundingBoxBlock(
             blockPos[0],
             blockPos[1],
@@ -136,7 +176,6 @@ export default class Physics {
             BLOCK_WIDTH,
             BLOCK_WIDTH
           );
-          a.push(blockBoundingBox);
 
           const isCollided = this.isBoundingBoxCollide(
             blockBoundingBox.min,
@@ -145,17 +184,9 @@ export default class Physics {
             playerBoundingBox.max
           );
 
-          // if (block === 8) {
-          //   console.log(
-          //     isCollided,
-          //     blockBoundingBox.min,
-          //     blockBoundingBox.max,
-          //     playerBoundingBox.min,
-          //     playerBoundingBox.max
-          //   );
-          // }
-
           if (isCollided) {
+            a.push(blockBoundingBox);
+
             const newFacesCollide = this.getBlockDirection(
               blockPos[0],
               blockPos[1],
@@ -214,8 +245,11 @@ export default class Physics {
   }
 
   calculateCorrectMovement(vectorMove: Vector3, playerPosition: Vector3) {
+    const roundedFuturePos = this.fakeFutureRoundedPos(
+      vectorMove.clone(),
+      playerPosition.clone()
+    );
     const nextPosition = playerPosition.clone().add(vectorMove);
-
     const {
       facesCollide: collisionFaces,
       a,
@@ -247,6 +281,7 @@ export default class Physics {
         collisionFaces[Face.top] && Number(collisionFaces[Face.top]),
       a,
       playerBoundingBox,
+      roundedFuturePos,
     };
   }
 }

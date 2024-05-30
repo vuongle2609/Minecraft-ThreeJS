@@ -71,8 +71,14 @@ export default class Player extends BaseEntity {
 
     this.worker?.addEventListener("message", (e) => {
       if (e.data.type === "updatePosition") {
-        const { position, onGround, collideObject, a, playerBoundingBox } =
-          e.data.data;
+        const {
+          position,
+          onGround,
+          collideObject,
+          a,
+          playerBoundingBox,
+          roundedFuturePos,
+        } = e.data.data;
 
         this.debugCollider.forEach((item) => this.scene?.remove(item));
         this.debugCollider = [];
@@ -102,7 +108,21 @@ export default class Player extends BaseEntity {
         const helper = new Box3Helper(box, 0xffff00);
         this.scene?.add(helper);
         this.debugCollider.push(helper);
+        if (roundedFuturePos) {
+          //123
+          const box1 = new Box3().setFromCenterAndSize(
+            new Vector3(
+              roundedFuturePos[0],
+              roundedFuturePos[1],
+              roundedFuturePos[2]
+            ),
+            new Vector3(BLOCK_WIDTH, BLOCK_WIDTH, BLOCK_WIDTH)
+          );
 
+          const helper1 = new Box3Helper(box1, 0x00ffff);
+          this.scene?.add(helper1);
+          this.debugCollider.push(helper1);
+        }
         this.prevStepKey = this.currentStepKey;
         this.currentStepKey = collideObject;
 
@@ -237,7 +257,7 @@ export default class Player extends BaseEntity {
     this.camera?.position.copy(new Vector3(x, y + 1.4 - this.cameraOffset, z));
   }
 
-  updateMovementThrootle = throttle(this.handleMovement.bind(this), 100);
+  updateMovementThrootle = throttle(this.handleMovement.bind(this), 0);
 
   update(delta: number, t: number) {
     this.updateMovementThrootle(delta);
