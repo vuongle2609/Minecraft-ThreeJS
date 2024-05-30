@@ -1,4 +1,4 @@
-export const CHARACTER_LENGTH = 3.6;
+export const CHARACTER_LENGTH = 3.4;
 export const CHARACTER_WIDTH = 1.2;
 
 export const CHARACTER_LENGTH_ROUND = Math.ceil(CHARACTER_LENGTH);

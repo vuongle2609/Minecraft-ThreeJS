@@ -81,18 +81,12 @@ const textures = {
   bedRockTexture: textureLoader.load(bedrock),
   waterTexture: textureLoader.load(water),
 };
-// is it good to set both to nearest?
 
+// is it good to set both to nearest?
 Object.values(textures).forEach((item) => {
   item.magFilter = NearestFilter;
 });
 
-// texture format: side side top bottom side side
-
-// const worldMaterial = MeshStandardMaterial;
-// const worldMaterial = MeshPhongMaterial;
-// const worldMaterial = MeshBasicMaterial;
-// const worldMaterial = MeshToonMaterial;
 const worldMaterial = MeshLambertMaterial;
 
 // back front side sideleft top bottom

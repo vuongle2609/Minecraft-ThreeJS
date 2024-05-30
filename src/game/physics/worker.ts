@@ -32,7 +32,7 @@ class PhysicsWorker {
   vy = this.originalVy;
   onGround = true;
 
-  physicsEngine = new Physics();
+  physicsEngine = new Physics(this.blocksMapping);
 
   constructor() {}
 
@@ -80,20 +80,28 @@ class PhysicsWorker {
       this.vy -= GRAVITY * GRAVITY_SCALE * delta;
     }
 
-    const { calculatedMoveVector: correctMovement, collideObject } =
-      this.physicsEngine.calculateCorrectMovement(
-        new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z),
-        playerPosition,
-        this.blocksMapping
-      );
+    // round final result y if odd then make it even
+    const {
+      calculatedMoveVector: correctMovement,
+      collideObject,
+      collideObjectTop,
+    } = this.physicsEngine.calculateCorrectMovement(
+      new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z),
+      playerPosition
+    );
 
     if (!collideObject && this.onGround) {
-      this.vy = -5;
+      this.vy = -10;
       this.onGround = false;
+    }
+
+    if (collideObjectTop) {
+      this.vy = -3;
     }
 
     if (collideObject) {
       this.onGround = true;
+      // this.playerPos.y = Math.round(this.playerPos.y);
     }
 
     this.playerPos.add(

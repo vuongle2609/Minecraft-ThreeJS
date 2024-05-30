@@ -1,4 +1,4 @@
-export const calNeighborsOffset = (stack: number) => {
+export const calNeighborsOffset = (stack: number, scalar = 1) => {
   const mappingNeighbors: Record<string, { x: number; z: number }> = {};
 
   const variants: number[] = [];
@@ -15,8 +15,8 @@ export const calNeighborsOffset = (stack: number) => {
     variants.forEach((num1) => {
       if (!mappingNeighbors[num + "_" + num1]) {
         mappingNeighbors[num + "_" + num1] = {
-          x: num,
-          z: num1,
+          x: num * scalar,
+          z: num1 * scalar,
         };
       }
     });

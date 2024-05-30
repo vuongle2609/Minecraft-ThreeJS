@@ -30,6 +30,11 @@ export default class GameScene extends RenderPage {
     canvas: document.querySelector("#gameScene") as HTMLCanvasElement,
   });
 
+  rendererDebug = new WebGLRenderer({
+    antialias: true,
+    canvas: document.querySelector("#gameSceneDebug") as HTMLCanvasElement,
+  });
+
   worker = new Worker(new URL("../physics/worker", import.meta.url), {
     type: "module",
   });
@@ -42,6 +47,8 @@ export default class GameScene extends RenderPage {
     0.1,
     2000
   );
+
+  cameraDebug = new PerspectiveCamera(70, 200 / 200, 0.1, 2000);
 
   control = new PointerLockControls(this.camera, document.body);
 
@@ -76,6 +83,9 @@ export default class GameScene extends RenderPage {
   initialize() {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.shadowMap.enabled = false;
+
+    this.rendererDebug.setSize(200, 200);
+    this.rendererDebug.shadowMap.enabled = false;
 
     window.addEventListener(
       "resize",
@@ -161,9 +171,11 @@ export default class GameScene extends RenderPage {
   }
 
   renderCoordinate() {
-    const { x, y, z } =
-      this.player?.player.position.clone().multiplyScalar(1 / BLOCK_WIDTH) ||
-      {};
+    // const { x, y, z } =
+    //   this.player?.player.position.clone().multiplyScalar(1 / BLOCK_WIDTH) ||
+    //   {};
+
+    const { x, y, z } = this.player?.player.position || {};
 
     if (this.coordinateElement)
       this.coordinateElement.innerHTML = `XYZ: ${x.toFixed(3)} / ${y.toFixed(
@@ -226,7 +238,12 @@ export default class GameScene extends RenderPage {
 
       this.chunkManager?.update();
 
+      const { x, y, z } = this.player.player.position;
+      this.cameraDebug.position.set(x, y, z + 5);
+      this.cameraDebug.lookAt(this.player.player.position);
+
       this.renderer.render(this.scene, this.camera);
+      this.rendererDebug.render(this.scene, this.cameraDebug);
     }
   }
 }
