@@ -5,6 +5,7 @@ import { BlockKeys, BlocksMappingType } from "@/type";
 import { CHUNK_SIZE, FLAT_WORLD_TYPE, TIME_TO_INTERACT } from "@/constants";
 import {
   CHARACTER_LENGTH,
+  CHARACTER_WIDTH,
   GRAVITY,
   GRAVITY_SCALE,
   JUMP_FORCE,
@@ -14,10 +15,48 @@ import {
   nameChunkFromCoordinate,
   nameFromCoordinate,
 } from "@/game/helpers/nameFromCoordinate";
-import Physics from "./physics";
 import { FlatWorld } from "../terrant/flatWorldGeneration";
 import { DefaultWorld } from "../terrant/worldGeneration";
 import { getChunkCoordinate } from "../helpers/chunkHelpers";
+import { Physics, PlayerState } from "prismarine-physics";
+const mcData = require("minecraft-data")("1.13.2");
+const Block = require("prismarine-block")("1.13.2");
+
+const fakeWorld = {
+  getBlock: (pos) => {
+    const type =
+      pos.y < 60 ? mcData.blocksByName.stone.id : mcData.blocksByName.air.id;
+    const b = new Block(type, 0, 0);
+    b.position = pos;
+    return b;
+  },
+};
+
+function fakePlayer(pos: any, baseVersion: any) {
+  return {
+    entity: {
+      position: pos,
+      velocity: new Vector3(0, 0, 0),
+      onGround: false,
+      isInWater: false,
+      isInLava: false,
+      isInWeb: false,
+      elytraFlying: false,
+      isCollidedHorizontally: false,
+      isCollidedVertically: false,
+      yaw: 0,
+      pitch: 0,
+      effects: [],
+    },
+    inventory: {
+      slots: [],
+    },
+    jumpTicks: 0,
+    jumpQueued: false,
+    fireworkRocketDuration: 0,
+    version: baseVersion,
+  };
+}
 
 class PhysicsWorker {
   worldGen: FlatWorld | DefaultWorld;
@@ -32,101 +71,71 @@ class PhysicsWorker {
   vy = this.originalVy;
   onGround = true;
 
-  physicsEngine = new Physics(this.blocksMapping);
+  physicsEngine = Physics(mcData, fakeWorld);
 
+  playerBody = this.physicsEngine.addBody(
+    this.getBoundingBoxPlayer(0, 40, 0, CHARACTER_WIDTH, CHARACTER_LENGTH),
+    4,
+    4,
+    1,
+    1,
+    () => {
+      console.log("collide");
+    }
+  );
   constructor() {}
+
+  getBoundingBoxPlayer(
+    x: number,
+    y: number,
+    z: number,
+    width: number,
+    height: number
+  ) {
+    return {
+      vec: [x + width / 2, y + height, z + width / 2],
+      base: [x - width / 2, y, z - width / 2],
+    };
+  }
+
+  getBoundingBoxBlock(
+    x: number,
+    y: number,
+    z: number,
+    width: number,
+    height: number
+  ) {
+    return {
+      vec: [x + width / 2, y + height / 2, z + width / 2],
+      base: [x - width / 2, y - width / 2, z - width / 2],
+    };
+  }
 
   calculateMovement({
     directionVectorArr,
     forwardVectorArr,
     position,
-    delta,
+    delta,control
   }: {
     forwardVectorArr: number[];
     directionVectorArr: number[];
     position: number[];
-    delta: number;
+    delta: number;control: any
   }) {
-    const forwardVector = new Vector3(
-      forwardVectorArr[0],
-      forwardVectorArr[1],
-      forwardVectorArr[2]
-    );
+    console.log(control);
 
-    const directionVector = new Vector3(
-      directionVectorArr[0],
-      directionVectorArr[1],
-      directionVectorArr[2]
-    );
-
-    const playerPosition = new Vector3(position[0], position[1], position[2]);
-
-    forwardVector.y = 0;
-    forwardVector.normalize();
-
-    const vectorUp = new Vector3(0, 1, 0);
-
-    const vectorRight = vectorUp.clone().crossVectors(vectorUp, forwardVector);
-
-    const moveVector = new Vector3().addVectors(
-      forwardVector.clone().multiplyScalar(directionVector.z),
-      vectorRight.multiplyScalar(directionVector.x)
-    );
-
-    moveVector.normalize().multiplyScalar(delta * SPEED);
-    //https://www.cgtrader.com/free-3d-models/character/man/minecraft-steve-low-poly-rigged
-
-    if (this.vy > this.originalVy) {
-      this.vy -= GRAVITY * GRAVITY_SCALE * delta;
-    }
-
-    // round final result y if odd then make it even
-    const {
-      calculatedMoveVector: correctMovement,
-      collideObject,
-      collideObjectTop,
-      a,
-      playerBoundingBox,
-      roundedFuturePos,
-    } = this.physicsEngine.calculateCorrectMovement(
-      new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z),
-      playerPosition
-    );
-
-    if (!collideObject && this.onGround) {
-      this.vy = -10;
-      this.onGround = false;
-    }
-
-    if (collideObjectTop) {
-      this.vy = -3;
-    }
-
-    if (collideObject) {
-      this.onGround = true;
-      // this.playerPos.y = Math.round(this.playerPos.y);
-    }
-
-    this.playerPos.add(
-      new Vector3(correctMovement.x, correctMovement.y, correctMovement.z)
-    );
-
-    if (this.playerPos.y < -61) {
-      const [x, y, z] = this.spawn;
-      this.playerPos.set(x, y, z);
-    }
-
-    self.postMessage({
-      type: "updatePosition",
-      data: {
-        position: [this.playerPos.x, this.playerPos.y, this.playerPos.z],
-        onGround: this.onGround,
-        collideObject,
-        a,
-        playerBoundingBox,
-        roundedFuturePos,
-      },
-    });
+    // self.postMessage(
+    //   {
+    //     type: "updatePosition",
+    //     data: {
+    //       position: playerPos,
+    //       onGround: this.onGround,
+    //       // collideObject,
+    //     },
+    //   },
+    //   //@ts-ignore
+    //   [playerPos.buffer]
+    // );
   }
 
   jumpCharacter() {
@@ -142,7 +151,7 @@ class PhysicsWorker {
         ...this.eventMapping,
         calculateMovement: this.calculateMovement.bind(this),
       };
-
+const a = 1;
       self.postMessage({
         type: "removeLoading",
         data: {},

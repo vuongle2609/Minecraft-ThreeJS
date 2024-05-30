@@ -12,7 +12,11 @@
     "dat.gui": "^0.7.9",
     "date-fns": "^3.0.6",
     "fastnoise-lite": "^1.1.1",
-    "uuid": "^9.0.1"
+    "minecraft-data": "^3.65.0",
+    "prismarine-block": "^1.17.1",
+    "prismarine-physics": "^1.8.0",
+    "uuid": "^9.0.1",
+    "voxel-physics-engine": "^0.13.0"
   },
   "devDependencies": {
     "@types/dat.gui": "^0.7.7",

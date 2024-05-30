@@ -6,7 +6,7 @@ export const CHARACTER_LENGTH_ROUND = Math.ceil(CHARACTER_LENGTH);
 export const GRAVITY = 9.8;
 export const GRAVITY_SCALE = 8;
 
-export const SPEED = 7;
+export const SPEED = 100;
 
 export const JUMP_FORCE = 20;
 
