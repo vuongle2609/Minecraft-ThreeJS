@@ -1,10 +1,11 @@
-import SoundManager from '@/game/classes/soundManager';
-import CreateWorld from '@/UI/pages/createWorld';
-import EditWorld from '@/UI/pages/editWorld';
-import GameRender from '@/UI/pages/gameRender';
-import InitScreen from '@/UI/pages/initScreen';
-import MainScreen from '@/UI/pages/mainScreen';
-import SelectWorld from '@/UI/pages/selectWorld';
+import SoundManager from "@/game/classes/soundManager";
+import CreateWorld from "@/UI/pages/createWorld";
+import EditWorld from "@/UI/pages/editWorld";
+import GameRender from "@/UI/pages/gameRender";
+import InitScreen from "@/UI/pages/initScreen";
+import MainScreen from "@/UI/pages/mainScreen";
+import SelectWorld from "@/UI/pages/selectWorld";
+import DeleteWorld from "../pages/deleteWorld";
 
 export default class Router {
   soundManager: SoundManager;
@@ -16,6 +17,7 @@ export default class Router {
     gameRender: new GameRender(this),
     initScreen: new InitScreen(this),
     editWorld: new EditWorld(this),
+    deleteWorld: new DeleteWorld(this),
   };
 
   constructor(soundManager: SoundManager) {
