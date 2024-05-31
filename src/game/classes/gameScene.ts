@@ -12,7 +12,6 @@ import {
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 
-import { BLOCK_WIDTH } from "@/constants";
 import ChunkManager from "./chunkManager";
 import Cloud from "./cloud";
 import InventoryManager from "./inventoryManager";

@@ -18,6 +18,11 @@ import Physics from "./physics";
 import { FlatWorld } from "../terrant/flatWorldGeneration";
 import { DefaultWorld } from "../terrant/worldGeneration";
 import { getChunkCoordinate } from "../helpers/chunkHelpers";
+import {
+  getBoundingBoxBlock,
+  getBoundingBoxPlayer,
+  isBoundingBoxCollide,
+} from "../helpers/bounding";
 
 class PhysicsWorker {
   worldGen: FlatWorld | DefaultWorld;
@@ -83,23 +88,29 @@ class PhysicsWorker {
     // round final result y if odd then make it even
     const {
       calculatedMoveVector: correctMovement,
-      collideObject,
-      collideObjectTop,
+      objectBottom,
+      objectTop,
+      isOnWater,
+      isUnderWater,
     } = this.physicsEngine.calculateCorrectMovement(
       new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z),
       playerPosition
     );
 
-    if (!collideObject && this.onGround) {
+    if (isOnWater) {
+      correctMovement.multiplyScalar(1 / 2);
+    }
+
+    if (!objectBottom && this.onGround) {
       this.vy = -10;
       this.onGround = false;
     }
 
-    if (collideObjectTop) {
+    if (objectTop) {
       this.vy = -3;
     }
 
-    if (collideObject) {
+    if (objectBottom) {
       this.onGround = true;
       // this.playerPos.y = Math.round(this.playerPos.y);
     }
@@ -118,7 +129,7 @@ class PhysicsWorker {
       data: {
         position: [this.playerPos.x, this.playerPos.y, this.playerPos.z],
         onGround: this.onGround,
-        collideObject,
+        objectBottom,
       },
     });
   }
@@ -146,6 +157,46 @@ class PhysicsWorker {
   initPhysics() {
     this.initFunc?.();
     this.initFunc = undefined;
+  }
+
+  requestPlaceBlock({
+    position,
+    type,
+  }: {
+    position: number[];
+    type: BlockKeys;
+  }) {
+    const blockBoundingBox = getBoundingBoxBlock(
+      position[0],
+      position[1],
+      position[2]
+    );
+    const playerPos = this.playerPos.clone();
+    playerPos.y -= CHARACTER_LENGTH / 2;
+    const playerBoundingBox = getBoundingBoxPlayer(
+      playerPos.x,
+      playerPos.y,
+      playerPos.z
+    );
+
+    const isPlaceBlockCollideWithPlayer = isBoundingBoxCollide(
+      blockBoundingBox.min,
+      blockBoundingBox.max,
+      playerBoundingBox.min,
+      playerBoundingBox.max
+    );
+
+    if (!isPlaceBlockCollideWithPlayer) {
+      this.addBlock({ position, type });
+
+      self.postMessage({
+        type: "renderPlaceBlock",
+        data: {
+          position,
+          type,
+        },
+      });
+    }
   }
 
   addBlock({ position, type }: { position: number[]; type: BlockKeys }) {
@@ -227,6 +278,7 @@ class PhysicsWorker {
     jumpCharacter: this.jumpCharacter.bind(this),
     init: this.init.bind(this),
     addBlocks: this.addBlocks.bind(this),
+    requestPlaceBlock: this.requestPlaceBlock.bind(this),
   };
 }
 
