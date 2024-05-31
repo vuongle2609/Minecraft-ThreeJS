@@ -2,7 +2,7 @@ import { Face } from "@/constants/block";
 import { Vector3 } from "three";
 
 import { BLOCK_WIDTH } from "@/constants";
-import { CHARACTER_LENGTH, CHARACTER_WIDTH } from "@/constants/player";
+import { CHARACTER_LENGTH } from "@/constants/player";
 import {
   getBoundingBoxBlock,
   getBoundingBoxPlayer,

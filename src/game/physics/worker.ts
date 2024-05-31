@@ -159,7 +159,13 @@ class PhysicsWorker {
     this.initFunc = undefined;
   }
 
-  addBlock({ position, type }: { position: number[]; type: BlockKeys }) {
+  requestPlaceBlock({
+    position,
+    type,
+  }: {
+    position: number[];
+    type: BlockKeys;
+  }) {
     const blockBoundingBox = getBoundingBoxBlock(
       position[0],
       position[1],
@@ -181,10 +187,7 @@ class PhysicsWorker {
     );
 
     if (!isPlaceBlockCollideWithPlayer) {
-      this.blocksMapping.set(
-        nameFromCoordinate(position[0], position[1], position[2]),
-        type as BlockKeys
-      );
+      this.addBlock({ position, type });
 
       self.postMessage({
         type: "renderPlaceBlock",
@@ -194,6 +197,13 @@ class PhysicsWorker {
         },
       });
     }
+  }
+
+  addBlock({ position, type }: { position: number[]; type: BlockKeys }) {
+    this.blocksMapping.set(
+      nameFromCoordinate(position[0], position[1], position[2]),
+      type as BlockKeys
+    );
   }
 
   addBlocks({ arrayBlocksData }: { arrayBlocksData: Int32Array }) {
@@ -268,6 +278,7 @@ class PhysicsWorker {
     jumpCharacter: this.jumpCharacter.bind(this),
     init: this.init.bind(this),
     addBlocks: this.addBlocks.bind(this),
+    requestPlaceBlock: this.requestPlaceBlock.bind(this),
   };
 }
 

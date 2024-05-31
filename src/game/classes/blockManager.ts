@@ -83,6 +83,7 @@ export default class BlockManager extends BaseEntity {
     this.worker?.addEventListener("message", (e) => {
       if (e.data.type === "renderPlaceBlock") {
         const { position, type } = e.data.data;
+
         this.handleRenderPlaceBlock(position, type);
       }
     });
@@ -314,7 +315,7 @@ export default class BlockManager extends BaseEntity {
     type: BlockKeys;
   }) {
     this.worker?.postMessage({
-      type: "addBlock",
+      type: "requestPlaceBlock",
       data: {
         position,
         type,
@@ -325,15 +326,12 @@ export default class BlockManager extends BaseEntity {
   onMouseDown(e: MouseEvent) {
     switch (e.button) {
       case 0:
-        // left click
         this.handleBreakBlock();
         break;
       case 1:
-        // middle click
         this.handleGetBlock();
         break;
       case 2:
-        // right click
         this.handlePlaceBlock();
     }
   }
