@@ -2,7 +2,6 @@ import { InstancedMesh } from "three";
 
 export enum BlockKeys {
   grass = 1,
-
   stone = 3,
   sand = 4,
   dirt = 5,

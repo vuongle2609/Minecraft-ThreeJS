@@ -1,20 +1,12 @@
-import {
-  Box3,
-  Box3Helper,
-  BoxGeometry,
-  Mesh,
-  MeshStandardMaterial,
-  Vector3,
-} from "three";
+import { BoxGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
 
+import { throttle } from "@/UI/utils/throttle";
 import blocks from "@/constants/blocks";
 import { CHARACTER_LENGTH, CHARACTER_WIDTH } from "@/constants/player";
 import BasicCharacterControllerInput from "@/game/action/input";
 import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
 import { BlockKeys } from "@/type";
 import { getChunkCoordinate } from "../helpers/chunkHelpers";
-import { BLOCK_WIDTH } from "@/constants";
-import { throttle } from "@/UI/utils/throttle";
 
 export default class Player extends BaseEntity {
   input = new BasicCharacterControllerInput();
@@ -169,6 +161,7 @@ export default class Player extends BaseEntity {
         this.currentStepSound.pause();
         this.currentStepSound.currentTime = 0;
       }
+
       this.currentStepSound = blocks[this.currentStepKey].step;
     }
   }
@@ -203,7 +196,7 @@ export default class Player extends BaseEntity {
   update(delta: number, t: number) {
     this.updateMovementThrootle(delta);
     // this.breathingEffect(delta);
-    // this.updateMovementSound();
+    this.updateMovementSound();
     this.updateCamera();
   }
 }

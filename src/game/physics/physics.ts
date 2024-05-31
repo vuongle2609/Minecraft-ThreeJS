@@ -30,86 +30,86 @@ export default class Physics {
     );
   }
 
-  getBlockDirection(
-    x: number,
-    y: number,
-    z: number,
-    xC: number,
-    yC: number,
-    zC: number
-  ) {
-    let facesCollide: Record<string, BlockKeys | 0 | boolean> = {
-      [Face.rightZ]: false,
-      [Face.leftZ]: false,
-      [Face.rightX]: false,
-      [Face.leftX]: false,
-      [Face.top]: false,
-      [Face.bottom]: false,
-    };
+  // getBlockDirection(
+  //   x: number,
+  //   y: number,
+  //   z: number,
+  //   xC: number,
+  //   yC: number,
+  //   zC: number
+  // ) {
+  //   let facesCollide: Record<string, BlockKeys | 0 | boolean> = {
+  //     [Face.rightZ]: false,
+  //     [Face.leftZ]: false,
+  //     [Face.rightX]: false,
+  //     [Face.leftX]: false,
+  //     [Face.top]: false,
+  //     [Face.bottom]: false,
+  //   };
 
-    const facesCollideTempX: Record<string, BlockKeys | 0 | boolean> = {
-      [Face.rightX]: false,
-      [Face.leftX]: false,
-    };
+  //   const facesCollideTempX: Record<string, BlockKeys | 0 | boolean> = {
+  //     [Face.rightX]: false,
+  //     [Face.leftX]: false,
+  //   };
 
-    const facesCollideTempZ: Record<string, BlockKeys | 0 | boolean> = {
-      [Face.rightZ]: false,
-      [Face.leftZ]: false,
-    };
+  //   const facesCollideTempZ: Record<string, BlockKeys | 0 | boolean> = {
+  //     [Face.rightZ]: false,
+  //     [Face.leftZ]: false,
+  //   };
 
-    const isTop = y - yC > BLOCK_WIDTH;
-    const isBot = yC - y === BLOCK_WIDTH;
+  //   const isTop = y - yC > BLOCK_WIDTH;
+  //   const isBot = yC - y === BLOCK_WIDTH;
 
-    if (y < yC && isBot) {
-      facesCollide[Face.bottom] = true;
-    }
+  //   if (y < yC && isBot) {
+  //     facesCollide[Face.bottom] = true;
+  //   }
 
-    if (y > yC && isTop) {
-      facesCollide[Face.top] = true;
-    }
+  //   if (y > yC && isTop) {
+  //     facesCollide[Face.top] = true;
+  //   }
 
-    let calX = false;
-    let calZ = false;
+  //   let calX = false;
+  //   let calZ = false;
 
-    if (x < xC && !isTop && !isBot) {
-      facesCollideTempX[Face.rightX] = true;
-      calX = true;
-    }
+  //   if (x < xC && !isTop && !isBot) {
+  //     facesCollideTempX[Face.rightX] = true;
+  //     calX = true;
+  //   }
 
-    if (x > xC && !isTop && !isBot) {
-      facesCollideTempX[Face.leftX] = true;
-      calX = true;
-    }
+  //   if (x > xC && !isTop && !isBot) {
+  //     facesCollideTempX[Face.leftX] = true;
+  //     calX = true;
+  //   }
 
-    if (z < zC && !isTop && !isBot) {
-      facesCollideTempZ[Face.rightZ] = true;
-      calZ = true;
-    }
+  //   if (z < zC && !isTop && !isBot) {
+  //     facesCollideTempZ[Face.rightZ] = true;
+  //     calZ = true;
+  //   }
 
-    if (z > zC && !isTop && !isBot) {
-      facesCollideTempZ[Face.leftZ] = true;
-      calZ = true;
-    }
+  //   if (z > zC && !isTop && !isBot) {
+  //     facesCollideTempZ[Face.leftZ] = true;
+  //     calZ = true;
+  //   }
 
-    // if (calX && calZ) {
-    //   // facesCollide = {
-    //   //   ...facesCollide,
-    //   //   ...facesCollideTempX,
-    //   // };
-    // } else {
-    //   facesCollide = {
-    //     ...facesCollide,
-    //     ...facesCollideTempZ,
-    //     ...facesCollideTempX,
-    //   };
-    // }
-    facesCollide = {
-      ...facesCollide,
-      ...facesCollideTempZ,
-      ...facesCollideTempX,
-    };
-    return facesCollide;
-  }
+  //   // if (calX && calZ) {
+  //   //   // facesCollide = {
+  //   //   //   ...facesCollide,
+  //   //   //   ...facesCollideTempX,
+  //   //   // };
+  //   // } else {
+  //   //   facesCollide = {
+  //   //     ...facesCollide,
+  //   //     ...facesCollideTempZ,
+  //   //     ...facesCollideTempX,
+  //   //   };
+  //   // }
+  //   facesCollide = {
+  //     ...facesCollide,
+  //     ...facesCollideTempZ,
+  //     ...facesCollideTempX,
+  //   };
+  //   return facesCollide;
+  // }
 
   getRoundedCoordirnate(pos: Vector3) {
     const xFloor = Math.floor(pos.x);
@@ -181,8 +181,8 @@ export default class Physics {
 
           if (isCollided) {
             facesCollide = {
-              [Face.rightX]: true,
-              [Face.leftX]: true,
+              [Face.rightX]: block,
+              [Face.leftX]: block,
             };
           }
         }
@@ -246,8 +246,8 @@ export default class Physics {
 
           if (isCollided) {
             facesCollide = {
-              [Face.top]: true,
-              [Face.bottom]: true,
+              [Face.top]: block,
+              [Face.bottom]: block,
             };
           }
         }
@@ -315,8 +315,8 @@ export default class Physics {
 
           if (isCollided) {
             facesCollide = {
-              [Face.rightZ]: true,
-              [Face.leftZ]: true,
+              [Face.rightZ]: block,
+              [Face.leftZ]: block,
             };
           }
         }
