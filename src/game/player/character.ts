@@ -54,10 +54,10 @@ export default class Player extends BaseEntity {
 
     this.worker?.addEventListener("message", (e) => {
       if (e.data.type === "updatePosition") {
-        const { position, onGround, collideObject } = e.data.data;
+        const { position, onGround, objectBottom } = e.data.data;
 
         this.prevStepKey = this.currentStepKey;
-        this.currentStepKey = collideObject;
+        this.currentStepKey = objectBottom;
 
         this.onGround = onGround;
 
