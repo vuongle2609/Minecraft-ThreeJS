@@ -3,6 +3,11 @@ import { Vector3 } from "three";
 
 import { BLOCK_WIDTH } from "@/constants";
 import { CHARACTER_LENGTH, CHARACTER_WIDTH } from "@/constants/player";
+import {
+  getBoundingBoxBlock,
+  getBoundingBoxPlayer,
+  isBoundingBoxCollide,
+} from "@/game/helpers/bounding";
 import { calNeighborsOffset } from "@/game/helpers/calNeighborsOffset";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
 import { BlockKeys } from "@/type";
@@ -12,22 +17,6 @@ export default class Physics {
 
   constructor(blocksMapping: Map<string, 0 | BlockKeys>) {
     this.blocksMapping = blocksMapping;
-  }
-
-  isBoundingBoxCollide(
-    box1Min: Vector3,
-    box1Max: Vector3,
-    box2Min: Vector3,
-    box2Max: Vector3
-  ) {
-    return !(
-      box1Max.x < box2Min.x ||
-      box1Min.x > box2Max.x ||
-      box1Max.y < box2Min.y ||
-      box1Min.y > box2Max.y ||
-      box1Max.z < box2Min.z ||
-      box1Min.z > box2Max.z
-    );
   }
 
   getRoundedCoordirnate(pos: Vector3) {
@@ -58,12 +47,10 @@ export default class Physics {
 
     nextPosition.y -= CHARACTER_LENGTH / 2;
 
-    const playerBoundingBox = this.getBoundingBoxPlayer(
+    const playerBoundingBox = getBoundingBoxPlayer(
       nextPosition.x,
       nextPosition.y,
-      nextPosition.z,
-      CHARACTER_WIDTH,
-      CHARACTER_LENGTH
+      nextPosition.z
     );
 
     const roundedNextPos = this.getRoundedCoordirnate(nextPosition);
@@ -96,15 +83,13 @@ export default class Physics {
 
         if (!block || block === BlockKeys.water) return;
 
-        const blockBoundingBox = this.getBoundingBoxBlock(
+        const blockBoundingBox = getBoundingBoxBlock(
           blockPos[0],
           blockPos[1],
-          blockPos[2],
-          BLOCK_WIDTH,
-          BLOCK_WIDTH
+          blockPos[2]
         );
 
-        const isCollided = this.isBoundingBoxCollide(
+        const isCollided = isBoundingBoxCollide(
           blockBoundingBox.min,
           blockBoundingBox.max,
           playerBoundingBox.min,
@@ -135,29 +120,39 @@ export default class Physics {
     return facesCollide;
   }
 
-  getBoundingBoxPlayer(
-    x: number,
-    y: number,
-    z: number,
-    width: number,
-    height: number
-  ) {
-    return {
-      max: new Vector3(x + width / 2, y + height, z + width / 2),
-      min: new Vector3(x - width / 2, y, z - width / 2),
-    };
-  }
+  checkWaterInteract(playerPos: Vector3) {
+    playerPos.y -= CHARACTER_LENGTH / 2;
 
-  getBoundingBoxBlock(
-    x: number,
-    y: number,
-    z: number,
-    width: number,
-    height: number
-  ) {
+    const roundedCurrentPos = this.getRoundedCoordirnate(playerPos);
+
+    const blockBelowPos = [
+      roundedCurrentPos[0],
+      roundedCurrentPos[1],
+      roundedCurrentPos[2],
+    ];
+
+    const blockUpPos = [
+      roundedCurrentPos[0],
+      roundedCurrentPos[1] + BLOCK_WIDTH,
+      roundedCurrentPos[2],
+    ];
+
+    const blockBellow = this.blocksMapping.get(
+      nameFromCoordinate(blockBelowPos[0], blockBelowPos[1], blockBelowPos[2])
+    );
+
+    const blockUp = this.blocksMapping.get(
+      nameFromCoordinate(blockUpPos[0], blockUpPos[1], blockUpPos[2])
+    );
+
+    const isUnderWater =
+      blockBellow === BlockKeys.water && blockUp === BlockKeys.water;
+
+    const isOnWater = blockBellow === BlockKeys.water;
+
     return {
-      max: new Vector3(x + width / 2, y + height / 2, z + width / 2),
-      min: new Vector3(x - width / 2, y - width / 2, z - width / 2),
+      isUnderWater,
+      isOnWater,
     };
   }
 
@@ -167,11 +162,13 @@ export default class Physics {
       playerPosition.clone(),
       "x"
     );
+
     const collisionFacesY = this.calCollideFaces(
       vectorMove.clone(),
       playerPosition.clone(),
       "y"
     );
+
     const collisionFacesZ = this.calCollideFaces(
       vectorMove.clone(),
       playerPosition.clone(),
@@ -184,20 +181,28 @@ export default class Physics {
       collisionFacesX[Face.leftX] || collisionFacesX[Face.rightX]
         ? 0
         : vectorMove.x;
+
     calculatedMoveVector.y =
       collisionFacesY[Face.bottom] || collisionFacesY[Face.top]
         ? 0
         : vectorMove.y;
+
     calculatedMoveVector.z =
       collisionFacesZ[Face.leftZ] || collisionFacesZ[Face.rightZ]
         ? 0
         : vectorMove.z;
+
+    const { isUnderWater, isOnWater } = this.checkWaterInteract(
+      playerPosition.clone()
+    );
 
     return {
       calculatedMoveVector,
       objectBottom:
         collisionFacesY[Face.bottom] && Number(collisionFacesY[Face.bottom]),
       objectTop: collisionFacesY[Face.top] && Number(collisionFacesY[Face.top]),
+      isUnderWater,
+      isOnWater,
     };
   }
 }

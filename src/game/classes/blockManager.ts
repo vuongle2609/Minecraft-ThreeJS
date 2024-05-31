@@ -21,6 +21,12 @@ import { BLOCK_WIDTH } from "@/constants";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
+import {
+  getBoundingBoxBlock,
+  getBoundingBoxPlayer,
+  isBoundingBoxCollide,
+} from "../helpers/bounding";
+import { CHARACTER_LENGTH } from "@/constants/player";
 
 const { leftX, leftZ, bottom, rightX, rightZ, top } = Face;
 
@@ -73,6 +79,13 @@ export default class BlockManager extends BaseEntity {
     this.disposeBlockManager = () => {
       document.removeEventListener("mousedown", eventMouseDown, false);
     };
+
+    this.worker?.addEventListener("message", (e) => {
+      if (e.data.type === "renderPlaceBlock") {
+        const { position, type } = e.data.data;
+        this.handleRenderPlaceBlock(position, type);
+      }
+    });
   }
 
   updateBlock({
@@ -210,6 +223,36 @@ export default class BlockManager extends BaseEntity {
     this.currentBreakSound.play();
   }
 
+  handleRenderPlaceBlock(blockPositionArr: number[], placeType: BlockKeys) {
+    const [x, y, z] = blockPositionArr;
+    this.updateBlock({
+      x,
+      y,
+      z,
+      type: placeType,
+    });
+
+    const chunk = getChunkCoordinate(x, z);
+    const chunkName = nameChunkFromCoordinate(chunk.x, chunk.z);
+
+    const coorName = nameFromCoordinate(x, y, z);
+
+    this.chunksBlocks[chunkName]?.push(coorName);
+
+    this.blocksWorldChunk[chunkName] = this.blocksWorldChunk[chunkName] || {};
+    this.blocksWorldChunk[chunkName][coorName] = placeType;
+
+    // play sound
+    if (this.currentPlaceSound) {
+      this.currentPlaceSound.pause();
+      this.currentPlaceSound.currentTime = 0;
+    }
+
+    this.currentPlaceSound = blocks[placeType].place;
+
+    this.currentPlaceSound.play();
+  }
+
   handlePlaceBlock() {
     const intersectObj = this.getIntersectObject();
 
@@ -247,44 +290,10 @@ export default class BlockManager extends BaseEntity {
     const placeType = this.inventoryManager.currentFocus;
 
     if (placeType) {
-      this.updateBlock({
-        x: blockPosition.x,
-        y: blockPosition.y,
-        z: blockPosition.z,
+      this.updateBlockWorker({
+        position: [blockPosition.x, blockPosition.y, blockPosition.z],
         type: placeType,
       });
-
-      this.worker?.postMessage({
-        type: "addBlock",
-        data: {
-          position: [blockPosition.x, blockPosition.y, blockPosition.z],
-          type: placeType,
-        },
-      });
-
-      const chunk = getChunkCoordinate(blockPosition.x, blockPosition.z);
-      const chunkName = nameChunkFromCoordinate(chunk.x, chunk.z);
-
-      const coorName = nameFromCoordinate(
-        blockPosition.x,
-        blockPosition.y,
-        blockPosition.z
-      );
-
-      this.chunksBlocks[chunkName]?.push(coorName);
-
-      this.blocksWorldChunk[chunkName] = this.blocksWorldChunk[chunkName] || {};
-      this.blocksWorldChunk[chunkName][coorName] = placeType;
-
-      // play sound
-      if (this.currentPlaceSound) {
-        this.currentPlaceSound.pause();
-        this.currentPlaceSound.currentTime = 0;
-      }
-
-      this.currentPlaceSound = blocks[placeType].place;
-
-      this.currentPlaceSound.play();
     }
   }
 
@@ -297,7 +306,13 @@ export default class BlockManager extends BaseEntity {
     });
   }
 
-  updateBlockWorker({ position, type }: { position: number[]; type: string }) {
+  updateBlockWorker({
+    position,
+    type,
+  }: {
+    position: number[];
+    type: BlockKeys;
+  }) {
     this.worker?.postMessage({
       type: "addBlock",
       data: {

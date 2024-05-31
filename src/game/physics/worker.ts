@@ -18,6 +18,11 @@ import Physics from "./physics";
 import { FlatWorld } from "../terrant/flatWorldGeneration";
 import { DefaultWorld } from "../terrant/worldGeneration";
 import { getChunkCoordinate } from "../helpers/chunkHelpers";
+import {
+  getBoundingBoxBlock,
+  getBoundingBoxPlayer,
+  isBoundingBoxCollide,
+} from "../helpers/bounding";
 
 class PhysicsWorker {
   worldGen: FlatWorld | DefaultWorld;
@@ -85,10 +90,16 @@ class PhysicsWorker {
       calculatedMoveVector: correctMovement,
       objectBottom,
       objectTop,
+      isOnWater,
+      isUnderWater,
     } = this.physicsEngine.calculateCorrectMovement(
       new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z),
       playerPosition
     );
+
+    if (isOnWater) {
+      correctMovement.multiplyScalar(1 / 2);
+    }
 
     if (!objectBottom && this.onGround) {
       this.vy = -10;
@@ -149,10 +160,40 @@ class PhysicsWorker {
   }
 
   addBlock({ position, type }: { position: number[]; type: BlockKeys }) {
-    this.blocksMapping.set(
-      nameFromCoordinate(position[0], position[1], position[2]),
-      type as BlockKeys
+    const blockBoundingBox = getBoundingBoxBlock(
+      position[0],
+      position[1],
+      position[2]
     );
+    const playerPos = this.playerPos.clone();
+    playerPos.y -= CHARACTER_LENGTH / 2;
+    const playerBoundingBox = getBoundingBoxPlayer(
+      playerPos.x,
+      playerPos.y,
+      playerPos.z
+    );
+
+    const isPlaceBlockCollideWithPlayer = isBoundingBoxCollide(
+      blockBoundingBox.min,
+      blockBoundingBox.max,
+      playerBoundingBox.min,
+      playerBoundingBox.max
+    );
+
+    if (!isPlaceBlockCollideWithPlayer) {
+      this.blocksMapping.set(
+        nameFromCoordinate(position[0], position[1], position[2]),
+        type as BlockKeys
+      );
+
+      self.postMessage({
+        type: "renderPlaceBlock",
+        data: {
+          position,
+          type,
+        },
+      });
+    }
   }
 
   addBlocks({ arrayBlocksData }: { arrayBlocksData: Int32Array }) {

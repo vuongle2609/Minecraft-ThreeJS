@@ -1,6 +1,5 @@
 import { BoxGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
 
-import { throttle } from "@/UI/utils/throttle";
 import blocks from "@/constants/blocks";
 import { CHARACTER_LENGTH, CHARACTER_WIDTH } from "@/constants/player";
 import BasicCharacterControllerInput from "@/game/action/input";
@@ -191,10 +190,8 @@ export default class Player extends BaseEntity {
     this.camera?.position.copy(new Vector3(x, y + 1.4 - this.cameraOffset, z));
   }
 
-  updateMovementThrootle = throttle(this.handleMovement.bind(this), 0);
-
   update(delta: number, t: number) {
-    this.updateMovementThrootle(delta);
+    this.handleMovement(delta);
     // this.breathingEffect(delta);
     this.updateMovementSound();
     this.updateCamera();
