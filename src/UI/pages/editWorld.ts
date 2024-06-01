@@ -17,10 +17,6 @@ export default class EditWorld extends RenderPage {
     this.router = router;
   }
 
-  handleRenderWorld(id: string) {
-    this.router.navigate("gameRender", id);
-  }
-
   element = String.raw`
       <div
         class="w-full h-full items-center justify-center bg-cover flex flex-col"

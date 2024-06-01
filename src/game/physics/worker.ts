@@ -1,8 +1,8 @@
 import { Vector3 } from "three";
 
-import { BlockKeys } from "@/type";
+import { BlockKeys, BlocksMappingType } from "@/type";
 
-import { CHUNK_SIZE, TIME_TO_INTERACT } from "@/constants";
+import { CHUNK_SIZE, FLAT_WORLD_TYPE, TIME_TO_INTERACT } from "@/constants";
 import {
   CHARACTER_LENGTH,
   GRAVITY,
@@ -10,11 +10,23 @@ import {
   JUMP_FORCE,
   SPEED,
 } from "@/constants/player";
-import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
+import {
+  nameChunkFromCoordinate,
+  nameFromCoordinate,
+} from "@/game/helpers/nameFromCoordinate";
 import Physics from "./physics";
+import { FlatWorld } from "../terrant/flatWorldGeneration";
+import { DefaultWorld } from "../terrant/worldGeneration";
+import { getChunkCoordinate } from "../helpers/chunkHelpers";
+import {
+  getBoundingBoxBlock,
+  getBoundingBoxPlayer,
+  isBoundingBoxCollide,
+} from "../helpers/bounding";
 
 class PhysicsWorker {
-  chunkGenerated = 0;
+  worldGen: FlatWorld | DefaultWorld;
+  chunkBlocksCustomMap: Record<string, BlocksMappingType> = {};
 
   blocksMapping: Map<string, BlockKeys | 0> = new Map();
 
@@ -25,11 +37,11 @@ class PhysicsWorker {
   vy = this.originalVy;
   onGround = true;
 
-  physicsEngine = new Physics();
+  physicsEngine = new Physics(this.blocksMapping);
 
   constructor() {}
 
-  calculateMovement = ({
+  calculateMovement({
     directionVectorArr,
     forwardVectorArr,
     position,
@@ -39,7 +51,7 @@ class PhysicsWorker {
     directionVectorArr: number[];
     position: number[];
     delta: number;
-  }) => {
+  }) {
     const forwardVector = new Vector3(
       forwardVectorArr[0],
       forwardVectorArr[1],
@@ -73,20 +85,34 @@ class PhysicsWorker {
       this.vy -= GRAVITY * GRAVITY_SCALE * delta;
     }
 
-    const { calculatedMoveVector: correctMovement, collideObject } =
-      this.physicsEngine.calculateCorrectMovement(
-        new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z),
-        playerPosition,
-        this.blocksMapping
-      );
+    // round final result y if odd then make it even
+    const {
+      calculatedMoveVector: correctMovement,
+      objectBottom,
+      objectTop,
+      isOnWater,
+      isUnderWater,
+    } = this.physicsEngine.calculateCorrectMovement(
+      new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z),
+      playerPosition
+    );
 
-    if (!collideObject && this.onGround) {
-      this.vy = -5;
+    if (isOnWater) {
+      correctMovement.multiplyScalar(1 / 2);
+    }
+
+    if (!objectBottom && this.onGround) {
+      this.vy = -10;
       this.onGround = false;
     }
 
-    if (collideObject) {
+    if (objectTop) {
+      this.vy = -3;
+    }
+
+    if (objectBottom) {
       this.onGround = true;
+      // this.playerPos.y = Math.round(this.playerPos.y);
     }
 
     this.playerPos.add(
@@ -94,9 +120,8 @@ class PhysicsWorker {
     );
 
     if (this.playerPos.y < -61) {
-      this.playerPos.copy(
-        new Vector3(CHUNK_SIZE / 2, CHARACTER_LENGTH + 60, CHUNK_SIZE / 2)
-      );
+      const [x, y, z] = this.spawn;
+      this.playerPos.set(x, y, z);
     }
 
     self.postMessage({
@@ -104,47 +129,87 @@ class PhysicsWorker {
       data: {
         position: [this.playerPos.x, this.playerPos.y, this.playerPos.z],
         onGround: this.onGround,
-        collideObject,
+        objectBottom,
       },
     });
-  };
+  }
 
-  jumpCharacter = () => {
+  jumpCharacter() {
     if (this.onGround) {
       this.vy = JUMP_FORCE;
       this.onGround = false;
     }
-  };
+  }
 
   initFunc: undefined | Function = () =>
     setTimeout(() => {
       this.eventMapping = {
         ...this.eventMapping,
-        calculateMovement: this.calculateMovement,
+        calculateMovement: this.calculateMovement.bind(this),
       };
 
       self.postMessage({
         type: "removeLoading",
-        data: {
-        },
+        data: {},
       });
     }, TIME_TO_INTERACT);
 
-  initPhysics = () => {
+  initPhysics() {
     this.initFunc?.();
     this.initFunc = undefined;
-  };
+  }
 
-  addBlock = ({ position, type }: { position: number[]; type: BlockKeys }) => {
+  requestPlaceBlock({
+    position,
+    type,
+  }: {
+    position: number[];
+    type: BlockKeys;
+  }) {
+    const blockBoundingBox = getBoundingBoxBlock(
+      position[0],
+      position[1],
+      position[2]
+    );
+    const playerPos = this.playerPos.clone();
+    playerPos.y -= CHARACTER_LENGTH / 2;
+    const playerBoundingBox = getBoundingBoxPlayer(
+      playerPos.x,
+      playerPos.y,
+      playerPos.z
+    );
+
+    const isPlaceBlockCollideWithPlayer = isBoundingBoxCollide(
+      blockBoundingBox.min,
+      blockBoundingBox.max,
+      playerBoundingBox.min,
+      playerBoundingBox.max
+    );
+
+    if (!isPlaceBlockCollideWithPlayer) {
+      this.addBlock({ position, type });
+
+      self.postMessage({
+        type: "renderPlaceBlock",
+        data: {
+          position,
+          type,
+        },
+      });
+    }
+  }
+
+  addBlock({ position, type }: { position: number[]; type: BlockKeys }) {
     this.blocksMapping.set(
       nameFromCoordinate(position[0], position[1], position[2]),
       type as BlockKeys
     );
-  };
+  }
 
-  addBlocks = ({ arrayBlocksData }: { arrayBlocksData: Int32Array }) => {
+  addBlocks({ arrayBlocksData }: { arrayBlocksData: Int32Array }) {
     let tmpPos: number[] = [];
     const lengthCached = arrayBlocksData.length;
+
     for (let index = 0; index < lengthCached; index++) {
       const num = arrayBlocksData[index];
 
@@ -157,33 +222,63 @@ class PhysicsWorker {
         tmpPos.push(num);
       }
     }
-    this.chunkGenerated += 1;
+  }
 
-    if (this.chunkGenerated === 9) {
-      this.initPhysics();
+  genFirstChunk(initPos: number[]) {
+    const { x, z } = getChunkCoordinate(initPos[0], initPos[1], initPos[2]);
+
+    const { blocksInChunk } = this.worldGen.getBlocksInChunk(
+      x,
+      z,
+      this.chunkBlocksCustomMap[nameChunkFromCoordinate(x, z)]
+    );
+
+    for (const [_, { position, type }] of blocksInChunk) {
+      this.addBlock({
+        position,
+        type,
+      });
     }
-  };
 
-  init = ({ initPos }: { initPos: number[] }) => {
-    if (initPos) {
-      this.playerPos.set(initPos[0], initPos[1] + 0.5, initPos[2]);
-    } else {
-      this.playerPos.set(this.spawn[0], this.spawn[1], this.spawn[2]);
-    }
-  };
+    this.initPhysics();
+  }
 
-  removeBlock = ({ position }: { position: number[] }) => {
+  init({
+    seed,
+    type,
+    chunkBlocksCustom,
+    initPos,
+  }: {
+    seed: number;
+    type: number;
+    chunkBlocksCustom: Record<string, BlocksMappingType>;
+    initPos: number[];
+  }) {
+    this.worldGen =
+      type === FLAT_WORLD_TYPE ? new FlatWorld(seed) : new DefaultWorld(seed);
+
+    this.chunkBlocksCustomMap = chunkBlocksCustom;
+
+    const newInitPos = initPos || this.spawn;
+
+    this.playerPos.set(newInitPos[0], newInitPos[1], newInitPos[2]);
+
+    this.genFirstChunk(newInitPos);
+  }
+
+  removeBlock({ position }: { position: number[] }) {
     this.blocksMapping.delete(
       nameFromCoordinate(position[0], position[1], position[2])
     );
-  };
+  }
 
   eventMapping: Record<string, Function> = {
-    addBlock: this.addBlock,
-    removeBlock: this.removeBlock,
-    jumpCharacter: this.jumpCharacter,
-    init: this.init,
-    addBlocks: this.addBlocks,
+    addBlock: this.addBlock.bind(this),
+    removeBlock: this.removeBlock.bind(this),
+    jumpCharacter: this.jumpCharacter.bind(this),
+    init: this.init.bind(this),
+    addBlocks: this.addBlocks.bind(this),
+    requestPlaceBlock: this.requestPlaceBlock.bind(this),
   };
 }
 

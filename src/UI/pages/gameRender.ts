@@ -69,12 +69,12 @@ export default class GameRender extends RenderPage {
         id="gameScene"
         class="fixed top-0 bottom-0 left-0 right-0 w-full h-full -z-10"
       ></canvas>
-    `;
 
-  //<canvas
-  //   id="gameSceneDebug"
-  //   class="fixed top-0 right-0 w-[200px] h-[200px] z-50"
-  //></canvas>
+      <canvas
+    id="gameSceneDebug"
+    class="fixed top-0 right-0 w-[200px] h-[200px] z-50"
+  ></canvas>
+    `;
 
   render<T>(state?: T) {
     this.id = state as string;

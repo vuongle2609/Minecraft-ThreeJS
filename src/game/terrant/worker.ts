@@ -32,12 +32,9 @@ const getBlocksInChunk = ({
 
   self.postMessage(
     {
-      type: "renderBlocks",
-      data: {
-        facesToRender,
-        chunkName,
-        arrayBlocksData,
-      },
+      facesToRender,
+      chunkName,
+      arrayBlocksData,
     },
 
     // @ts-ignore

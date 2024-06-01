@@ -1,12 +1,12 @@
-import { format } from 'date-fns';
-import { v4 } from 'uuid';
+import { format } from "date-fns";
+import { v4 } from "uuid";
 
-import { WORLD_TYPE_MAPPING } from '@/constants';
-import { RenderPage } from '@/game/classes/renderPage';
-import { WorldsType } from '@/type';
+import { WORLD_TYPE_MAPPING } from "@/constants";
+import { RenderPage } from "@/game/classes/renderPage";
+import { WorldsType } from "@/type";
 
-import Router from '../router';
-import { $, $$ } from '../utils/selector';
+import Router from "../router";
+import { $, $$ } from "../utils/selector";
 
 export default class SelectWorld extends RenderPage {
   router: Router;
@@ -90,18 +90,10 @@ export default class SelectWorld extends RenderPage {
     this.router.navigate("gameRender", id);
   }
 
-  deleteWorld() {
-    const worlds: Record<string, WorldsType> = JSON.parse(
-      localStorage.getItem("worlds") || "{}"
-    );
+  deleteWorld(id: string | null) {
+    if (!id) return;
 
-    delete worlds[this.selectedWorld as keyof typeof worlds];
-
-    localStorage.setItem("worlds", JSON.stringify(worlds));
-
-    this.selectedWorld = null;
-    this.disableInteractButton();
-    this.renderWorlds();
+    this.router.navigate("deleteWorld", id);
   }
 
   reCreateWorld() {
@@ -157,7 +149,7 @@ export default class SelectWorld extends RenderPage {
     };
 
     $("#delete").onclick = () => {
-      this.deleteWorld();
+      this.deleteWorld(this.selectedWorld);
     };
 
     $("#reCreate").onclick = () => {

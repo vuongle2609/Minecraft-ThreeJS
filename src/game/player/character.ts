@@ -53,10 +53,10 @@ export default class Player extends BaseEntity {
 
     this.worker?.addEventListener("message", (e) => {
       if (e.data.type === "updatePosition") {
-        const { position, onGround, collideObject } = e.data.data;
+        const { position, onGround, objectBottom } = e.data.data;
 
         this.prevStepKey = this.currentStepKey;
-        this.currentStepKey = collideObject;
+        this.currentStepKey = objectBottom;
 
         this.onGround = onGround;
 
@@ -83,6 +83,9 @@ export default class Player extends BaseEntity {
       this.currentChunk = getChunkCoordinate(roundedPos.x, roundedPos.z);
 
       this.chunkManager?.handleRequestChunks(this.currentChunk);
+    } else {
+      this.chunkManager?.validateChunk(this.currentChunk);
+      this.chunkManager?.renderChunk();
     }
   };
 
@@ -157,6 +160,7 @@ export default class Player extends BaseEntity {
         this.currentStepSound.pause();
         this.currentStepSound.currentTime = 0;
       }
+
       this.currentStepSound = blocks[this.currentStepKey].step;
     }
   }
@@ -188,7 +192,7 @@ export default class Player extends BaseEntity {
 
   update(delta: number, t: number) {
     this.handleMovement(delta);
-    this.breathingEffect(delta);
+    // this.breathingEffect(delta);
     this.updateMovementSound();
     this.updateCamera();
   }
