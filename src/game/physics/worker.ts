@@ -1,6 +1,6 @@
 import { Vector3 } from "three";
 
-import { BlockKeys, BlocksMappingType } from "@/type";
+import { BlockKeys, BlocksMappingType, PlayerInput } from "@/type";
 
 import { CHUNK_SIZE, FLAT_WORLD_TYPE, TIME_TO_INTERACT } from "@/constants";
 import {
@@ -23,6 +23,7 @@ import {
   getBoundingBoxPlayer,
   isBoundingBoxCollide,
 } from "../helpers/bounding";
+import Control from "./control";
 
 class PhysicsWorker {
   worldGen: FlatWorld | DefaultWorld;
@@ -38,33 +39,47 @@ class PhysicsWorker {
   onGround = true;
 
   physicsEngine = new Physics(this.blocksMapping);
+  control = new Control();
 
   constructor() {}
 
   calculateMovement({
-    directionVectorArr,
     forwardVectorArr,
-    position,
     delta,
+    keys,
   }: {
     forwardVectorArr: number[];
-    directionVectorArr: number[];
-    position: number[];
     delta: number;
+    keys: PlayerInput;
   }) {
+    const directionVector = new Vector3();
+
+    if (keys.left) {
+      directionVector.x += 1;
+    }
+
+    if (keys.right) {
+      directionVector.x -= 1;
+    }
+
+    if (keys.forward) {
+      directionVector.z += 1;
+    }
+
+    if (keys.backward) {
+      directionVector.z -= 1;
+    }
+
+    if (keys.space && this.onGround) {
+      this.vy = JUMP_FORCE;
+      this.onGround = false;
+    }
+
     const forwardVector = new Vector3(
       forwardVectorArr[0],
       forwardVectorArr[1],
       forwardVectorArr[2]
     );
-
-    const directionVector = new Vector3(
-      directionVectorArr[0],
-      directionVectorArr[1],
-      directionVectorArr[2]
-    );
-
-    const playerPosition = new Vector3(position[0], position[1], position[2]);
 
     forwardVector.y = 0;
     forwardVector.normalize();
@@ -94,7 +109,7 @@ class PhysicsWorker {
       isUnderWater,
     } = this.physicsEngine.calculateCorrectMovement(
       new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z),
-      playerPosition
+      this.playerPos
     );
 
     if (isOnWater) {
@@ -132,13 +147,6 @@ class PhysicsWorker {
         objectBottom,
       },
     });
-  }
-
-  jumpCharacter() {
-    if (this.onGround) {
-      this.vy = JUMP_FORCE;
-      this.onGround = false;
-    }
   }
 
   initFunc: undefined | Function = () =>
@@ -275,7 +283,6 @@ class PhysicsWorker {
   eventMapping: Record<string, Function> = {
     addBlock: this.addBlock.bind(this),
     removeBlock: this.removeBlock.bind(this),
-    jumpCharacter: this.jumpCharacter.bind(this),
     init: this.init.bind(this),
     addBlocks: this.addBlocks.bind(this),
     requestPlaceBlock: this.requestPlaceBlock.bind(this),
