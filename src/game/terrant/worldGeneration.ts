@@ -279,7 +279,7 @@ export class DefaultWorld extends BaseGeneration {
       new Map()
     );
 
-    const facesToRender = this.calFaceToRender(
+    const { facesToRender, typeRenderCount } = this.calFaceToRender(
       blocksInChunk,
       blocksInChunkNeighbor
     );
@@ -294,6 +294,7 @@ export class DefaultWorld extends BaseGeneration {
 
     return {
       facesToRender: Object.fromEntries(facesToRender),
+      typeRenderCount: Object.fromEntries(typeRenderCount),
       arrayBlocksData,
     };
   }

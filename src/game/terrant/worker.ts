@@ -22,7 +22,7 @@ const getBlocksInChunk = ({
   const world =
     type === FLAT_WORLD_TYPE ? new FlatWorld(seed) : new DefaultWorld(seed);
 
-  const { facesToRender, arrayBlocksData } = world.initialize(
+  const { facesToRender, arrayBlocksData, typeRenderCount } = world.initialize(
     x,
     z,
     chunkBlocksCustom,
@@ -35,6 +35,7 @@ const getBlocksInChunk = ({
       facesToRender,
       chunkName,
       arrayBlocksData,
+      typeRenderCount,
     },
 
     // @ts-ignore

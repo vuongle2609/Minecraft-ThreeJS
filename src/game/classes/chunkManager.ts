@@ -13,6 +13,7 @@ import { detailFromName } from "../helpers/detailFromName";
 import { BasePropsType } from "./baseEntity";
 import BlockManager from "./blockManager";
 import InventoryManager from "./inventoryManager";
+import Chunk from "./chunk";
 
 interface PropsType {
   inventoryManager: InventoryManager;
@@ -161,7 +162,8 @@ export default class ChunkManager extends BlockManager {
       const currWorker = this.chunkWorkers[index];
 
       currWorker.worker.onmessage = (e) => {
-        const { chunkName, facesToRender, arrayBlocksData } = e.data;
+        const { chunkName, facesToRender, arrayBlocksData, typeRenderCount } =
+          e.data;
 
         currWorker.currentProcessChunk = null;
         currWorker.isBusy = false;
@@ -174,6 +176,13 @@ export default class ChunkManager extends BlockManager {
             facesToRender,
           });
         }
+
+        new Chunk({
+          scene: this.scene,
+          facesToRender,
+          typeRenderCount,
+          arrayBlocksData,
+        });
 
         this.worker?.postMessage(
           {
@@ -318,13 +327,13 @@ export default class ChunkManager extends BlockManager {
 
       if (tmpPos.length === 3) {
         const key = nameFromCoordinate(tmpPos[0], tmpPos[1], tmpPos[2]);
-        this.updateBlock({
-          x: tmpPos[0],
-          y: tmpPos[1],
-          z: tmpPos[2],
-          type: num,
-          facesToRender: facesToRender[key] || null,
-        });
+        // this.updateBlock({
+        //   x: tmpPos[0],
+        //   y: tmpPos[1],
+        //   z: tmpPos[2],
+        //   type: num,
+        //   facesToRender: facesToRender[key] || null,
+        // });
         blocksInChunk.push(key);
 
         tmpPos = [];

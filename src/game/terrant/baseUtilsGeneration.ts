@@ -79,6 +79,7 @@ export class BaseGeneration {
     Object.keys(blocksInChunk);
 
     const facesToRender = new Map();
+    const typeRenderCount = new Map();
 
     for (let [key, value] of blocksInChunk) {
       const { position, type } = value;
@@ -110,9 +111,33 @@ export class BaseGeneration {
 
       const shouldSet = Object.values(valueToSet).filter(Boolean).length;
 
-      if (shouldSet) facesToRender.set(key, valueToSet);
+      if (shouldSet) {
+        facesToRender.set(key, valueToSet);
+
+        const prevCountValue = typeRenderCount.get(type);
+
+        if (!prevCountValue) {
+          typeRenderCount.set(type, {
+            [leftZ]: valueToSet[leftZ] ? 1 : 0,
+            [rightZ]: valueToSet[rightZ] ? 1 : 0,
+            [leftX]: valueToSet[leftX] ? 1 : 0,
+            [rightX]: valueToSet[rightX] ? 1 : 0,
+            [bottom]: valueToSet[bottom] ? 1 : 0,
+            [top]: valueToSet[top] ? 1 : 0,
+          });
+        } else {
+          typeRenderCount.set(type, {
+            [leftZ]: prevCountValue[leftZ] + 1,
+            [rightZ]: prevCountValue[rightZ] + 1,
+            [leftX]: prevCountValue[leftX] + 1,
+            [rightX]: prevCountValue[rightX] + 1,
+            [bottom]: prevCountValue[bottom] + 1,
+            [top]: prevCountValue[top] + 1,
+          });
+        }
+      }
     }
 
-    return facesToRender;
+    return { facesToRender, typeRenderCount };
   }
 }

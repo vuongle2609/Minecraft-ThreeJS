@@ -17,6 +17,7 @@ import Cloud from "./cloud";
 import InventoryManager from "./inventoryManager";
 import Light from "./light";
 import { RenderPage } from "./renderPage";
+import { BLOCK_WIDTH } from "@/constants";
 
 export default class GameScene extends RenderPage {
   id: string;
@@ -170,11 +171,9 @@ export default class GameScene extends RenderPage {
   }
 
   renderCoordinate() {
-    // const { x, y, z } =
-    //   this.player?.player.position.clone().multiplyScalar(1 / BLOCK_WIDTH) ||
-    //   {};
-
-    const { x, y, z } = this.player?.player.position || {};
+    const { x, y, z } =
+      this.player?.player.position.clone().multiplyScalar(1 / BLOCK_WIDTH) ||
+      {};
 
     if (this.coordinateElement)
       this.coordinateElement.innerHTML = `XYZ: ${x.toFixed(3)} / ${y.toFixed(

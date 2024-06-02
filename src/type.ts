@@ -56,9 +56,5 @@ export interface BlocksIntancedMapping
 export interface BlocksIntancedType
   extends Record<
     BlockTextureType,
-    {
-      mesh: InstancedMesh;
-      count: number;
-      indexCanAllocate: number[];
-    }
+    { prevMatrix: number; mesh: InstancedMesh }
   > {}
