@@ -6,6 +6,7 @@ import BasicCharacterControllerInput from "@/game/action/input";
 import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
 import { BlockKeys } from "@/type";
 import { getChunkCoordinate } from "../helpers/chunkHelpers";
+import { $ } from "@/UI/utils/selector";
 
 export default class Player extends BaseEntity {
   input = new BasicCharacterControllerInput();
@@ -51,14 +52,24 @@ export default class Player extends BaseEntity {
 
     this.handleDetectChunkChange();
 
+    const waterModal = $("#modal_water");
+
     this.worker?.addEventListener("message", (e) => {
       if (e.data.type === "updatePosition") {
-        const { position, onGround, objectBottom } = e.data.data;
+        const { position, onGround, objectBottom, isUnderWater } = e.data.data;
 
         this.prevStepKey = this.currentStepKey;
         this.currentStepKey = objectBottom;
 
         this.onGround = onGround;
+
+        if (isUnderWater && waterModal.classList.contains("hidden")) {
+          waterModal.classList.remove("hidden");
+        }
+
+        if (!isUnderWater && !waterModal.classList.contains("hidden")) {
+          waterModal.classList.add("hidden");
+        }
 
         this.player.position.set(position[0], position[1], position[2]);
 

@@ -14,16 +14,15 @@ import {
   nameChunkFromCoordinate,
   nameFromCoordinate,
 } from "@/game/helpers/nameFromCoordinate";
-import Physics from "./physics";
-import { FlatWorld } from "../terrant/flatWorldGeneration";
-import { DefaultWorld } from "../terrant/worldGeneration";
-import { getChunkCoordinate } from "../helpers/chunkHelpers";
 import {
   getBoundingBoxBlock,
   getBoundingBoxPlayer,
   isBoundingBoxCollide,
 } from "../helpers/bounding";
-import Control from "./control";
+import { getChunkCoordinate } from "../helpers/chunkHelpers";
+import { FlatWorld } from "../terrant/flatWorldGeneration";
+import { DefaultWorld } from "../terrant/worldGeneration";
+import Physics from "./physics";
 
 class PhysicsWorker {
   worldGen: FlatWorld | DefaultWorld;
@@ -44,7 +43,6 @@ class PhysicsWorker {
   shouldUp = true;
 
   physicsEngine = new Physics(this.blocksMapping);
-  control = new Control();
 
   constructor() {}
 
@@ -88,7 +86,7 @@ class PhysicsWorker {
 
     if (!keys.space && this.onWater) {
       this.shouldUp = true;
-      this.vy = -2;
+      this.vy = -8;
     }
 
     if (!this.onWater && this.belowIsWater && keys.space && this.shouldUp) {
@@ -110,11 +108,11 @@ class PhysicsWorker {
     }
 
     if (keys.space && (this.underWater || this.onWater) && this.shouldUp) {
-      this.vy = 6;
+      this.vy = 8;
     }
 
     if (!this.onWater && this.belowIsWater && keys.space && !this.shouldUp) {
-      this.vy = -2;
+      this.vy = -3;
     }
 
     const forwardVector = new Vector3(
@@ -192,6 +190,7 @@ class PhysicsWorker {
         position: [this.playerPos.x, this.playerPos.y, this.playerPos.z],
         onGround: this.onGround,
         objectBottom,
+        isUnderWater,
       },
     });
   }
@@ -226,8 +225,10 @@ class PhysicsWorker {
       position[1],
       position[2]
     );
+
     const playerPos = this.playerPos.clone();
     playerPos.y -= CHARACTER_LENGTH / 2;
+
     const playerBoundingBox = getBoundingBoxPlayer(
       playerPos.x,
       playerPos.y,
