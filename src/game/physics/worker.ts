@@ -1,6 +1,6 @@
 import { Vector3 } from "three";
 
-import { BlockKeys, BlocksMappingType } from "@/type";
+import { BlockKeys, BlocksMappingType, PlayerInput } from "@/type";
 
 import { CHUNK_SIZE, FLAT_WORLD_TYPE, TIME_TO_INTERACT } from "@/constants";
 import {
@@ -14,15 +14,15 @@ import {
   nameChunkFromCoordinate,
   nameFromCoordinate,
 } from "@/game/helpers/nameFromCoordinate";
-import Physics from "./physics";
-import { FlatWorld } from "../terrant/flatWorldGeneration";
-import { DefaultWorld } from "../terrant/worldGeneration";
-import { getChunkCoordinate } from "../helpers/chunkHelpers";
 import {
   getBoundingBoxBlock,
   getBoundingBoxPlayer,
   isBoundingBoxCollide,
 } from "../helpers/bounding";
+import { getChunkCoordinate } from "../helpers/chunkHelpers";
+import { FlatWorld } from "../terrant/flatWorldGeneration";
+import { DefaultWorld } from "../terrant/worldGeneration";
+import Physics from "./physics";
 
 class PhysicsWorker {
   worldGen: FlatWorld | DefaultWorld;
@@ -36,35 +36,90 @@ class PhysicsWorker {
   originalVy = -40;
   vy = this.originalVy;
   onGround = true;
+  underWater = false;
+  onWater = false;
+  belowIsWater = false;
+
+  shouldUp = true;
 
   physicsEngine = new Physics(this.blocksMapping);
 
   constructor() {}
 
   calculateMovement({
-    directionVectorArr,
     forwardVectorArr,
-    position,
     delta,
+    keys,
   }: {
     forwardVectorArr: number[];
-    directionVectorArr: number[];
-    position: number[];
     delta: number;
+    keys: PlayerInput;
   }) {
+    const directionVector = new Vector3();
+
+    if (keys.left) {
+      directionVector.x += 1;
+    }
+
+    if (keys.right) {
+      directionVector.x -= 1;
+    }
+
+    if (keys.forward) {
+      directionVector.z += 1;
+    }
+
+    if (keys.backward) {
+      directionVector.z -= 1;
+    }
+
+    if (
+      keys.space &&
+      this.onGround &&
+      !this.underWater &&
+      !this.onWater &&
+      !this.belowIsWater
+    ) {
+      this.vy = JUMP_FORCE;
+      this.onGround = false;
+    }
+
+    if (!keys.space && this.onWater) {
+      this.shouldUp = true;
+      this.vy = -8;
+    }
+
+    if (!this.onWater && this.belowIsWater && keys.space && this.shouldUp) {
+      this.shouldUp = false;
+    }
+
+    if (
+      !this.underWater &&
+      this.onWater &&
+      !this.belowIsWater &&
+      keys.space &&
+      !this.shouldUp
+    ) {
+      this.shouldUp = true;
+    }
+
+    if (this.underWater && keys.space && !this.shouldUp) {
+      this.shouldUp = true;
+    }
+
+    if (keys.space && (this.underWater || this.onWater) && this.shouldUp) {
+      this.vy = 8;
+    }
+
+    if (!this.onWater && this.belowIsWater && keys.space && !this.shouldUp) {
+      this.vy = -3;
+    }
+
     const forwardVector = new Vector3(
       forwardVectorArr[0],
       forwardVectorArr[1],
       forwardVectorArr[2]
     );
-
-    const directionVector = new Vector3(
-      directionVectorArr[0],
-      directionVectorArr[1],
-      directionVectorArr[2]
-    );
-
-    const playerPosition = new Vector3(position[0], position[1], position[2]);
 
     forwardVector.y = 0;
     forwardVector.normalize();
@@ -92,21 +147,26 @@ class PhysicsWorker {
       objectTop,
       isOnWater,
       isUnderWater,
+      belowIsWater,
     } = this.physicsEngine.calculateCorrectMovement(
       new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z),
-      playerPosition
+      this.playerPos
     );
+
+    this.onWater = isOnWater;
+    this.underWater = isUnderWater;
+    this.belowIsWater = belowIsWater;
 
     if (isOnWater) {
       correctMovement.multiplyScalar(1 / 2);
     }
 
-    if (!objectBottom && this.onGround) {
+    if (!objectBottom && this.onGround && !this.onWater && !this.underWater) {
       this.vy = -10;
       this.onGround = false;
     }
 
-    if (objectTop) {
+    if (objectTop && !this.onWater && !this.underWater) {
       this.vy = -3;
     }
 
@@ -130,15 +190,9 @@ class PhysicsWorker {
         position: [this.playerPos.x, this.playerPos.y, this.playerPos.z],
         onGround: this.onGround,
         objectBottom,
+        isUnderWater,
       },
     });
-  }
-
-  jumpCharacter() {
-    if (this.onGround) {
-      this.vy = JUMP_FORCE;
-      this.onGround = false;
-    }
   }
 
   initFunc: undefined | Function = () =>
@@ -171,8 +225,10 @@ class PhysicsWorker {
       position[1],
       position[2]
     );
+
     const playerPos = this.playerPos.clone();
     playerPos.y -= CHARACTER_LENGTH / 2;
+
     const playerBoundingBox = getBoundingBoxPlayer(
       playerPos.x,
       playerPos.y,
@@ -275,7 +331,6 @@ class PhysicsWorker {
   eventMapping: Record<string, Function> = {
     addBlock: this.addBlock.bind(this),
     removeBlock: this.removeBlock.bind(this),
-    jumpCharacter: this.jumpCharacter.bind(this),
     init: this.init.bind(this),
     addBlocks: this.addBlocks.bind(this),
     requestPlaceBlock: this.requestPlaceBlock.bind(this),

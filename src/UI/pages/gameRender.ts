@@ -25,7 +25,7 @@ export default class GameRender extends RenderPage {
         <span>Building terrain</span>
       </div>
 
-      <div id="modal_focus" class="fixed top-0 bottom-0 left-0 right-0 items-center justify-center bg-gray-900/70 flex flex-col z-20">
+      <div id="modal_focus" class="fixed top-0 bottom-0 left-0 right-0 items-center justify-center bg-gray-900/70 flex flex-col z-30">
         <div class="flex flex-col w-full h-full items-center justify-center px-[200px] gap-4">
           <h2 class="text-white text-lg">Game Menu</h2>
 
@@ -43,7 +43,7 @@ export default class GameRender extends RenderPage {
         </div>
       </div>
 
-      <div id="modal_game" class="fixed top-0 bottom-0 left-0 right-0 items-center justify-center z-10">
+      <div id="modal_game" class="fixed top-0 bottom-0 left-0 right-0 items-center justify-center z-20">
         <div class="text-white font-medium fixed top-2 left-2">
           <span id="coordinate"></span>
           <br/>
@@ -63,6 +63,9 @@ export default class GameRender extends RenderPage {
           <div class="shadow-inset flex" id="inventory_container">
           </div>
         </div>
+      </div>
+
+      <div id="modal_water" class="fixed top-0 bottom-0 left-0 right-0 bg-blue-900/70 z-10 hidden">
       </div>
 
       <canvas

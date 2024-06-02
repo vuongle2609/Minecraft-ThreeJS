@@ -21,12 +21,6 @@ import { BLOCK_WIDTH } from "@/constants";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
-import {
-  getBoundingBoxBlock,
-  getBoundingBoxPlayer,
-  isBoundingBoxCollide,
-} from "../helpers/bounding";
-import { CHARACTER_LENGTH } from "@/constants/player";
 
 const { leftX, leftZ, bottom, rightX, rightZ, top } = Face;
 
