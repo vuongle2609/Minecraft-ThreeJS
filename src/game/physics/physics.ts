@@ -122,13 +122,22 @@ export default class Physics {
 
   checkWaterInteract(playerPos: Vector3) {
     playerPos.y -= CHARACTER_LENGTH / 2;
+    const playerPos2 = playerPos.clone();
+    playerPos2.y += 1;
 
     const roundedCurrentPos = this.getRoundedCoordirnate(playerPos);
+    const roundedCurrentPos2 = this.getRoundedCoordirnate(playerPos2);
 
     const blockBelowPos = [
       roundedCurrentPos[0],
       roundedCurrentPos[1],
       roundedCurrentPos[2],
+    ];
+
+    const blockBelowFootPos = [
+      roundedCurrentPos2[0],
+      roundedCurrentPos2[1] - BLOCK_WIDTH,
+      roundedCurrentPos2[2],
     ];
 
     const blockUpPos = [
@@ -141,6 +150,14 @@ export default class Physics {
       nameFromCoordinate(blockBelowPos[0], blockBelowPos[1], blockBelowPos[2])
     );
 
+    const blockBellowFoot = this.blocksMapping.get(
+      nameFromCoordinate(
+        blockBelowFootPos[0],
+        blockBelowFootPos[1],
+        blockBelowFootPos[2]
+      )
+    );
+
     const blockUp = this.blocksMapping.get(
       nameFromCoordinate(blockUpPos[0], blockUpPos[1], blockUpPos[2])
     );
@@ -150,9 +167,12 @@ export default class Physics {
 
     const isOnWater = blockBellow === BlockKeys.water;
 
+    const belowIsWater = blockBellowFoot === BlockKeys.water;
+
     return {
       isUnderWater,
       isOnWater,
+      belowIsWater,
     };
   }
 
@@ -192,7 +212,7 @@ export default class Physics {
         ? 0
         : vectorMove.z;
 
-    const { isUnderWater, isOnWater } = this.checkWaterInteract(
+    const { isUnderWater, isOnWater, belowIsWater } = this.checkWaterInteract(
       playerPosition.clone()
     );
 
@@ -203,6 +223,7 @@ export default class Physics {
       objectTop: collisionFacesY[Face.top] && Number(collisionFacesY[Face.top]),
       isUnderWater,
       isOnWater,
+      belowIsWater,
     };
   }
 }

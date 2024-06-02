@@ -37,6 +37,11 @@ class PhysicsWorker {
   originalVy = -40;
   vy = this.originalVy;
   onGround = true;
+  underWater = false;
+  onWater = false;
+  belowIsWater = false;
+
+  shouldUp = true;
 
   physicsEngine = new Physics(this.blocksMapping);
   control = new Control();
@@ -70,9 +75,46 @@ class PhysicsWorker {
       directionVector.z -= 1;
     }
 
-    if (keys.space && this.onGround) {
+    if (
+      keys.space &&
+      this.onGround &&
+      !this.underWater &&
+      !this.onWater &&
+      !this.belowIsWater
+    ) {
       this.vy = JUMP_FORCE;
       this.onGround = false;
+    }
+
+    if (!keys.space && this.onWater) {
+      this.shouldUp = true;
+      this.vy = -2;
+    }
+
+    if (!this.onWater && this.belowIsWater && keys.space && this.shouldUp) {
+      this.shouldUp = false;
+    }
+
+    if (
+      !this.underWater &&
+      this.onWater &&
+      !this.belowIsWater &&
+      keys.space &&
+      !this.shouldUp
+    ) {
+      this.shouldUp = true;
+    }
+
+    if (this.underWater && keys.space && !this.shouldUp) {
+      this.shouldUp = true;
+    }
+
+    if (keys.space && (this.underWater || this.onWater) && this.shouldUp) {
+      this.vy = 6;
+    }
+
+    if (!this.onWater && this.belowIsWater && keys.space && !this.shouldUp) {
+      this.vy = -2;
     }
 
     const forwardVector = new Vector3(
@@ -107,21 +149,26 @@ class PhysicsWorker {
       objectTop,
       isOnWater,
       isUnderWater,
+      belowIsWater,
     } = this.physicsEngine.calculateCorrectMovement(
       new Vector3(moveVector.x, moveVector.y + this.vy * delta, moveVector.z),
       this.playerPos
     );
 
+    this.onWater = isOnWater;
+    this.underWater = isUnderWater;
+    this.belowIsWater = belowIsWater;
+
     if (isOnWater) {
       correctMovement.multiplyScalar(1 / 2);
     }
 
-    if (!objectBottom && this.onGround) {
+    if (!objectBottom && this.onGround && !this.onWater && !this.underWater) {
       this.vy = -10;
       this.onGround = false;
     }
 
-    if (objectTop) {
+    if (objectTop && !this.onWater && !this.underWater) {
       this.vy = -3;
     }
 
