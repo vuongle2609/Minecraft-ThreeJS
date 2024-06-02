@@ -259,7 +259,7 @@ export default class ChunkManager extends BlockManager {
     this.handleRenderChunkBlocks(chunkName, arrayBlocksData, facesToRender);
   }
 
-  renderChunk = throttle(this.handleRenderChunksInQueue.bind(this), 0);
+  renderChunk = throttle(this.handleRenderChunksInQueue.bind(this), 200);
 
   validateChunk = throttle(this.handleValidateChunkRendered.bind(this), 1000);
 
