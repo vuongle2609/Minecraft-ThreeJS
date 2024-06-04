@@ -195,7 +195,7 @@ class PhysicsWorker {
     });
   }
 
-  initFunc: undefined | Function = () =>
+  initFunc: undefined | Function = () => {
     setTimeout(() => {
       this.eventMapping = {
         ...this.eventMapping,
@@ -207,6 +207,7 @@ class PhysicsWorker {
         data: {},
       });
     }, TIME_TO_INTERACT);
+  };
 
   initPhysics() {
     this.initFunc?.();
@@ -270,9 +271,7 @@ class PhysicsWorker {
       const num = arrayBlocksData[index];
 
       if (tmpPos.length === 3) {
-        const key = nameFromCoordinate(tmpPos[0], tmpPos[1], tmpPos[2]);
-
-        this.blocksMapping.set(key, num);
+        this.addBlock({ position: tmpPos, type: num });
         tmpPos = [];
       } else {
         tmpPos.push(num);
@@ -281,7 +280,7 @@ class PhysicsWorker {
   }
 
   genFirstChunk(initPos: number[]) {
-    const { x, z } = getChunkCoordinate(initPos[0], initPos[1], initPos[2]);
+    const { x, z } = getChunkCoordinate(initPos[0], initPos[2]);
 
     const { blocksInChunk } = this.worldGen.getBlocksInChunk(
       x,
