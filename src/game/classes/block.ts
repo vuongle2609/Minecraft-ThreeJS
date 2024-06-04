@@ -137,6 +137,7 @@ export default class Block extends BaseEntity {
 
     const material =
       texture[this.atttribute.textureMap[face] as keyof typeof texture];
+
     const plane = new Mesh(renderGeometry, material);
 
     const { rotation } = this.calFaceAttr(face);
