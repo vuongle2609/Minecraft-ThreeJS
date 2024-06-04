@@ -80,6 +80,7 @@ export class BaseGeneration {
 
     const facesToRender = new Map();
     const typeRenderCount = new Map();
+    const blockShouldRender: number[] = [];
 
     for (let [key, value] of blocksInChunk) {
       const { position, type } = value;
@@ -113,6 +114,7 @@ export class BaseGeneration {
 
       if (shouldSet) {
         facesToRender.set(key, valueToSet);
+        blockShouldRender.push(...position, type);
 
         const prevCountValue = typeRenderCount.get(type);
 
@@ -138,6 +140,6 @@ export class BaseGeneration {
       }
     }
 
-    return { facesToRender, typeRenderCount };
+    return { facesToRender, typeRenderCount, blockShouldRender };
   }
 }

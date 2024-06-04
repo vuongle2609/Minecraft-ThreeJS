@@ -1,25 +1,30 @@
-import blocks, { renderGeometry } from "@/constants/blocks";
-import { DynamicDrawUsage, InstancedMesh, Object3D } from "three";
-import BaseEntity, { BasePropsType } from "./baseEntity";
-import { BlockKeys, BlocksIntancedMapping, BlocksIntancedType } from "@/type";
 import { BlockFaces, Face } from "@/constants/block";
+import blocks, { renderGeometry } from "@/constants/blocks";
+import { BlockKeys, BlocksIntancedMapping, BlocksIntancedType } from "@/type";
+import { Group, InstancedMesh, Object3D } from "three";
 import { nameFromCoordinate } from "../helpers/nameFromCoordinate";
+import BaseEntity, { BasePropsType } from "./baseEntity";
 
 interface PropsType {
   arrayBlocksData: Int32Array;
   facesToRender: Record<string, Record<Face, boolean>>;
-  typeRenderCount: any;
+  typeRenderCount: Record<BlockKeys, Record<Face, number>>;
+  blocksGroup: Group;
 }
 
 const { leftZ, rightZ, leftX, rightX, top, bottom } = Face;
 
 export default class Chunk extends BaseEntity {
+  blocksGroup: Group;
   dummy = new Object3D();
 
   constructor(props: BasePropsType & PropsType) {
-    const { arrayBlocksData, facesToRender, typeRenderCount } = props;
+    const { arrayBlocksData, facesToRender, typeRenderCount, blocksGroup } =
+      props;
 
     super(props);
+
+    this.blocksGroup = blocksGroup;
 
     this.initialize(arrayBlocksData, facesToRender, typeRenderCount);
   }
@@ -27,16 +32,18 @@ export default class Chunk extends BaseEntity {
   initialize(
     arrayBlocksData: Int32Array,
     facesToRender: Record<string, Record<Face, boolean>>,
-    typeRenderCount: any
+    typeRenderCount: Record<BlockKeys, Record<Face, number>>
   ) {
     const blockInstancedMapping = Object.keys(typeRenderCount).reduce(
-      (prev, typeKey) => {
-        const currBlock = blocks[typeKey as unknown as BlockKeys];
+      (prev, curr) => {
+        const typeKey = curr as unknown as BlockKeys;
+        const currBlock = blocks[typeKey];
         const faces = typeRenderCount[typeKey];
 
         const textureCount = new Map();
 
-        Object.keys(faces).forEach((face) => {
+        Object.keys(faces).forEach((item) => {
+          const face = item as unknown as Face;
           const faceNumber = faces[face];
           const textureType = currBlock.textureMap[Number(face)];
 
@@ -60,7 +67,7 @@ export default class Chunk extends BaseEntity {
               textureCount.get(Number(key))
             );
 
-            this.scene?.add(mesh);
+            this.blocksGroup?.add(mesh);
 
             mesh.instanceMatrix.needsUpdate = true;
             mesh.frustumCulled = false;
@@ -123,8 +130,6 @@ export default class Chunk extends BaseEntity {
         tmpPos.push(num);
       }
     }
-
-    console.log(blockInstancedMapping);
 
     Object.values(blockInstancedMapping).forEach((face) => {
       Object.values(face as BlocksIntancedType).forEach((item) => {

@@ -22,12 +22,12 @@ const getBlocksInChunk = ({
   const world =
     type === FLAT_WORLD_TYPE ? new FlatWorld(seed) : new DefaultWorld(seed);
 
-  const { facesToRender, arrayBlocksData, typeRenderCount } = world.initialize(
-    x,
-    z,
-    chunkBlocksCustom,
-    neighborsChunkData
-  );
+  const {
+    facesToRender,
+    arrayBlocksData,
+    typeRenderCount,
+    arrayBlocksDataRender,
+  } = world.initialize(x, z, chunkBlocksCustom, neighborsChunkData);
   const chunkName = nameChunkFromCoordinate(x, z);
 
   self.postMessage(
@@ -36,10 +36,11 @@ const getBlocksInChunk = ({
       chunkName,
       arrayBlocksData,
       typeRenderCount,
+      arrayBlocksDataRender,
     },
 
     // @ts-ignore
-    [arrayBlocksData.buffer]
+    [arrayBlocksData.buffer, arrayBlocksDataRender.buffer]
   );
 };
 

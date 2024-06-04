@@ -162,8 +162,13 @@ export default class ChunkManager extends BlockManager {
       const currWorker = this.chunkWorkers[index];
 
       currWorker.worker.onmessage = (e) => {
-        const { chunkName, facesToRender, arrayBlocksData, typeRenderCount } =
-          e.data;
+        const {
+          chunkName,
+          facesToRender,
+          arrayBlocksData,
+          typeRenderCount,
+          arrayBlocksDataRender,
+        } = e.data;
 
         currWorker.currentProcessChunk = null;
         currWorker.isBusy = false;
@@ -178,10 +183,10 @@ export default class ChunkManager extends BlockManager {
         }
 
         new Chunk({
-          scene: this.scene,
+          blocksGroup: this.blocksGroup,
           facesToRender,
           typeRenderCount,
-          arrayBlocksData,
+          arrayBlocksData: arrayBlocksDataRender,
         });
 
         this.worker?.postMessage(
@@ -307,7 +312,7 @@ export default class ChunkManager extends BlockManager {
         !isPendingProcess(chunk) &&
         !isPendingRender(chunk)
       ) {
-        this.handleAssignWorkerChunk(chunkName, chunk);
+        // this.handleAssignWorkerChunk(chunkName, chunk);
       }
     });
   }

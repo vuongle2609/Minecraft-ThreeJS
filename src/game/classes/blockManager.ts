@@ -1,8 +1,11 @@
 import {
   BoxGeometry,
   Group,
+  InstancedMesh,
+  Matrix4,
   Mesh,
   MeshStandardMaterial,
+  Object3D,
   Vector2,
   Vector3,
 } from "three";
@@ -45,6 +48,8 @@ export default class BlockManager extends BaseEntity {
   blocksGroup = new Group();
 
   disposeBlockManager: Function;
+
+  dummy = new Object3D();
 
   blockDisplayHover = new Mesh(
     new BoxGeometry(BLOCK_WIDTH + 0.01, BLOCK_WIDTH + 0.01, BLOCK_WIDTH + 0.01),
@@ -129,6 +134,17 @@ export default class BlockManager extends BaseEntity {
     if (!intersectObject) return;
 
     if (intersectObject.distance > 12) return;
+
+    console.log(intersectObject);
+
+    const matrixIntersect = new Matrix4();
+    (intersectObject.object as InstancedMesh).getMatrixAt(
+      intersectObject.instanceId as number,
+      matrixIntersect
+    );
+
+    this.dummy.applyMatrix4(matrixIntersect);
+    console.log(this.dummy.position);
 
     return intersectObject;
   }

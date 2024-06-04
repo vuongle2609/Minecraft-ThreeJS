@@ -279,10 +279,8 @@ export class DefaultWorld extends BaseGeneration {
       new Map()
     );
 
-    const { facesToRender, typeRenderCount } = this.calFaceToRender(
-      blocksInChunk,
-      blocksInChunkNeighbor
-    );
+    const { facesToRender, typeRenderCount, blockShouldRender } =
+      this.calFaceToRender(blocksInChunk, blocksInChunkNeighbor);
 
     const arrayBlocksDataTmp: number[] = [];
 
@@ -291,11 +289,13 @@ export class DefaultWorld extends BaseGeneration {
     }
 
     const arrayBlocksData = Int32Array.from(arrayBlocksDataTmp);
+    const arrayBlocksDataRender = Int32Array.from(blockShouldRender);
 
     return {
       facesToRender: Object.fromEntries(facesToRender),
       typeRenderCount: Object.fromEntries(typeRenderCount),
       arrayBlocksData,
+      arrayBlocksDataRender,
     };
   }
 }
