@@ -58,6 +58,28 @@ export class BaseGeneration {
     return !neighBor;
   }
 
+  getFacesOcclusion(
+    position: number[],
+    blocksInChunk: Map<
+      string,
+      {
+        position: number[];
+        type: BlockKeys;
+      }
+    > = new Map()
+  ) {
+    const valueToSet = {
+      [leftZ]: 0,
+      [rightZ]: 0,
+      [leftX]: 0,
+      [rightX]: 0,
+      [bottom]: 0,
+      [top]: "v1",
+    };
+
+    return valueToSet;
+  }
+
   calFaceToRender(
     blocksInChunk: Map<
       string,
@@ -79,6 +101,7 @@ export class BaseGeneration {
     Object.keys(blocksInChunk);
 
     const facesToRender = new Map();
+    const blockOcclusion = new Map();
 
     for (let [key, value] of blocksInChunk) {
       const { position, type } = value;
@@ -110,9 +133,16 @@ export class BaseGeneration {
 
       const shouldSet = Object.values(valueToSet).filter(Boolean).length;
 
-      if (shouldSet) facesToRender.set(key, valueToSet);
+      if (shouldSet) {
+        facesToRender.set(key, valueToSet);
+
+        blockOcclusion.set(
+          key,
+          this.getFacesOcclusion(position, blockExisting)
+        );
+      }
     }
 
-    return facesToRender;
+    return { facesToRender, blockOcclusion };
   }
 }

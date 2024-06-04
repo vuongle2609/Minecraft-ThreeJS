@@ -98,7 +98,7 @@ export class FlatWorld extends BaseGeneration {
       new Map()
     );
 
-    const facesToRender = this.calFaceToRender(
+    const { facesToRender, blockOcclusion } = this.calFaceToRender(
       blocksInChunk,
       blocksInChunkNeighbor
     );
@@ -114,6 +114,7 @@ export class FlatWorld extends BaseGeneration {
     return {
       facesToRender: Object.fromEntries(facesToRender),
       arrayBlocksData,
+      blockOcclusion: Object.fromEntries(blockOcclusion),
     };
   }
 }
