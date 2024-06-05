@@ -29,18 +29,18 @@ export enum BlockTextureType {
 }
 
 export enum FaceAoType {
-  e1,
-  e2,
-  e3,
-  e4,
-  f1,
-  f2,
-  f3,
-  f4,
-  v1,
-  v2,
-  v3,
-  v4,
+  e1 = 1,
+  e2 = 2,
+  e3 = 3,
+  e4 = 4,
+  f1 = 5,
+  f2 = 6,
+  f3 = 7,
+  f4 = 8,
+  v1 = 9,
+  v2 = 10,
+  v3 = 11,
+  v4 = 12,
 }
 
 export interface PlayerInput {

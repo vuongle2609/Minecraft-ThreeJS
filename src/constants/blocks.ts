@@ -89,19 +89,19 @@ const occlusionTextures = {
   },
   [FaceAoType.f1]: {
     texture: textureLoader.load(f),
-    aoMapIntensity: 0.24,
+    aoMapIntensity: 0.18,
   },
   [FaceAoType.f2]: {
     texture: textureLoader.load(f),
-    aoMapIntensity: 0.36,
+    aoMapIntensity: 0.22,
   },
   [FaceAoType.f3]: {
     texture: textureLoader.load(f),
-    aoMapIntensity: 0.48,
+    aoMapIntensity: 0.26,
   },
   [FaceAoType.f4]: {
     texture: textureLoader.load(f),
-    aoMapIntensity: 0.6,
+    aoMapIntensity: 0.30
   },
   [FaceAoType.v1]: {
     texture: textureLoader.load(v1),
