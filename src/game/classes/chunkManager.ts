@@ -4,7 +4,7 @@ import {
   nameChunkFromCoordinate,
   nameFromCoordinate,
 } from "@/game/helpers/nameFromCoordinate";
-import { BlockKeys } from "@/type";
+import { BlockKeys, FaceAoType } from "@/type";
 
 import { throttle } from "@/UI/utils/throttle";
 import { calNeighborsOffset } from "../helpers/calNeighborsOffset";
@@ -32,6 +32,7 @@ type ChunkWorkerDataType = {
   chunkName: string;
   arrayBlocksData: Int32Array;
   facesToRender: Record<string, Record<Face, boolean>>;
+  blockOcclusion: Record<string, Record<Face, null | FaceAoType>>;
 };
 
 export default class ChunkManager extends BlockManager {
@@ -161,7 +162,8 @@ export default class ChunkManager extends BlockManager {
       const currWorker = this.chunkWorkers[index];
 
       currWorker.worker.onmessage = (e) => {
-        const { chunkName, facesToRender, arrayBlocksData } = e.data;
+        const { chunkName, facesToRender, arrayBlocksData, blockOcclusion } =
+          e.data;
 
         currWorker.currentProcessChunk = null;
         currWorker.isBusy = false;
@@ -172,6 +174,7 @@ export default class ChunkManager extends BlockManager {
             chunkName,
             arrayBlocksData: Array.from(arrayBlocksData) as any,
             facesToRender,
+            blockOcclusion,
           });
         }
 
@@ -252,11 +255,16 @@ export default class ChunkManager extends BlockManager {
 
     if (!data) return;
 
-    const { chunkName, arrayBlocksData, facesToRender } = data;
+    const { chunkName, arrayBlocksData, facesToRender, blockOcclusion } = data;
 
     if (!this.chunksActive.includes(chunkName)) return;
 
-    this.handleRenderChunkBlocks(chunkName, arrayBlocksData, facesToRender);
+    this.handleRenderChunkBlocks(
+      chunkName,
+      arrayBlocksData,
+      facesToRender,
+      blockOcclusion
+    );
   }
 
   renderChunk = throttle(this.handleRenderChunksInQueue.bind(this), 0);
@@ -307,7 +315,8 @@ export default class ChunkManager extends BlockManager {
   handleRenderChunkBlocks(
     chunkName: string,
     arrayBlocksData: Int32Array,
-    facesToRender: Record<string, Record<Face, boolean>>
+    facesToRender: Record<string, Record<Face, boolean>>,
+    blockOcclusion: Record<string, Record<Face, null | FaceAoType>>
   ) {
     const blocksInChunk: string[] = [];
 
@@ -324,6 +333,7 @@ export default class ChunkManager extends BlockManager {
           z: tmpPos[2],
           type: num,
           facesToRender: facesToRender[key] || null,
+          blockOcclusion: blockOcclusion[key] || null,
         });
         blocksInChunk.push(key);
 

@@ -1,4 +1,4 @@
-import { InstancedMesh } from "three";
+import { InstancedMesh, MeshLambertMaterial } from "three";
 
 export enum BlockKeys {
   grass = 1,
@@ -27,6 +27,22 @@ export enum BlockTextureType {
   front,
   back,
 }
+
+export enum FaceAoType {
+  e1 = 1,
+  e2 = 2,
+  e3 = 3,
+  e4 = 4,
+  f1 = 5,
+  f2 = 6,
+  f3 = 7,
+  f4 = 8,
+  v1 = 9,
+  v2 = 10,
+  v3 = 11,
+  v4 = 12,
+}
+
 export interface PlayerInput {
   forward: boolean;
   backward: boolean;
@@ -62,3 +78,22 @@ export interface BlocksIntancedType
       indexCanAllocate: number[];
     }
   > {}
+
+export type BlocksType = Record<
+  BlockKeys,
+  {
+    name: string;
+    renderInInventory: boolean;
+    icon: string;
+    step: HTMLAudioElement;
+    place: HTMLAudioElement;
+    break: HTMLAudioElement;
+    volume: 0.1;
+    texture: Record<BlockTextureType, MeshLambertMaterial>;
+    textureMap: BlockTextureType[];
+    textureFaceAo: Record<
+      BlockTextureType,
+      Record<FaceAoType | "base", MeshLambertMaterial>
+    >;
+  }
+>;

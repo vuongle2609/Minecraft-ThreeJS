@@ -9,7 +9,7 @@ export default class Light extends BaseEntity {
   }
 
   initial() {
-    const ambientLight = new AmbientLight(0xffffff, 0.9);
+    const ambientLight = new AmbientLight(0xffffff, 0.7);
 
     this.scene?.add(ambientLight);
   }
