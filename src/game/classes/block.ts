@@ -4,8 +4,10 @@ import { BLOCK_WIDTH } from "@/constants";
 import { BlockFaces, Face } from "@/constants/block";
 import blocks, { BlockAttributeType, renderGeometry } from "@/constants/blocks";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
-import { BlockKeys } from "@/type";
+import { BlockKeys, FaceAoType } from "@/type";
 import BaseEntity, { BasePropsType } from "./baseEntity";
+import { getFacesOcclusion } from "../helpers/calculateAO";
+import { calNeighborsOffset } from "../helpers/calNeighborsOffset";
 
 interface PropsType {
   position: Vector3;
@@ -14,6 +16,7 @@ interface PropsType {
   blocksMapping: Map<string, Block>;
   facesToRender?: Record<Face, boolean> | null;
   isPlace?: boolean;
+  blockOcclusion?: Record<Face, null | FaceAoType> | null;
 }
 
 const { leftZ, rightZ, leftX, rightX, top, bottom } = Face;
@@ -33,6 +36,14 @@ export default class Block extends BaseEntity {
   blocksMapping: Map<string, Block>;
   blocksGroup: Group;
   isPlace: boolean;
+  blockOcclusion: Record<Face, null | FaceAoType> = {
+    [leftZ]: null,
+    [rightZ]: null,
+    [leftX]: null,
+    [rightX]: null,
+    [bottom]: null,
+    [top]: null,
+  };
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
@@ -44,6 +55,7 @@ export default class Block extends BaseEntity {
       blocksGroup,
       facesToRender,
       isPlace,
+      blockOcclusion,
     } = props!;
 
     this.blocksGroup = blocksGroup;
@@ -52,13 +64,14 @@ export default class Block extends BaseEntity {
     this.atttribute = blocks[type];
     this.blocksMapping = blocksMapping;
     this.isPlace = !!isPlace;
+    if (blockOcclusion) this.blockOcclusion = blockOcclusion;
 
     if (facesToRender === null) return;
 
     facesToRender ? this.renderWithKnownFace(facesToRender) : this.render();
   }
 
-  renderWithKnownFace(facesToRender: Record<Face, boolean>) {
+  renderWithKnownFace(facesToRender: Record<Face, boolean | any>) {
     if (facesToRender[leftZ]) this.addFace(leftZ);
     if (facesToRender[rightZ]) this.addFace(rightZ);
     if (facesToRender[leftX]) this.addFace(leftX);
@@ -67,9 +80,47 @@ export default class Block extends BaseEntity {
     if (facesToRender[bottom]) this.addFace(bottom);
   }
 
+  calculateAO() {
+    const { x, y, z } = this.position;
+
+    this.blockOcclusion = getFacesOcclusion([x, y, z], this.blocksMapping);
+  }
+
+  calculateAONeighbors() {
+    const offSets = calNeighborsOffset(1, BLOCK_WIDTH);
+    for (let hs = 1; hs > -6; hs--) {
+      offSets.forEach(({ x, z }) => {
+        if (x === 0 && z === 0 && hs === 0) return;
+
+        const blockCoor = [
+          this.position.x + x,
+          this.position.y + hs * BLOCK_WIDTH,
+          this.position.z + z,
+        ];
+
+        const block = this.blocksMapping.get(
+          nameFromCoordinate(blockCoor[0], blockCoor[1], blockCoor[2])
+        );
+
+        block?.calculateAO();
+        block?.rerenderAO();
+      });
+    }
+  }
+
+  rerenderAO() {
+    Object.values(this.blockFaces).forEach((item) => {
+      if (item) {
+        this.blocksGroup?.remove(item);
+        item.geometry.dispose();
+      }
+    });
+
+    this.renderWithKnownFace(this.blockFaces);
+  }
+
   render() {
-    // should handle at top level, maybe dont need?
-    // if (position.x % 2 || position.y % 2 || position.z % 2) return;
+    this.calculateAO();
 
     const { x, y, z } = this.position;
 
@@ -133,10 +184,15 @@ export default class Block extends BaseEntity {
   }
 
   addFace(face: keyof BlockFaces) {
-    const texture = this.atttribute.texture;
+    const faceAoKey = this.blockOcclusion[face] || "base";
+
+    const textureAo = this.atttribute.textureFaceAo;
 
     const material =
-      texture[this.atttribute.textureMap[face] as keyof typeof texture];
+      textureAo[this.atttribute.textureMap[face] as keyof typeof textureAo][
+        faceAoKey
+      ];
+
     const plane = new Mesh(renderGeometry, material);
 
     const { rotation } = this.calFaceAttr(face);
@@ -221,5 +277,6 @@ export default class Block extends BaseEntity {
     bottomBlock?.addFace(top);
 
     this.blocksMapping.delete(nameFromCoordinate(x, y, z));
+    this.calculateAONeighbors();
   }
 }

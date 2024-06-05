@@ -1,11 +1,22 @@
 import {
   BufferAttribute,
   BufferGeometry,
+  DoubleSide,
   MeshLambertMaterial,
   NearestFilter,
   TextureLoader,
 } from "three";
 
+// occlusion
+import e1 from "@/assets/ao/e1.png";
+import e2 from "@/assets/ao/e2.png";
+import e3 from "@/assets/ao/e3.png";
+import e4 from "@/assets/ao/e4.png";
+import f from "@/assets/ao/f.png";
+import v1 from "@/assets/ao/v1.png";
+import v2 from "@/assets/ao/v2.png";
+import v3 from "@/assets/ao/v3.png";
+import v4 from "@/assets/ao/v4.png";
 // textures image
 import bedrock from "@/assets/block/bedrock.png";
 import cobblestoneSide from "@/assets/block/cobblestone.png";
@@ -54,10 +65,61 @@ import placeWood from "@/assets/sound/place/wood.mp3";
 // soundStep
 import stepGrass from "@/assets/sound/step/grass3.ogg";
 import stepStone from "@/assets/sound/step/stone3.ogg";
-import { BlockKeys, BlockTextureType } from "@/type";
+import { BlockKeys, BlocksType, BlockTextureType, FaceAoType } from "@/type";
 
 // texture load
 const textureLoader = new TextureLoader();
+
+const occlusionTextures = {
+  [FaceAoType.e1]: {
+    texture: textureLoader.load(e1),
+    aoMapIntensity: 0.24,
+  },
+  [FaceAoType.e2]: {
+    texture: textureLoader.load(e2),
+    aoMapIntensity: 0.24,
+  },
+  [FaceAoType.e3]: {
+    texture: textureLoader.load(e3),
+    aoMapIntensity: 0.24,
+  },
+  [FaceAoType.e4]: {
+    texture: textureLoader.load(e4),
+    aoMapIntensity: 0.24,
+  },
+  [FaceAoType.f1]: {
+    texture: textureLoader.load(f),
+    aoMapIntensity: 0.18,
+  },
+  [FaceAoType.f2]: {
+    texture: textureLoader.load(f),
+    aoMapIntensity: 0.22,
+  },
+  [FaceAoType.f3]: {
+    texture: textureLoader.load(f),
+    aoMapIntensity: 0.26,
+  },
+  [FaceAoType.f4]: {
+    texture: textureLoader.load(f),
+    aoMapIntensity: 0.30
+  },
+  [FaceAoType.v1]: {
+    texture: textureLoader.load(v1),
+    aoMapIntensity: 0.24,
+  },
+  [FaceAoType.v2]: {
+    texture: textureLoader.load(v2),
+    aoMapIntensity: 0.24,
+  },
+  [FaceAoType.v3]: {
+    texture: textureLoader.load(v3),
+    aoMapIntensity: 0.24,
+  },
+  [FaceAoType.v4]: {
+    texture: textureLoader.load(v4),
+    aoMapIntensity: 0.24,
+  },
+};
 
 const textures = {
   grassTopTexture: textureLoader.load(grassTop),
@@ -90,7 +152,7 @@ Object.values(textures).forEach((item) => {
 const worldMaterial = MeshLambertMaterial;
 
 // back front side sideleft top bottom
-const blocks = {
+const blocksTmp = {
   [BlockKeys.grass]: {
     name: "Grass",
     renderInInventory: true,
@@ -427,7 +489,8 @@ const blocks = {
       [BlockTextureType.side]: new worldMaterial({
         map: textures.waterTexture,
         transparent: true,
-        opacity: 0.7,
+        opacity: 0.9,
+        // side: DoubleSide,
       }),
     },
     textureMap: [
@@ -462,6 +525,42 @@ const blocks = {
     ],
   },
 };
+
+const blocks = Object.keys(blocksTmp).reduce((prev, key) => {
+  const currentBlock = blocksTmp[key as unknown as BlockKeys];
+
+  const textureFaceAo = Object.keys(currentBlock.texture).reduce(
+    (prev, textureType) => {
+      //@ts-ignore
+      const currTexture = currentBlock.texture[textureType as BlockTextureType];
+
+      const textureOcclusion: Record<string, MeshLambertMaterial> = {
+        base: currTexture,
+      };
+
+      Object.keys(occlusionTextures).forEach((key) => {
+        const currTextureAo = occlusionTextures[key as unknown as FaceAoType];
+
+        const textureClone = currTexture.clone();
+        textureClone.aoMap = currTextureAo.texture;
+        textureClone.aoMapIntensity = currTextureAo.aoMapIntensity;
+
+        textureOcclusion[key] = textureClone;
+      });
+
+      return { ...prev, [textureType]: textureOcclusion };
+    },
+    {}
+  );
+
+  return {
+    ...prev,
+    [key]: {
+      ...currentBlock,
+      textureFaceAo,
+    },
+  };
+}, {}) as BlocksType;
 
 export type BlockAttributeType = (typeof blocks)[BlockKeys];
 

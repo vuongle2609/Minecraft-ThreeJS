@@ -3,6 +3,7 @@ import { Face } from "@/constants/block";
 import { getNeighborsSeparate } from "@/game/helpers/blocksHelpers";
 import { detailFromName } from "@/game/helpers/detailFromName";
 import { BlockKeys } from "@/type";
+import { getFacesOcclusion } from "../helpers/calculateAO";
 
 const { leftZ, rightZ, leftX, rightX, bottom, top } = Face;
 
@@ -79,6 +80,7 @@ export class BaseGeneration {
     Object.keys(blocksInChunk);
 
     const facesToRender = new Map();
+    const blockOcclusion = new Map();
 
     for (let [key, value] of blocksInChunk) {
       const { position, type } = value;
@@ -104,15 +106,19 @@ export class BaseGeneration {
         [rightZ]: this.shouldRenderFace(faceHasNeighbor?.[rightZ], type),
         [leftX]: this.shouldRenderFace(faceHasNeighbor?.[leftX], type),
         [rightX]: this.shouldRenderFace(faceHasNeighbor?.[rightX], type),
-        [bottom]: this.lowestY === y ? false : !faceHasNeighbor?.[bottom],
+        [bottom]: this.shouldRenderFace(faceHasNeighbor?.[bottom], type),
         [top]: this.shouldRenderFace(faceHasNeighbor?.[top], type),
       };
 
       const shouldSet = Object.values(valueToSet).filter(Boolean).length;
 
-      if (shouldSet) facesToRender.set(key, valueToSet);
+      if (shouldSet) {
+        facesToRender.set(key, valueToSet);
+
+        blockOcclusion.set(key, getFacesOcclusion(position, blockExisting));
+      }
     }
 
-    return facesToRender;
+    return { facesToRender, blockOcclusion };
   }
 }

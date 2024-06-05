@@ -6,6 +6,7 @@ import BasicCharacterControllerInput from "@/game/action/input";
 import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
 import { BlockKeys } from "@/type";
 import { getChunkCoordinate } from "../helpers/chunkHelpers";
+import { $ } from "@/UI/utils/selector";
 
 export default class Player extends BaseEntity {
   input = new BasicCharacterControllerInput();
@@ -51,14 +52,24 @@ export default class Player extends BaseEntity {
 
     this.handleDetectChunkChange();
 
+    const waterModal = $("#modal_water");
+
     this.worker?.addEventListener("message", (e) => {
       if (e.data.type === "updatePosition") {
-        const { position, onGround, objectBottom } = e.data.data;
+        const { position, onGround, objectBottom, isUnderWater } = e.data.data;
 
         this.prevStepKey = this.currentStepKey;
         this.currentStepKey = objectBottom;
 
         this.onGround = onGround;
+
+        if (isUnderWater && waterModal.classList.contains("hidden")) {
+          waterModal.classList.remove("hidden");
+        }
+
+        if (!isUnderWater && !waterModal.classList.contains("hidden")) {
+          waterModal.classList.add("hidden");
+        }
 
         this.player.position.set(position[0], position[1], position[2]);
 
@@ -94,32 +105,20 @@ export default class Player extends BaseEntity {
 
     const { keys } = this.input;
 
-    const directionVector = new Vector3();
-
     if (keys.left) {
       this.isWalk = true;
-      directionVector.x += 1;
     }
 
     if (keys.right) {
       this.isWalk = true;
-      directionVector.x -= 1;
     }
 
     if (keys.forward) {
       this.isWalk = true;
-      directionVector.z += 1;
     }
 
     if (keys.backward) {
       this.isWalk = true;
-      directionVector.z -= 1;
-    }
-
-    if (keys.space) {
-      this.worker?.postMessage({
-        type: "jumpCharacter",
-      });
     }
 
     const forwardVector = new Vector3();
@@ -129,18 +128,9 @@ export default class Player extends BaseEntity {
     this.worker?.postMessage({
       type: "calculateMovement",
       data: {
-        directionVectorArr: [
-          directionVector.x,
-          directionVector.y,
-          directionVector.z,
-        ],
         forwardVectorArr: [forwardVector.x, forwardVector.y, forwardVector.z],
-        position: [
-          this.player.position.x,
-          this.player.position.y,
-          this.player.position.z,
-        ],
         delta,
+        keys,
       },
     });
   }

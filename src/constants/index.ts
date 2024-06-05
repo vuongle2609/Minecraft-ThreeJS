@@ -18,7 +18,7 @@ export const DEFAULT_CHUNK_VIEW = 1;
 // when change world data in localstorage must be clear due to different chunksize store data
 export const CHUNK_SIZE = 16;
 
-export const TIME_TO_INTERACT = 300;
+export const TIME_TO_INTERACT = 800;
 
 export const NORMAL_WORLD_HEIGHT = 10;
 export const FLAT_WORLD_HEIGHT = 3;

@@ -15,18 +15,12 @@ import {
   nameChunkFromCoordinate,
   nameFromCoordinate,
 } from "@/game/helpers/nameFromCoordinate";
-import { BlockKeys } from "@/type";
+import { BlockKeys, FaceAoType } from "@/type";
 
 import { BLOCK_WIDTH } from "@/constants";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 import Block from "./block";
 import InventoryManager from "./inventoryManager";
-import {
-  getBoundingBoxBlock,
-  getBoundingBoxPlayer,
-  isBoundingBoxCollide,
-} from "../helpers/bounding";
-import { CHARACTER_LENGTH } from "@/constants/player";
 
 const { leftX, leftZ, bottom, rightX, rightZ, top } = Face;
 
@@ -95,12 +89,16 @@ export default class BlockManager extends BaseEntity {
     z,
     type,
     facesToRender,
+    blockOcclusion,
+    isPlace,
   }: {
     x: number;
     y: number;
     z: number;
     type: BlockKeys | 0;
     facesToRender?: Record<Face, boolean> | null;
+    blockOcclusion?: Record<Face, null | FaceAoType> | null;
+    isPlace?: boolean;
   }) {
     // if block marked as destroyed then return
     if (type == 0) {
@@ -115,9 +113,11 @@ export default class BlockManager extends BaseEntity {
       blocksMapping: this.blocksMapping,
       facesToRender,
       blocksGroup: this.blocksGroup,
+      blockOcclusion,
     });
 
     this.blocksMapping.set(nameFromCoordinate(x, y, z), block);
+    if (isPlace) block.calculateAONeighbors();
   }
 
   getIntersectObject() {
@@ -231,6 +231,7 @@ export default class BlockManager extends BaseEntity {
       y,
       z,
       type: placeType,
+      isPlace: true,
     });
 
     const chunk = getChunkCoordinate(x, z);

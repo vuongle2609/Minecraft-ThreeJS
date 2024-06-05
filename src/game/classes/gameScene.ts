@@ -17,6 +17,7 @@ import Cloud from "./cloud";
 import InventoryManager from "./inventoryManager";
 import Light from "./light";
 import { RenderPage } from "./renderPage";
+import { BLOCK_WIDTH } from "@/constants";
 
 export default class GameScene extends RenderPage {
   id: string;
@@ -99,7 +100,7 @@ export default class GameScene extends RenderPage {
     document.body.appendChild(this.element);
 
     this.scene.background = new Color("#6EB1FF");
-    this.scene.fog = new FogExp2(0xcccccc, 0.008);
+    this.scene.fog = new FogExp2(0xcccccc, 0.007);
 
     if (this.worldStorage.rotation)
       this.camera.rotation.fromArray(this.worldStorage.rotation as any);
@@ -170,11 +171,9 @@ export default class GameScene extends RenderPage {
   }
 
   renderCoordinate() {
-    // const { x, y, z } =
-    //   this.player?.player.position.clone().multiplyScalar(1 / BLOCK_WIDTH) ||
-    //   {};
-
-    const { x, y, z } = this.player?.player.position || {};
+    const { x, y, z } =
+      this.player?.player.position.clone().multiplyScalar(1 / BLOCK_WIDTH) ||
+      {};
 
     if (this.coordinateElement)
       this.coordinateElement.innerHTML = `XYZ: ${x.toFixed(3)} / ${y.toFixed(
