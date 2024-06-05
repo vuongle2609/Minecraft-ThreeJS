@@ -90,6 +90,7 @@ export default class BlockManager extends BaseEntity {
     type,
     facesToRender,
     blockOcclusion,
+    isPlace,
   }: {
     x: number;
     y: number;
@@ -97,6 +98,7 @@ export default class BlockManager extends BaseEntity {
     type: BlockKeys | 0;
     facesToRender?: Record<Face, boolean> | null;
     blockOcclusion?: Record<Face, null | FaceAoType> | null;
+    isPlace?: boolean;
   }) {
     // if block marked as destroyed then return
     if (type == 0) {
@@ -115,6 +117,7 @@ export default class BlockManager extends BaseEntity {
     });
 
     this.blocksMapping.set(nameFromCoordinate(x, y, z), block);
+    if (isPlace) block.calculateAONeighbors();
   }
 
   getIntersectObject() {
@@ -228,6 +231,7 @@ export default class BlockManager extends BaseEntity {
       y,
       z,
       type: placeType,
+      isPlace: true,
     });
 
     const chunk = getChunkCoordinate(x, z);

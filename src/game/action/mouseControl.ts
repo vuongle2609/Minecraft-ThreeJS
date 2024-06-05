@@ -1,7 +1,7 @@
-import { Raycaster, Vector2 } from 'three';
+import { Raycaster, Vector2 } from "three";
 
-import BaseEntity, { BasePropsType } from '@/game/classes/baseEntity';
-import { $ } from '@/UI/utils/selector';
+import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
+import { $ } from "@/UI/utils/selector";
 
 export default class MouseControl extends BaseEntity {
   public mousePercentScreenX = 0;
@@ -44,8 +44,6 @@ export default class MouseControl extends BaseEntity {
       this.mousePercentScreenY = this.y / canvasHeight;
     };
 
-    window.addEventListener("pointermove", this.onPointerMove.bind(this));
-
     btnFocus?.addEventListener("click", () => {
       this.control?.lock();
     });
@@ -68,19 +66,12 @@ export default class MouseControl extends BaseEntity {
       if ($("#modal-inventory")) return;
 
       const modalFocus = $("#modal_focus");
-      // const modalGame = $("#modal_game");
 
       this.paused = true;
 
       document.removeEventListener("mousemove", updatePosition, false);
 
       modalFocus.style.display = "flex";
-      // modalGame.style.display = "none";
     });
-  }
-
-  onPointerMove(event: PointerEvent) {
-    // this.pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-    // this.pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
   }
 }
