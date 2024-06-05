@@ -4,7 +4,7 @@ import { BLOCK_WIDTH } from "@/constants";
 import { BlockFaces, Face } from "@/constants/block";
 import blocks, { BlockAttributeType, renderGeometry } from "@/constants/blocks";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
-import { BlockKeys } from "@/type";
+import { BlockKeys, FaceAoType } from "@/type";
 import BaseEntity, { BasePropsType } from "./baseEntity";
 
 interface PropsType {
@@ -14,6 +14,7 @@ interface PropsType {
   blocksMapping: Map<string, Block>;
   facesToRender?: Record<Face, boolean> | null;
   isPlace?: boolean;
+  blockOcclusion?: Record<Face, null | FaceAoType> | null;
 }
 
 const { leftZ, rightZ, leftX, rightX, top, bottom } = Face;
@@ -33,6 +34,14 @@ export default class Block extends BaseEntity {
   blocksMapping: Map<string, Block>;
   blocksGroup: Group;
   isPlace: boolean;
+  blockOcclusion: Record<Face, null | FaceAoType> = {
+    [leftZ]: null,
+    [rightZ]: null,
+    [leftX]: null,
+    [rightX]: null,
+    [bottom]: null,
+    [top]: null,
+  };
 
   constructor(props: BasePropsType & PropsType) {
     super(props);
@@ -44,6 +53,7 @@ export default class Block extends BaseEntity {
       blocksGroup,
       facesToRender,
       isPlace,
+      blockOcclusion,
     } = props!;
 
     this.blocksGroup = blocksGroup;
@@ -52,6 +62,7 @@ export default class Block extends BaseEntity {
     this.atttribute = blocks[type];
     this.blocksMapping = blocksMapping;
     this.isPlace = !!isPlace;
+    if (blockOcclusion) this.blockOcclusion = blockOcclusion;
 
     if (facesToRender === null) return;
 
@@ -133,10 +144,14 @@ export default class Block extends BaseEntity {
   }
 
   addFace(face: keyof BlockFaces) {
-    const texture = this.atttribute.texture;
+    const faceAoKey = this.blockOcclusion[face] || "base";
+
+    const textureAo = this.atttribute.textureFaceAo;
 
     const material =
-      texture[this.atttribute.textureMap[face] as keyof typeof texture];
+      textureAo[this.atttribute.textureMap[face] as keyof typeof textureAo][
+        faceAoKey
+      ];
 
     const plane = new Mesh(renderGeometry, material);
 

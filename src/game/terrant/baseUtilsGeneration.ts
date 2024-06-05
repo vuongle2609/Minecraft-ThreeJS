@@ -2,7 +2,7 @@ import { BLOCK_WIDTH } from "@/constants";
 import { Face } from "@/constants/block";
 import { getNeighborsSeparate } from "@/game/helpers/blocksHelpers";
 import { detailFromName } from "@/game/helpers/detailFromName";
-import { BlockKeys } from "@/type";
+import { BlockKeys, FaceAoType } from "@/type";
 
 const { leftZ, rightZ, leftX, rightX, bottom, top } = Face;
 
@@ -69,12 +69,12 @@ export class BaseGeneration {
     > = new Map()
   ) {
     const valueToSet = {
-      [leftZ]: 0,
-      [rightZ]: 0,
-      [leftX]: 0,
-      [rightX]: 0,
-      [bottom]: 0,
-      [top]: "v1",
+      [leftZ]: null,
+      [rightZ]: null,
+      [leftX]: null,
+      [rightX]: null,
+      [bottom]: null,
+      [top]: FaceAoType.v1,
     };
 
     return valueToSet;

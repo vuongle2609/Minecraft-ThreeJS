@@ -15,7 +15,7 @@ import {
   nameChunkFromCoordinate,
   nameFromCoordinate,
 } from "@/game/helpers/nameFromCoordinate";
-import { BlockKeys } from "@/type";
+import { BlockKeys, FaceAoType } from "@/type";
 
 import { BLOCK_WIDTH } from "@/constants";
 import BaseEntity, { BasePropsType } from "./baseEntity";
@@ -89,12 +89,14 @@ export default class BlockManager extends BaseEntity {
     z,
     type,
     facesToRender,
+    blockOcclusion,
   }: {
     x: number;
     y: number;
     z: number;
     type: BlockKeys | 0;
     facesToRender?: Record<Face, boolean> | null;
+    blockOcclusion?: Record<Face, null | FaceAoType> | null;
   }) {
     // if block marked as destroyed then return
     if (type == 0) {
@@ -109,6 +111,7 @@ export default class BlockManager extends BaseEntity {
       blocksMapping: this.blocksMapping,
       facesToRender,
       blocksGroup: this.blocksGroup,
+      blockOcclusion,
     });
 
     this.blocksMapping.set(nameFromCoordinate(x, y, z), block);
