@@ -65,46 +65,50 @@ export default class BasicCharacterControllerInput {
   }
 
   onKeydown(e: KeyboardEvent) {
-    switch (e.keyCode) {
-      case 87: // w
+    console.log(
+      "🚀 ~ BasicCharacterControllerInput ~ onKeydown ~ e.code:",
+      e.code
+    );
+    switch (e.code) {
+      case "KeyW": // w
         this.keys.forward = true;
         break;
-      case 65: // a
+      case "KeyA": // a
         this.keys.left = true;
         break;
-      case 83: // s
+      case "KeyS": // s
         this.keys.backward = true;
         break;
-      case 68: // d
+      case "KeyD": // d
         this.keys.right = true;
         break;
-      case 32: // space
+      case "Space": // space
         this.keys.space = true;
         break;
-      case 16: // shift
+      case "ShiftLeft": // shift
         this.keys.shift = true;
         break;
     }
   }
 
   onKeyup(e: KeyboardEvent) {
-    switch (e.keyCode) {
-      case 87: // w
+    switch (e.code) {
+      case "KeyW": // w
         this.keys.forward = false;
         break;
-      case 65: // a
+      case "KeyA": // a
         this.keys.left = false;
         break;
-      case 83: // s
+      case "KeyS": // s
         this.keys.backward = false;
         break;
-      case 68: // d
+      case "KeyD": // d
         this.keys.right = false;
         break;
-      case 32: // space
+      case "Space": // space
         this.keys.space = false;
         break;
-      case 16: // shift
+      case "ShiftLeft": // shift
         this.keys.shift = false;
         break;
     }
