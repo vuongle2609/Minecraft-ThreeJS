@@ -1,4 +1,4 @@
-import { PlayerInput } from "../../type";
+import { PlayerInput } from "@/type";
 
 export default class BasicCharacterControllerInput {
   keys: PlayerInput;
@@ -65,10 +65,6 @@ export default class BasicCharacterControllerInput {
   }
 
   onKeydown(e: KeyboardEvent) {
-    console.log(
-      "🚀 ~ BasicCharacterControllerInput ~ onKeydown ~ e.code:",
-      e.code
-    );
     switch (e.code) {
       case "KeyW": // w
         this.keys.forward = true;
