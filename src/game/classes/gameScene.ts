@@ -3,6 +3,7 @@ import Player from "@/game/player/character";
 import { WorldsType } from "@/type";
 import { $ } from "@/UI/utils/selector";
 import {
+  Cache,
   Clock,
   Color,
   FogExp2,
@@ -12,12 +13,14 @@ import {
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 
+import { BLOCK_WIDTH } from "@/constants";
 import ChunkManager from "./chunkManager";
 import Cloud from "./cloud";
 import InventoryManager from "./inventoryManager";
 import Light from "./light";
 import { RenderPage } from "./renderPage";
-import { BLOCK_WIDTH } from "@/constants";
+
+Cache.enabled = true;
 
 export default class GameScene extends RenderPage {
   id: string;

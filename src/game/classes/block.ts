@@ -5,9 +5,9 @@ import { BlockFaces, Face } from "@/constants/block";
 import blocks, { BlockAttributeType, renderGeometry } from "@/constants/blocks";
 import { nameFromCoordinate } from "@/game/helpers/nameFromCoordinate";
 import { BlockKeys, FaceAoType } from "@/type";
-import BaseEntity, { BasePropsType } from "./baseEntity";
-import { getFacesOcclusion } from "../helpers/calculateAO";
 import { calNeighborsOffset } from "../helpers/calNeighborsOffset";
+import { getFacesOcclusion } from "../helpers/calculateAO";
+import BaseEntity, { BasePropsType } from "./baseEntity";
 
 interface PropsType {
   position: Vector3;

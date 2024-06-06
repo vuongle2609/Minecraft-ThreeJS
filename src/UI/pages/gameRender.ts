@@ -18,14 +18,15 @@ export default class GameRender extends RenderPage {
   }
 
   element = String.raw` 
-      <div id="loading_modal" class="fixed top-0 bottom-0 left-0 right-0 items-center justify-center bg-gray-900/70 flex flex-col z-50 gap-2 text-lg text-white"
-      style="background-image: url('/assets/home/dirt_background.webp')"
-      >
+      <div id="loading_modal"
+        class="fixed top-0 bottom-0 left-0 right-0 items-center justify-center bg-gray-900/70 flex flex-col z-50 gap-2 text-lg text-white"
+        style="background-image: url('/assets/home/dirt_background.webp')">
         <span>Loading world</span>
         <span>Building terrain</span>
       </div>
 
-      <div id="modal_focus" class="fixed top-0 bottom-0 left-0 right-0 items-center justify-center bg-gray-900/70 flex flex-col z-30">
+      <div id="modal_focus"
+        class="fixed top-0 bottom-0 left-0 right-0 items-center justify-center bg-gray-900/70 flex flex-col z-30">
         <div class="flex flex-col w-full h-full items-center justify-center px-[200px] gap-4">
           <h2 class="text-white text-lg">Game Menu</h2>
 
@@ -47,9 +48,9 @@ export default class GameRender extends RenderPage {
         <div class="text-white font-medium fixed top-2 left-2">
           <span id="infoScene"></span>
           <span id="coordinate"></span>
-          <br/>
+          <br />
           <span id="chunk"></span>
-          <br/>
+          <br />
           <span id="fps"></span>
         </div>
 
@@ -58,7 +59,8 @@ export default class GameRender extends RenderPage {
           <div class="w-5 h-1 bg-gray-500 absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2"></div>
         </div>
 
-        <div id="itemLabel" class="fixed opacity-0 text-white bottom-20 text-xl transition-all duration-300 drop-shadow-md"></div>
+        <div id="itemLabel"
+          class="fixed opacity-0 text-white bottom-20 text-xl transition-all duration-300 drop-shadow-md"></div>
 
         <div class="fixed bottom-1 bg-gray-900/60 border-[3px] border-solid border-black">
           <div class="shadow-inset flex" id="inventory_container">
@@ -69,15 +71,9 @@ export default class GameRender extends RenderPage {
       <div id="modal_water" class="fixed top-0 bottom-0 left-0 right-0 bg-blue-900/70 z-10 hidden">
       </div>
 
-      <canvas
-        id="gameScene"
-        class="fixed top-0 bottom-0 left-0 right-0 w-full h-full -z-10"
-      ></canvas>
+      <canvas id="gameScene" class="fixed top-0 bottom-0 left-0 right-0 w-full h-full -z-10"></canvas>
 
-      <canvas
-    id="gameSceneDebug"
-    class="fixed top-0 right-0 w-[200px] h-[200px] z-50"
-  ></canvas>
+      <canvas id="gameSceneDebug" class="fixed top-0 right-0 w-[200px] h-[200px] z-50"></canvas>
     `;
 
   render<T>(state?: T) {

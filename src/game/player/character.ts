@@ -1,12 +1,12 @@
 import { BoxGeometry, Mesh, MeshStandardMaterial, Vector3 } from "three";
 
+import { $ } from "@/UI/utils/selector";
 import blocks from "@/constants/blocks";
 import { CHARACTER_LENGTH, CHARACTER_WIDTH } from "@/constants/player";
 import BasicCharacterControllerInput from "@/game/action/input";
 import BaseEntity, { BasePropsType } from "@/game/classes/baseEntity";
 import { BlockKeys } from "@/type";
 import { getChunkCoordinate } from "../helpers/chunkHelpers";
-import { $ } from "@/UI/utils/selector";
 
 export default class Player extends BaseEntity {
   input = new BasicCharacterControllerInput();

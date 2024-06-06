@@ -34,33 +34,26 @@ export default class CreateWorld extends RenderPage {
   }
 
   element = String.raw`
-      <div
-        class="w-full h-full items-center justify-center bg-cover flex flex-col"
-        style="background-image: url('/assets/home/dirt_background.webp')"
-      >
-        <div
-          class="flex flex-col w-full h-full items-center justify-center px-[200px] py-[100px] gap-8"
-        >
+      <div class="w-full h-full items-center justify-center bg-cover flex flex-col"
+        style="background-image: url('/assets/home/dirt_background.webp')">
+        <div class="flex flex-col w-full h-full items-center justify-center px-[200px] py-[100px] gap-8">
           <h2 class="text-white text-lg">Create New World</h2>
 
           <div class="w-full flex flex-col items-start max-w-[400px]">
             <label for="world_name" class="text-left text-gameGray">World Name</label>
-            <input id="world_name" class="text-white text-lg bg-black p-3 py-2 outline-none border-2 border-solid border-white w-full" value="${DEFAULT_WORLD_NAME}"/>
+            <input id="world_name"
+              class="text-white text-lg bg-black p-3 py-2 outline-none border-2 border-solid border-white w-full"
+              value="${DEFAULT_WORLD_NAME}" />
           </div>
 
           <div class="w-full flex gap-3">
-            <button
-              class="mc-button disabled"
-            >
+            <button class="mc-button disabled">
               <div class="title">
                 Game Mode: Creative?
               </div>
             </button>
 
-            <button
-              class="mc-button"
-              id="world_type"
-            >
+            <button class="mc-button" id="world_type">
               <div class="title">
                 World Type:&nbsp;<span id="world_type_id">${
                   WORLD_TYPE_MAPPING[
@@ -73,23 +66,19 @@ export default class CreateWorld extends RenderPage {
 
           <div class="w-full flex flex-col items-start max-w-[400px]" id="seed_container">
             <label for="seed" class="text-left text-gameGray">Seed (Numbers only)</label>
-            <input id="seed" class="text-white text-lg bg-black p-3 py-2 outline-none border-2 border-solid border-white w-full"  type="number" />
+            <input id="seed"
+              class="text-white text-lg bg-black p-3 py-2 outline-none border-2 border-solid border-white w-full"
+              type="number" />
           </div>
 
           <div class="w-full flex gap-3 mt-auto">
-            <button
-              class="mc-button"
-              id="create"
-            >
+            <button class="mc-button" id="create">
               <div class="title">
                 Create New World
               </div>
             </button>
 
-            <button
-              class="mc-button"
-              id="cancel"
-            >
+            <button class="mc-button" id="cancel">
               <div class="title">
                 Cancel
               </div>

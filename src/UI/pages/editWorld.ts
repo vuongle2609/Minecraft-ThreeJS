@@ -1,8 +1,8 @@
-import { RenderPage } from '@/game/classes/renderPage';
-import { WorldsType } from '@/type';
+import { RenderPage } from "@/game/classes/renderPage";
+import { WorldsType } from "@/type";
 
-import Router from '../router';
-import { $ } from '../utils/selector';
+import Router from "../router";
+import { $ } from "../utils/selector";
 
 export default class EditWorld extends RenderPage {
   router: Router;
@@ -18,34 +18,25 @@ export default class EditWorld extends RenderPage {
   }
 
   element = String.raw`
-      <div
-        class="w-full h-full items-center justify-center bg-cover flex flex-col"
-        style="background-image: url('/assets/home/dirt_background.webp')"
-      >
-        <div
-          class="flex flex-col w-full h-full items-center justify-center px-[200px] py-[100px] gap-8"
-        >
+      <div class="w-full h-full items-center justify-center bg-cover flex flex-col"
+        style="background-image: url('/assets/home/dirt_background.webp')">
+        <div class="flex flex-col w-full h-full items-center justify-center px-[200px] py-[100px] gap-8">
           <h2 class="text-white text-lg">Edit name</h2>
 
           <div class="w-full flex flex-col items-start max-w-[400px]">
             <label for="world_name" class="text-left text-gameGray">World Name</label>
-            <input id="world_name" class="text-white text-lg bg-black p-3 py-2 outline-none border-2 border-solid border-white w-full" />
+            <input id="world_name"
+              class="text-white text-lg bg-black p-3 py-2 outline-none border-2 border-solid border-white w-full" />
           </div>
 
           <div class="w-full flex gap-3 mt-auto">
-            <button
-              class="mc-button"
-              id="edit"
-            >
+            <button class="mc-button" id="edit">
               <div class="title">
                 Rename
               </div>
             </button>
 
-            <button
-              class="mc-button"
-              id="cancel"
-            >
+            <button class="mc-button" id="cancel">
               <div class="title">
                 Cancel
               </div>

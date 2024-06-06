@@ -14,47 +14,29 @@ export default class MainScreen extends RenderPage {
   }
 
   element = String.raw`
-      <div
-        class="w-full h-full items-center justify-center bg-cover flex flex-col"
-        style="background-image: url('/assets/home/bg.jpg')"
-      >
-        <div
-          class="flex flex-col w-full h-full backdrop-blur-md items-center justify-center px-[200px]"
-        >
+      <div class="w-full h-full items-center justify-center bg-cover flex flex-col"
+        style="background-image: url('/assets/home/bg.jpg')">
+        <div class="flex flex-col w-full h-full backdrop-blur-md items-center justify-center px-[200px]">
           <div class="w-screen mb-auto"></div>
 
-          <img
-            src="/assets/home/minecraft_logo_main.png"
-            class="max-w-[800px] w-full mb-20"
-          />
+          <img src="/assets/home/minecraft_logo_main.png" class="max-w-[800px] w-full mb-20" />
 
           <div class="w-full flex flex-col gap-4 max-w-[550px]">
-            <button
-              class="mc-button"
-              id="singleplayer"
-            >
+            <button class="mc-button" id="singleplayer">
               <div class="title">Singleplayer</div>
             </button>
 
-            <button
-              class="mc-button disabled"
-              id="multiplayer"
-            >
+            <button class="mc-button disabled" id="multiplayer">
               <div class="title">Multiplayer</div>
             </button>
           </div>
 
           <div class="w-full flex gap-4 mt-10 max-w-[550px]">
-            <button
-              class="mc-button disabled"
-            >
+            <button class="mc-button disabled">
               <div class="title">Options...</div>
             </button>
 
-            <button
-              class="mc-button"
-              id="github"
-            >
+            <button class="mc-button" id="github">
               <div class="title">Github</div>
             </button>
           </div>

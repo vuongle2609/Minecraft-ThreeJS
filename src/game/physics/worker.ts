@@ -172,7 +172,6 @@ class PhysicsWorker {
 
     if (objectBottom) {
       this.onGround = true;
-      // this.playerPos.y = Math.round(this.playerPos.y);
     }
 
     this.playerPos.add(
