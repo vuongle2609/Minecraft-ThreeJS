@@ -45,6 +45,7 @@ export default class GameRender extends RenderPage {
 
       <div id="modal_game" class="fixed top-0 bottom-0 left-0 right-0 items-center justify-center z-20">
         <div class="text-white font-medium fixed top-2 left-2">
+          <span id="infoScene"></span>
           <span id="coordinate"></span>
           <br/>
           <span id="chunk"></span>
