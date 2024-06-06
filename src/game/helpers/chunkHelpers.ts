@@ -1,4 +1,4 @@
-import { CHUNK_SIZE } from '../../constants/index';
+import { CHUNK_SIZE } from "@/constants/index";
 
 export const getChunkCoordinate = (
   x: number,

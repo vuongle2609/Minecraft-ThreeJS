@@ -15,29 +15,20 @@ export default class DeleteWorld extends RenderPage {
   }
 
   element = String.raw`
-      <div
-        class="w-full h-full items-center justify-center bg-cover flex flex-col"
-        style="background-image: url('/assets/home/dirt_background.webp')"
-      >
-        <div
-          class="flex flex-col w-full h-full items-center justify-center px-[200px] py-[100px] gap-8 max-h-[60%]"
-        >
-          <h2 class="text-white text-lg">Are you sure you want to delete this world? <br> 'New World' will be lost forever! (A long time!)</h2>
+      <div class="w-full h-full items-center justify-center bg-cover flex flex-col"
+        style="background-image: url('/assets/home/dirt_background.webp')">
+        <div class="flex flex-col w-full h-full items-center justify-center px-[200px] py-[100px] gap-8 max-h-[60%]">
+          <h2 class="text-white text-lg">Are you sure you want to delete this world? <br> 'New World' will be lost
+            forever! (A long time!)</h2>
 
           <div class="w-full flex gap-3 mt-auto">
-            <button
-              class="mc-button"
-              id="delete"
-            >
+            <button class="mc-button" id="delete">
               <div class="title">
                 Delete
               </div>
             </button>
 
-            <button
-              class="mc-button"
-              id="cancel"
-            >
+            <button class="mc-button" id="cancel">
               <div class="title">
                 Cancel
               </div>

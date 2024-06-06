@@ -19,63 +19,42 @@ export default class SelectWorld extends RenderPage {
   }
 
   element = String.raw`
-      <div
-        class="w-full h-full items-center justify-center bg-cover flex flex-col"
-        style="background-image: url('/assets/home/dirt_background.webp')"
-      >
-        <div
-          class="flex flex-col w-full h-full items-center justify-center py-[10px] gap-4"
-        >
+      <div class="w-full h-full items-center justify-center bg-cover flex flex-col"
+        style="background-image: url('/assets/home/dirt_background.webp')">
+        <div class="flex flex-col w-full h-full items-center justify-center py-[10px] gap-4">
           <h2 class="text-white text-lg px-[100px]">Select world</h2>
 
-          <div class="w-full grow flex flex-col gap-3 text-white overflow-auto bg-black/50 py-2 px-[200px]" id="world_list">
+          <div class="w-full grow flex flex-col gap-3 text-white overflow-auto bg-black/50 py-2 px-[200px]"
+            id="world_list">
           </div>
 
           <div class="w-full flex flex-col gap-2 mt-auto px-[100px] max-w-[1040px]">
             <div class="w-full flex gap-3">
-                <button
-                    class="mc-button interactSelected disabled"
-                    id="play"
-                >
-                  <div class="title">Play Selected World</div>
-                </button>
+              <button class="mc-button interactSelected disabled" id="play">
+                <div class="title">Play Selected World</div>
+              </button>
 
-                <button
-                    class="mc-button"
-                    id="create"
-                >
+              <button class="mc-button" id="create">
                 <div class="title">Create New World</div>
-                </button>
+              </button>
             </div>
 
             <div class="w-full flex gap-3">
-                <button
-                    class="mc-button interactSelected disabled"
-                    id="edit"
-                >
-                  <div class="title">Edit</div>
-                </button>
+              <button class="mc-button interactSelected disabled" id="edit">
+                <div class="title">Edit</div>
+              </button>
 
-                <button
-                    class="mc-button interactSelected disabled"
-                    id="delete"
-                >
-                  <div class="title">Delete</div>
-                </button>
+              <button class="mc-button interactSelected disabled" id="delete">
+                <div class="title">Delete</div>
+              </button>
 
-                <button
-                    class="mc-button interactSelected disabled"
-                    id="reCreate"
-                >
-                  <div class="title">Re-Create</div>
-                </button>
+              <button class="mc-button interactSelected disabled" id="reCreate">
+                <div class="title">Re-Create</div>
+              </button>
 
-                <button
-                    class="mc-button"
-                    id="cancel"
-                >
-                  <div class="title">Cancel</div>
-                </button>
+              <button class="mc-button" id="cancel">
+                <div class="title">Cancel</div>
+              </button>
             </div>
           </div>
         </div>

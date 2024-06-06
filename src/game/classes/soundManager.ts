@@ -1,4 +1,4 @@
-import { $$ } from '@/UI/utils/selector';
+import { $$ } from "@/UI/utils/selector";
 
 export default class SoundManager {
   soundsBackground = {
