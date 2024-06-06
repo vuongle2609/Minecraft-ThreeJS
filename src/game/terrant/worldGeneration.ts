@@ -206,13 +206,6 @@ export class DefaultWorld extends BaseGeneration {
 
         const newPos = [x, yA, z];
 
-        this.lowestY =
-          this.lowestY === undefined
-            ? newPos[1]
-            : newPos[1] < this.lowestY
-            ? newPos[1]
-            : this.lowestY;
-
         if (countSurface == 0) blockType = BlockKeys.grass;
 
         if (countSurface == 1) blockType = BlockKeys.dirt;
