@@ -60,7 +60,7 @@ export default class MainScreen extends RenderPage {
           </div>
 
           <div class="w-screen mt-auto flex justify-between px-2 py-1">
-            <span class="text-white text-lg">Minecraft threejs</span>
+            <span class="text-white text-lg">Minecraft ThreeJS</span>
             <span class="text-white text-lg">Copyright Mojang AB</span>
           </div>
         </div>
