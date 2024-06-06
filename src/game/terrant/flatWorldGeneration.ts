@@ -32,13 +32,6 @@ export class FlatWorld extends BaseGeneration {
             zA * BLOCK_WIDTH,
           ];
 
-          this.lowestY =
-            this.lowestY === undefined
-              ? position[1]
-              : position[1] < this.lowestY
-              ? position[1]
-              : this.lowestY;
-
           const blockName = nameFromCoordinate(
             position[0],
             position[1],
