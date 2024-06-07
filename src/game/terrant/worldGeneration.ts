@@ -277,6 +277,8 @@ export class DefaultWorld extends BaseGeneration {
       blocksInChunkNeighbor
     );
 
+    const a = this.calChunkMatrix(blocksInChunk, facesToRender, blockOcclusion);
+
     const arrayBlocksDataTmp: number[] = [];
 
     for (const [_key, { position, type }] of blocksInChunk) {

@@ -2,8 +2,16 @@ import { BLOCK_WIDTH } from "@/constants";
 import { Face } from "@/constants/block";
 import { getNeighborsSeparate } from "@/game/helpers/blocksHelpers";
 import { detailFromName } from "@/game/helpers/detailFromName";
-import { BlockKeys } from "@/type";
+import { BlockKeys, FaceAoType } from "@/type";
 import { getFacesOcclusion } from "../helpers/calculateAO";
+import {
+  InstancedMesh,
+  Matrix4,
+  MeshBasicMaterial,
+  Object3D,
+  Vector3,
+} from "three";
+import blocks, { renderGeometry } from "@/constants/blocks";
 
 const { leftZ, rightZ, leftX, rightX, bottom, top } = Face;
 
@@ -57,6 +65,84 @@ export class BaseGeneration {
     return !neighBor;
   }
 
+  calChunkMatrix(
+    blocksInChunk: Map<
+      string,
+      {
+        position: number[];
+        type: BlockKeys;
+      }
+    > = new Map(),
+    facesToRender: Map<
+      string,
+      {
+        [leftZ]: boolean;
+        [rightZ]: boolean;
+        [leftX]: boolean;
+        [rightX]: boolean;
+        [bottom]: boolean;
+        [top]: boolean;
+      }
+    >,
+    blockOcclusion: Map<string, Record<Face, FaceAoType | null>>
+  ) {
+    //{
+    //  "type0": {
+    //    posColl0: matrix4[],
+    //    posColl1: matrix4[],
+    //    posColl2: matrix4[],
+    //  },
+    //  "type1": {
+    //    posColl0: matrix4[],
+    //    posColl1: matrix4[],
+    //    posColl2: matrix4[],
+    //  },
+    //  "type2": {
+    //    posColl0: matrix4[],
+    //    posColl1: matrix4[],
+    //    posColl2: matrix4[],
+    //  },
+    //}
+
+    const instanced = Object.keys(blocks).reduce((prev, blockKey) => {
+      const currentBlock = blocks[blockKey as unknown as BlockKeys];
+
+      const textureFaceInstanced = Object.keys(
+        currentBlock.textureFaceAo
+      ).reduce((prev, aoType) => {
+        //@ts-ignore
+        const currTexture = currentBlock.textureFaceAo[aoType];
+
+        const count = blocksInChunk.size;
+
+        return {
+          ...prev,
+          [aoType]: {
+            prevCount: 0,
+          },
+        };
+      }, {});
+
+      return {
+        ...prev,
+        [blockKey]: {
+          ...currentBlock,
+        },
+      };
+    }, {});
+
+    const dummy = new Object3D();
+
+    let i = 0;
+    for (const [key, { position }] of blocksInChunk) {
+      const matrix = new Matrix4();
+      matrix.setPosition(new Vector3(position[0], position[1], position[2]));
+      this.blocks[type].setMatrixAt(this.getCount(type), matrix);
+    }
+
+    
+  }
+
   calFaceToRender(
     blocksInChunk: Map<
       string,
@@ -77,8 +163,18 @@ export class BaseGeneration {
 
     Object.keys(blocksInChunk);
 
-    const facesToRender = new Map();
-    const blockOcclusion = new Map();
+    const facesToRender = new Map<
+      string,
+      {
+        [leftZ]: boolean;
+        [rightZ]: boolean;
+        [leftX]: boolean;
+        [rightX]: boolean;
+        [bottom]: boolean;
+        [top]: boolean;
+      }
+    >();
+    const blockOcclusion = new Map<string, Record<Face, FaceAoType | null>>();
 
     for (let [key, value] of blocksInChunk) {
       const { position, type } = value;

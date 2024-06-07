@@ -13,6 +13,7 @@ import { detailFromName } from "../helpers/detailFromName";
 import { BasePropsType } from "./baseEntity";
 import BlockManager from "./blockManager";
 import InventoryManager from "./inventoryManager";
+import Chunk from "./chunk";
 
 interface PropsType {
   inventoryManager: InventoryManager;
@@ -319,7 +320,7 @@ export default class ChunkManager extends BlockManager {
     blockOcclusion: Record<string, Record<Face, null | FaceAoType>>
   ) {
     const blocksInChunk: string[] = [];
-
+    new Chunk({ blocksGroup: this.blocksGroup });
     let tmpPos: number[] = [];
     const lengthCached = arrayBlocksData.length;
     for (let index = 0; index < lengthCached; index++) {

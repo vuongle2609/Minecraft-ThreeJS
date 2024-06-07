@@ -101,7 +101,7 @@ const occlusionTextures = {
   },
   [FaceAoType.f4]: {
     texture: textureLoader.load(f),
-    aoMapIntensity: 0.30
+    aoMapIntensity: 0.3,
   },
   [FaceAoType.v1]: {
     texture: textureLoader.load(v1),
@@ -562,7 +562,7 @@ const blocks = Object.keys(blocksTmp).reduce((prev, key) => {
   };
 }, {}) as BlocksType;
 
-export type BlockAttributeType = (typeof blocks)[BlockKeys];
+export type BlockAttributeType = BlocksType;
 
 Object.values(blocks).forEach((block) => {
   block.step.loop = true;
