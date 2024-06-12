@@ -1,8 +1,8 @@
 import { FLAT_WORLD_TYPE } from "@/constants";
 import { nameChunkFromCoordinate } from "@/game/helpers/nameFromCoordinate";
+import { BlockKeys } from "@/type";
 import { FlatWorld } from "./flatWorldGeneration";
 import { DefaultWorld } from "./worldGeneration";
-import { BlockKeys } from "@/type";
 
 const getBlocksInChunk = ({
   x,

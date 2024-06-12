@@ -3,6 +3,7 @@ import Player from "@/game/player/character";
 import { WorldsType } from "@/type";
 import { $ } from "@/UI/utils/selector";
 import {
+  Cache,
   Clock,
   Color,
   FogExp2,
@@ -12,12 +13,14 @@ import {
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 
+import { BLOCK_WIDTH } from "@/constants";
 import ChunkManager from "./chunkManager";
 import Cloud from "./cloud";
 import InventoryManager from "./inventoryManager";
 import Light from "./light";
 import { RenderPage } from "./renderPage";
-import { BLOCK_WIDTH } from "@/constants";
+
+Cache.enabled = true;
 
 export default class GameScene extends RenderPage {
   id: string;
@@ -55,6 +58,7 @@ export default class GameScene extends RenderPage {
   coordinateElement: HTMLElement;
   fpsElement: HTMLElement;
   chunkElement: HTMLElement;
+  infoElement: HTMLElement;
 
   clock = new Clock();
   frames = 0;
@@ -112,6 +116,7 @@ export default class GameScene extends RenderPage {
     this.coordinateElement = $("#coordinate");
     this.fpsElement = $("#fps");
     this.chunkElement = $("#chunk");
+    this.infoElement = $("#infoScene");
 
     this.mouseControl = new MouseControl({
       control: this.control,
@@ -203,6 +208,17 @@ export default class GameScene extends RenderPage {
     }
   }
 
+  renderInfo() {
+    const { info } = this.renderer;
+
+    this.infoElement.innerHTML = `
+    <div class="flex flex-col">
+      <span>Geometries: ${info.memory.geometries} / Textures: ${info.memory.textures}</span>
+      <span>Calls: ${info.render.calls} / Frame: ${info.render.frame} / Lines: ${info.render.lines} / Points: ${info.render.points} / Triangles: ${info.render.triangles}</span>
+    </div>
+    `;
+  }
+
   disposeRender() {
     this.renderer.dispose();
     this.chunkManager.dispose();
@@ -227,7 +243,7 @@ export default class GameScene extends RenderPage {
       if (delta > 0.1) return;
 
       this.renderCoordinate();
-
+      this.renderInfo();
       this.renderFps();
 
       this.player?.update(delta, t);

@@ -11,8 +11,10 @@ export default class UI {
   }
 
   initialize() {
-    // this.router.navigate("gameRender");
+    if (import.meta.env.MODE === "development") {
+      this.router.navigate("selectWorld");
+      return;
+    }
     this.router.navigate("initScreen");
-    // this.router.navigate("selectWorld");
   }
 }

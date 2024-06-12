@@ -10,8 +10,6 @@ const { leftZ, rightZ, leftX, rightX, bottom, top } = Face;
 export class BaseGeneration {
   seed: number;
 
-  lowestY: number;
-
   constructor(seed: number) {
     this.seed = seed;
   }
@@ -101,7 +99,7 @@ export class BaseGeneration {
         BLOCK_WIDTH
       );
 
-      const valueToSet = {
+      let valueToSet = {
         [leftZ]: this.shouldRenderFace(faceHasNeighbor?.[leftZ], type),
         [rightZ]: this.shouldRenderFace(faceHasNeighbor?.[rightZ], type),
         [leftX]: this.shouldRenderFace(faceHasNeighbor?.[leftX], type),
@@ -109,6 +107,17 @@ export class BaseGeneration {
         [bottom]: this.shouldRenderFace(faceHasNeighbor?.[bottom], type),
         [top]: this.shouldRenderFace(faceHasNeighbor?.[top], type),
       };
+
+      if (type === BlockKeys.bedrock) {
+        valueToSet = {
+          [leftZ]: false,
+          [rightZ]: false,
+          [leftX]: false,
+          [rightX]: false,
+          [bottom]: false,
+          [top]: this.shouldRenderFace(faceHasNeighbor?.[top], type),
+        };
+      }
 
       const shouldSet = Object.values(valueToSet).filter(Boolean).length;
 

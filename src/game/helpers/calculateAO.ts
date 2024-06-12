@@ -1,8 +1,8 @@
+import { BLOCK_WIDTH } from "@/constants";
 import { Face } from "@/constants/block";
 import { BlockKeys, FaceAoType } from "@/type";
-import { nameFromCoordinate } from "./nameFromCoordinate";
-import { BLOCK_WIDTH } from "@/constants";
 import Block from "../classes/block";
+import { nameFromCoordinate } from "./nameFromCoordinate";
 
 const { leftZ, rightZ, leftX, rightX, bottom, top } = Face;
 
